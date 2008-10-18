@@ -1,0 +1,371 @@
+body {
+  background-color: black;
+  background-image: url(/images/fade.svg);
+  -webkit-background-size: 100% 100%;
+  font-family: "Lucida Grande";
+  color : white;
+  padding : 24px 0 24px 0;
+  margin: 0;
+}
+
+#login {
+  position: absolute;
+  right: 5px;
+  top: 3px;
+  font-size: 12px;
+}
+
+a {
+  color: white;
+}
+
+#lists > div {
+  width: 80%;
+  position: absolute;
+  top: 132px;
+  bottom: 0;
+  right: 0;
+  border-top: solid 2px #666;
+}
+
+#lists > div > div {
+  position: absolute;
+  top: 20px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+tbody > div {
+  background-image: url(/images/fade.svg);
+  padding : 200px;
+  font-size: 20px;
+  -webkit-background-size: 100% 100%;
+}
+
+tbody > div > div {
+  margin : 0 auto;
+  opacity : 0.6;
+  max-width: 100px;
+}
+
+tbody > div > div > marquee, tbody > div > div > div {
+  float: left;
+}
+
+table {
+  font-size: 12px;
+  padding: 0 0px;
+  display: block;
+}
+  
+  table thead, table tbody {
+    display: block;
+  }
+  
+  table thead tr {
+    display: block;
+    background: rgba(0,255,255,0.1);
+    text-align: left;
+    font-size: 13px;
+    padding-right: 16px;
+  }
+  
+  table thead tr th {
+    display : block;
+    float: left;
+    width: 15%;
+    padding-right: 1%;
+    overflow: hidden;
+  }
+
+  table tbody tr {
+    display: block;
+    cursor: pointer;
+    padding: 1px 0 0 0;
+    -webkit-transition-property: background-color, opacity;
+    -webkit-transition-duration: .5s, .5s;
+    -webkit-transition-timing-function: cubic-bezier(0.0, 0.0, 0.8, 1.0);
+  }
+
+  table tbody tr.track-hidden {
+    opacity: 0;
+  }
+
+  table tbody, table thead {
+    display: block;
+  }
+
+  table tbody tr td {
+    width: 15%;
+    padding-right: 1%;
+    display: block;
+    float: left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow:ellipsis;
+  }
+
+  table tbody tr:nth-child(odd) {
+    background: rgba(255,255,255,0.02);
+  }
+
+  table tbody tr:nth-child(odd):hover {
+    background: rgba(255,255,150,0.2);
+  }
+
+  table tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.1);
+  }
+
+  table tbody tr.private {
+    background: rgba(250,180,18,0.4);
+  }
+
+  table tbody tr.playing {
+    background: rgba(50,240,50,0.2);
+  }
+
+  table tbody tr.marked {
+    background: rgba(250,100,100,0.7);
+  }
+
+  table tbody tr:nth-child(even):hover {
+    background: rgba(255,255,150,0.2);
+  }
+
+  table tbody a {
+    color : white;
+    text-decoration: none;
+    padding-left : 6px;
+  }
+
+  table tbody a:hover {
+    text-decoration: underline;
+  }
+
+.hidden {
+  display: none;
+}
+
+#menu {
+  position: absolute;
+  width: 20%;
+  left: 0;
+  top: 132px;
+  margin: 0;
+  background: url(/images/fade-rev.svg);  
+  -webkit-background-size: 100% 100%;  
+}
+
+  #menu li {
+    display: block;
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-top-right-radius: 10px;    
+    -webkit-background-size: 100% 100%;
+    margin: 0 1em 0 0;
+    font-size: 13px;
+  }
+
+  #menu li:first-child {
+
+  }
+
+  #menu li.droppable-active {
+    /*background: url(/images/fade-hilite-2.svg);*/
+  }
+
+  #menu li.droppable-hover {
+    background-image: url(/images/fade-hilite-2.svg);    
+  }
+
+  #menu li.active {
+    background-color: red;
+    background-image: url(/images/fade-hilite.svg);
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-top-right-radius: 10px;    
+    -webkit-background-size: 100% 100%;
+        
+  }
+  
+  #menu li:hover {
+    background-color: yellow;
+    background-image: url(/images/fade-hilite.svg);
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-top-right-radius: 10px;    
+    -webkit-background-size: 100% 100%;    
+    color: #bbb;
+  }
+  
+  #menu li a {
+    display: block;
+    padding: 5px;
+    color: #eee;
+    text-decoration: none;
+  }
+
+#header img {
+  float: left;
+  margin: -6px 2em 0 24px;
+  padding: 0.5em;
+  width: 80px;
+  -webkit-box-shadow : 0px 0px 10px rgba(255,255,150,0.3);  
+}
+
+#progress {
+  float : left;
+  width: 50%;
+  height: 44px;
+  background-image: url(/images/fade-wave.svg);
+  -webkit-background-size: 100% 100%;
+  -webkit-border-radius: 5px;
+  -webkit-border: solid #c4c4c4 2px;
+  position: relative;
+}
+
+#progress:hover {
+  cursor: pointer;
+}
+
+  #progress span.marker {
+    background: rgba(0,170,0,0.5);
+    -webkit-box-shadow: 0px 0px 3px rgba(255,255,255,0.2);
+    height: 44px;
+    position: absolute;
+    width: 1px;
+    display: block;
+    top: 0;
+  }
+
+  #progress div.inner {
+    opacity: 0.4;
+    width: 50%;
+    height: 44px;
+    -webkit-border-radius: 5px;
+  }
+  
+  #progress #timecodes {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(255,255,255,0.6);
+    -webkit-border-radius: 5px;
+    font-size: 10px;
+    color: #333;
+    padding: 2px;
+    z-index: 200;
+    display: none;
+  }
+
+  #progress #artist {
+    position: absolute;
+    top: 12px;
+    left: 30px;
+    background: rgba(255,255,255,0.6);
+    -webkit-border-radius: 5px;
+    font-size: 13px;
+    color: #333;
+    padding: 2px;
+    display: none;
+    z-index: 200;
+  }
+
+#q {
+  float : right;
+  margin: 0.5em 1em 0 0;
+  width: 20%;
+  color: #777;
+  width: 100%;
+  font-size: 16px;
+  opacity: 0.9;
+  width: 200px;
+}
+#q:focus {
+  color: black;
+}
+
+#header {
+  background: url(/images/fade.svg);
+  -webkit-background-size: 100% 100%;
+  padding: 0em 0em 2em 0em;
+}
+
+button#play {
+  margin: 0 0 0 1em;
+  float: left;
+  width: 46px;
+  height: 46px;
+  -webkit-border-radius: 23px;
+  font-size : 30px;
+  color: white;
+  background: url(/images/fade.svg);
+  -webkit-background-size: 100% 100%;
+  -webkit-box-shadow : 2px 2px 2px rgba(0,0,0,0.5);
+}
+
+button#next,button#prev, button#tempo-up, button#tempo-down, button#reverse, button#loop-in , button#loop-out, button#loop-toggle {
+  margin: 0 0 0 1em;
+  float: left;
+  width: 26px;
+  height: 26px;
+  -webkit-border-radius: 13px;
+  font-size : 17px;
+  line-height: 11px;
+  color: white;
+  background: url(/images/fade.svg);
+  -webkit-background-size: 100% 100%;
+  -webkit-box-shadow : 2px 2px 2px rgba(0,0,0,0.5);
+}
+
+button#loop-in , button#loop-out, button#loop-toggle {
+  font-size : 9px;
+}
+
+button#play:hover, button#next:hover, button#prev:hover {
+  background: rgba(0,0,0,0.9);
+  color: rgb(0,180,180);
+  cursor: pointer;
+}
+
+#templates {
+  display:none;
+}
+
+#flash {
+  opacity: 0;
+  -webkit-transform: scale(0.7,0.0) skew(0deg);
+  position : fixed;
+  bottom: 100px;
+  width: 100%;
+  -webkit-transition-property: all;
+  -webkit-transition-duration: .2s;
+  -webkit-transition-timing-function: cubic-bezier(0.0, 0.0, 0.6, 1.0);
+}
+
+#flash.on {
+  -webkit-transform: scale(1.0,1.0) skew(0deg);
+  opacity: 1.0;
+  position : fixed;
+  bottom: 100px;
+  width: 100%;
+}
+  #flash div {
+    margin: 0 auto;
+    max-width: 50%;
+    background: rgba(255,255,255,0.7);
+    color: #333;
+    padding: 1em;
+    -webkit-border-radius: 5px;
+    -webkit-box-shadow : 0px 0px 8px rgba(255,255,100,0.3);
+  }
+
+/* clearing */
+#header:after,#menu:after, #lists table tr:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}

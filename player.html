@@ -1,1 +1,85 @@
-Player
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+  	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  	<title>SoundCloud Player</title>
+  	<meta name="generator" content="TextMate http://macromates.com/"/>
+  	<meta name="author" content="Eric Wahlforss"/>
+    <link href="/stylesheets/player.css" media="screen" rel="stylesheet" type="text/css" />
+    <script src="/scripts/jquery-1.2.6.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/scripts/md5.js"></script>
+    <script type="text/javascript" src="/scripts/jquery.dimensions.js"></script>
+    <script type="text/javascript" src="/scripts/ui.base.js"></script>
+    <script type="text/javascript" src="/scripts/ui.draggable.js"></script>
+    <script type="text/javascript" src="/scripts/ui.draggable.ext.js"></script>
+    <script type="text/javascript" src="/scripts/ui.droppable.js"></script>
+    <script type="text/javascript" src="/scripts/ui.droppable.ext.js"></script>
+    <script type="text/javascript" src="/scripts/ui.sortable.js"></script>
+    <script src="/scripts/utils.js" type="text/javascript"></script>
+    <script src="/scripts/player.js?v={{rando}}" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="flash"><div></div></div>
+    <div id="header">
+      <div id="login">
+        <a href="#">Sign in to your Google Account</a>
+      </div>
+      <img src="images/logo.png" />
+      <input accesskey="f" type="search" name="q" id="q" value="Search" />
+      <div id="progress">
+        <div class="inner"></div>
+        <div id="timecodes"><span></span> / <span></span></div>
+        <div id="artist"></div>
+      </div>
+    	<button id="prev">«</button>
+    	<button id="play">➤</button>
+    	<button id="next">»</button>
+    </div>
+    <ul id="menu">
+      <li><a href="#">Add playlist...</a></li>
+    </ul>
+    <div id="lists">
+    </div>
+  
+    <!-- TEMPLATES -->
+    <div id="templates">
+
+      <div id="tracklist">
+      	<table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Artist</th>
+              <th>Time</th>
+              <th>Description</th>                                    
+              <th>BPM</th>
+              <th>Sharing</th>
+            </tr>
+          </thead>
+        </table>
+      	<div>
+        	<table>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tracklist-row">
+        <table>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+    <!-- END TEMPLATES -->
+
+  </body>
+</html>

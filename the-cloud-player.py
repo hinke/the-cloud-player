@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 import wsgiref.handlers
+
+import random
+
 from google.appengine.ext import db
 
 from google.appengine.ext import webapp
@@ -16,7 +19,7 @@ class StartPage(webapp.RequestHandler):
     
 class PlayerPage(webapp.RequestHandler):
   def get(self):
-    self.response.out.write(template.render('player.html', {}))
+    self.response.out.write(template.render('player.html', {'rando': random.random()}))
 
 
 def main():
