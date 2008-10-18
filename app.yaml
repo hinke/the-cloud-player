@@ -1,0 +1,17 @@
+application: the-cloud-player
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+
+- url: /scripts
+  static_dir: scripts
+
+- url: /images
+  static_dir: images
+
+- url: .*
+  script: the-cloud-player.py
