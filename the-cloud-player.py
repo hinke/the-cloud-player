@@ -22,7 +22,7 @@ class StartPage(webapp.RequestHandler):
     
 class PlayerPage(webapp.RequestHandler):
   def get(self):
-    self.response.out.write(template.render('player.html', {'rando': random.random()}))
+    self.response.out.write(template.render('player.html', {'user':users.get_current_user(),'rando': random.random(), 'login_url': users.create_login_url("/app"), 'logout_url':users.create_logout_url("/")}))
 
 class Playlist(webapp.RequestHandler):
   def get(self):
@@ -54,8 +54,6 @@ class Playlists(webapp.RequestHandler):
 
   def post(self):  #Create new playlist
     playlist = models.Playlist(name = self.request.get("name"), 
-      position = self.request.get("position"),
-      tracks = self.request.get("tracks"),
       belongs_to = utils.get_current_user())
     
     self.response.out.write(utils.serialize_playlist(playlist))

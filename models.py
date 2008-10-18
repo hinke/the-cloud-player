@@ -10,5 +10,5 @@ class Playlist(db.Model):
   date_created = db.DateTimeProperty(auto_now_add=True)
   public = db.BooleanProperty(default=False)
   belongs_to = db.ReferenceProperty(User)
-  tracks = db.TextProperty()
-  position = db.IntegerProperty(required=True)
+  tracks = db.TextProperty(default=False)
+  position = db.IntegerProperty(default=0)

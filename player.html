@@ -22,7 +22,11 @@
     <div id="flash"><div></div></div>
     <div id="header">
       <div id="login">
-        <a href="#">Sign in to your Google Account</a>
+        {% if user %}
+          Signed in as {{user.email}} <a href="{{logout_url}}">Sign out</a>
+        {% else %}
+          <a href="{{login_url}}">Sign in with your Google Account</a>        
+        {% endif %}
       </div>
       <img src="images/logo.png" />
       <input accesskey="f" type="search" name="q" id="q" value="Search" />
