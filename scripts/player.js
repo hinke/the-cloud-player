@@ -82,9 +82,9 @@ SC.Player.prototype = {
       });
     
     $("#menu li:first a").click(function() { // ugly, playlists cant have spaces
-      var name = prompt("Name your playlist", "MyPlaylist");
+      var name = prompt("Please name your playlist", "My Playlist");
       if(name) {
-        $.post("/playlists",{'name':name},function(playlist) {
+        $.post("/playlists",{'name':name,'position': 0},function(playlist) {
           self.trackLists[name] = new SC.TrackList(name, null, self,null,false,playlist.id);
         });
       }
@@ -99,13 +99,17 @@ SC.Player.prototype = {
 
     // load playlists for user
     
-    var myPlaylists = [{name:'my playlist 1', id: 'id1',tracks: '43118,24984,44276'},
-    {name:'my playlist 2', id: 'id2',tracks: '44276,24984'},
-    {name:'my playlist 3', id: 'id3',tracks: '43118,24984'}];
-
-    $.each(myPlaylists,function() {
-      self.trackLists[this.id] = new SC.TrackList(this.name,null,self,"http://api.soundcloud.com/tracks.js?ids=" + this.tracks + "&callback=?",false,this.id);
+    $.getJSON("/playlists",function(playlists) {
+      $.each(playlists,function() {
+        //console.log(this)
+        self.trackLists[this.id] = new SC.TrackList(this.name,null,self,"http://api.soundcloud.com/tracks.js?ids=" + this.tracks + "&callback=?",false,this.id);
+      });
     });
+    
+    // var myPlaylists = [{name:'my playlist 1', id: 'id1',tracks: '43118,24984,44276'},
+    // {name:'my playlist 2', id: 'id2',tracks: '44276,24984'},
+    // {name:'my playlist 3', id: 'id3',tracks: '43118,24984'}];
+    //console.log("foo")
 
     //self.trackLists['Dashboard'] = new SC.TrackList("Dashboard",null,self,"http://api.soundcloud.com/events.js?filter=tracks&callback=?", true);
     //self.trackLists['Favorites'] = new SC.TrackList("Favorites",null,self,"http://api.soundcloud.com/me/favorites.js?callback=?");
@@ -374,9 +378,10 @@ SC.TrackList.prototype = {
     $("tr",this.list).each(function() {
       tracks += this.track.id + ",";
     });
-    // $.post("/playlist/" + this.id ,{"_method":"PUT","tracks":tracks},function() {
-    //   // commence ajax put
-    // });
+    console.log(tracks);
+    $.post("/playlists/" + this.id ,{"_method":"PUT","tracks":tracks},function() {
+      console.log('i has saved!!!11!!')
+    });
   },
   length : function() {
     return $("tr",this.list).length;

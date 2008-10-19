@@ -21,21 +21,22 @@ def get_playlists_for_user(user):
   return playlists
   
 def get_playlists():
-  return get_playlists_for_user(users.get_current_user())
+  return get_playlists_for_user(get_current_user())
 
 def url_to_playlist_key(url):
   url_array = url.split("/")
-  if len(url_array) > 3:
-    return url_array[3].lower()
+  if len(url_array) > 4:
+    return url_array[4]
   else:
     return ""
     
 def serialize_playlists(playlists):
+  cnt = playlists.count()
   idx = 1
   s = "["
   for playlist in playlists:
     s += serialize_playlist(playlist)
-    if idx != len(playlists):
+    if idx != cnt:
       s += ","
     idx += 1
     
@@ -45,13 +46,13 @@ def serialize_playlists(playlists):
     
 def serialize_playlist(playlist):
   s = "{"
-  s += "'key':'" + playlist.key() + "',"
+  s += "'id':'" + str(playlist.key()) + "',"
   s += "'name':'" + playlist.name + "',"
-  s += "'date_created':'" + playlist.date_created + "',"
-  s += "'belongs_to':'" + playlist.belongs_to + "',"
-  s += "'public':'" + playlist.public + "',"
+  s += "'date_created':'" + str(playlist.date_created) + "',"
+  #s += "'belongs_to':'" + str(playlist.belongs_to) + "',"
+  s += "'public':'" + str(playlist.public) + "',"
   s += "'tracks':'" + playlist.tracks + "',"
-  s += "'position':" + playlist.position
+  s += "'position':" + str(playlist.position)
   
   s += "}"
   

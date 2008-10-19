@@ -3,6 +3,7 @@
 import wsgiref.handlers
 
 import random
+import logging
 
 from google.appengine.ext import db
 
@@ -16,6 +17,13 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 import models
 import utils
 
+class UserHandler(webapp.RequestHandler):
+  def get(self):
+    user = utils.get_current_user()
+    if not user:
+      user = models.User(google_user=users.get_current_user())
+      user.put()
+    
 class StartPage(webapp.RequestHandler):
   def get(self):
     self.response.out.write(template.render('index.html', {}))
@@ -33,7 +41,8 @@ class Playlist(webapp.RequestHandler):
   def post(self):
     method = self.request.get("_method")
     key = utils.url_to_playlist_key(self.request.uri)
-    playlist = db.get(db.Key(key)).delete()
+    logging.info(key)
+    playlist = db.get(db.Key(key))
     
     if method == "PUT":
       if(self.request.get('name')):
@@ -56,6 +65,7 @@ class Playlists(webapp.RequestHandler):
     playlist = models.Playlist(name = self.request.get("name"), 
       belongs_to = utils.get_current_user())
     
+    playlist.put()
     self.response.out.write(utils.serialize_playlist(playlist))
     
 
@@ -64,6 +74,7 @@ def main():
                                       ('/playlists', Playlists), 
                                       ('/playlists/', Playlists), 
                                       ('/playlists/.*', Playlist), 
+                                      ('/user', UserHandler), 
                                       ('/', StartPage), 
                                       ('/app', PlayerPage)
                                       ],
