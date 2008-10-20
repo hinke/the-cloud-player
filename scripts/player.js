@@ -81,12 +81,21 @@ SC.Player.prototype = {
         }
       });
     
-    $("#menu li:first a").click(function() { // ugly, playlists cant have spaces
+    $("#menu li:first a").click(function() {
       var name = prompt("Please name your playlist", "My Playlist");
       if(name) {
         $.post("/playlists",{'name':name,'position': 0},function(playlist) {
           self.trackLists[name] = new SC.TrackList(name, null, self,null,false,playlist.id);
         });
+      }
+      return false;
+    });
+
+    // quick hack to add genre playlists
+    $("#menu li a.genre-playlist").click(function() {
+      var name = prompt("Please pick a genre", "Ambient");
+      if(name) {
+        self.trackLists['Genre'] = new SC.TrackList("Genre '" + name + "'",null,self,"http://api.soundcloud.com/tracks.js?order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&genres=" + name +"&callback=?",false,hex_md5(q));
       }
       return false;
     });
