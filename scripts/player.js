@@ -231,12 +231,22 @@ SC.Player.prototype = {
   },
   addTab : function(id, name, pane) {
     var self = this;
-    $("<li listId='" + id + "'><a href='#'>"+name+"</a></li>")
-      .find('a').click(function() {
+    $("<li listId='" + id + "'><a href='#'>"+name+"</a> <a href='/playlists/" + id + "'>[x]</a></li>")
+      .find('a:first').click(function() {
         self.switchTab(id);
         return false;
       })
       .attr('pane',pane)
+      .end()
+      .find('a:last').click(function() {
+        if(confirm("Do you want to delete this playlist?")) {
+          var self = this;
+          $.post(this.href,{"_method":"DELETE"},function() {
+            $(self).parents("li").fadeOut('fast');
+          });
+        }        
+        return false;
+      })
       .end()
       .appendTo("#menu")
       .hide()
