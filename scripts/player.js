@@ -76,7 +76,7 @@ SC.Player.prototype = {
         if(ev.keyCode === 13) {
           self.removeTab("search1");
           var q = $("#q").val();
-          self.trackLists['SearchResults'] = new SC.TrackList("Search for '" + q + "'",null,self,"http://api.soundcloud.com/tracks.js?q="+ q +"&callback=?",false,hex_md5(q));
+          self.trackLists[hex_md5(q)] = new SC.TrackList("Search for '" + q + "'",null,self,"http://api.soundcloud.com/tracks.js?q="+ q +"&callback=?",false,hex_md5(q));
           self.switchTab(hex_md5(q));
         }
       });
@@ -84,8 +84,9 @@ SC.Player.prototype = {
     $("#menu li:first a").click(function() {
       var name = prompt("Please name your playlist", "My Playlist");
       if(name) {
-        $.post("/playlists",{'name':name,'position': 0},function(playlist) {
-          self.trackLists[name] = new SC.TrackList(name, null, self,null,false,playlist.id);
+        $.post("/playlists",{'name':name,'position': 0},function(data) {
+          var playlist = eval('(' + data + ')');
+          self.trackLists[playlist.id] = new SC.TrackList(name, null, self,null,false,playlist.id);
         });
       }
       return false;
@@ -95,7 +96,16 @@ SC.Player.prototype = {
     $("#menu li a.genre-playlist").click(function() {
       var name = prompt("Please pick a genre", "Ambient");
       if(name) {
-        self.trackLists['Genre'] = new SC.TrackList("Genre '" + name + "'",null,self,"http://api.soundcloud.com/tracks.js?order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&genres=" + name +"&callback=?",false,hex_md5(q));
+        self.trackLists[hex_md5(name)] = new SC.TrackList("Genre '" + name + "'",null,self,"http://api.soundcloud.com/tracks.js?order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&genres=" + name +"&callback=?",false,hex_md5(name));
+      }
+      return false;
+    });
+
+    // quick hack to add genre playlists
+    $("#menu li a.favorites-playlist").click(function() {
+      var name = prompt("Please enter a user url (e.g. 'forss')", "forss");
+      if(name) {
+        self.trackLists[hex_md5("fav"+name)] = new SC.TrackList("Favorites from '" + name + "'",null,self,"http://api.soundcloud.com/users/" + name + "/favorites.js?callback=?",false,hex_md5("fav"+name));
       }
       return false;
     });
@@ -441,6 +451,10 @@ SC.TrackList.prototype = {
 
     var self = this;
     
+    if(!track.genre) {
+      track.genre = "";
+    }
+    
     //populate table
     $('#tracklist-row table tr')
       .clone()
@@ -466,7 +480,7 @@ SC.TrackList.prototype = {
       .find("td:nth-child(3)").text(SC.formatMs(track.duration)).end()
       .find("td:nth-child(4)").text(track.description).end()
       .find("td:nth-child(5)").text(track.bpm).end()
-      .find("td:nth-child(6)").text(track.sharing).end()
+      .find("td:nth-child(6)").text(track.genre).end()
       .addClass("track-hidden")
       .appendTo(this.list)
       .draggable({
