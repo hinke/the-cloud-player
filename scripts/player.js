@@ -76,7 +76,7 @@ SC.Player.prototype = {
         if(ev.keyCode === 13) {
           self.removeTab("search1");
           var q = $("#q").val();
-          self.trackLists[hex_md5(q)] = new SC.TrackList("Search for '" + q + "'",null,self,"http://api.soundcloud.com/tracks.js?q="+ q +"&callback=?",false,hex_md5(q));
+          self.trackLists[hex_md5("s" + q)] = new SC.TrackList("Search for '" + q + "'",null,self,"http://api.soundcloud.com/tracks.js?q="+ q +"&callback=?",false,hex_md5("s" + q));
           self.switchTab(hex_md5(q));
         }
       });
@@ -96,7 +96,7 @@ SC.Player.prototype = {
     $("#menu li a.genre-playlist").click(function() {
       var name = prompt("Please pick a genre", "Ambient");
       if(name) {
-        self.trackLists[hex_md5(name)] = new SC.TrackList("Genre '" + name + "'",null,self,"http://api.soundcloud.com/tracks.js?order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&genres=" + name +"&callback=?",false,hex_md5(name));
+        self.trackLists[hex_md5("gen" + name)] = new SC.TrackList("Genre '" + name + "'",null,self,"http://api.soundcloud.com/tracks.js?order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&genres=" + name +"&callback=?",false,hex_md5("gen" + name));
       }
       return false;
     });
