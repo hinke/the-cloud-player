@@ -246,6 +246,16 @@ table {
     background: yellow;
     -webkit-border-radius: 5px;
   }
+
+  #progress div.loading {
+    opacity: 0.4;
+    width: 50%;
+    height: 3px;
+    background: blue;
+    bottom: 0;
+    position: absolute;
+    -webkit-border-radius: 5px;
+  }
   
   #progress #timecodes {
     position: absolute;

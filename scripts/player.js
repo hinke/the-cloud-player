@@ -5,6 +5,7 @@ SC.Player.prototype = {
     if($.browser.safari)
       this.track = new Audio("http://soundcloud.com/forss/soulhack.mp3");
     this.progress = $('#progress div:first');
+    this.loading = $('#progress div.loading');
     this.progressParent = $('#progress');
     this.timecodes = $('#timecodes');
     
@@ -308,8 +309,11 @@ SC.Player.prototype = {
     this.isPlaying = true;
     this.playButton.html('■');
     var self = this;
+    window.foos = self.track;
     this.redrawTimer = setInterval(function(){
       self.progress.css('width',(self.track.currentTime/self.track.duration)*100+"%");
+      //console.log(self.track.buffered.end(),self.track.duration)
+      self.loading.css('width',(self.track.buffered.end()/self.track.duration)*100+"%");
       $('span:first',self.timecodes).html(SC.formatMs(self.track.currentTime*1000));
       $('span:last',self.timecodes).html(SC.formatMs(self.track.duration*1000));
     },30);
