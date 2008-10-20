@@ -243,6 +243,7 @@ table {
     opacity: 0.4;
     width: 50%;
     height: 44px;
+    background: yellow;
     -webkit-border-radius: 5px;
   }
   

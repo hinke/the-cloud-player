@@ -61,7 +61,7 @@ SC.Player.prototype = {
     this.playlist = [];
 
     $("#progress").click(function(ev) {
-      var percent = ev.layerX/($("#progress").width());
+      var percent = (ev.clientX-$(ev.target).offset().left)/($("#progress").width());
       self.track.currentTime = self.track.duration*percent;
     });
 
