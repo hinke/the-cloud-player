@@ -411,7 +411,6 @@ SC.TrackList.prototype = {
     $("tr",this.list).each(function() {
       tracks += this.track.id + ",";
     });
-    console.log(tracks);
     $.post("/playlists/" + this.id ,{"_method":"PUT","tracks":tracks},function() {
       console.log('i has saved!!!11!!')
     });
