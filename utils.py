@@ -49,11 +49,9 @@ def serialize_playlist(playlist):
   s += "'id':'" + str(playlist.key()) + "',"
   s += "'name':'" + playlist.name + "',"
   s += "'date_created':'" + str(playlist.date_created) + "',"
-  #s += "'belongs_to':'" + str(playlist.belongs_to) + "',"
   s += "'public':'" + str(playlist.public) + "',"
   s += "'tracks':'" + playlist.tracks + "',"
   s += "'position':" + str(playlist.position)
-  
   s += "}"
   
   return s

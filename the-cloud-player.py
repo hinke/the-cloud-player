@@ -17,19 +17,16 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 import models
 import utils
 
-class UserHandler(webapp.RequestHandler):
-  def get(self):
-    user = utils.get_current_user()
-    if not user:
-      user = models.User(google_user=users.get_current_user())
-      user.put()
-    
 class StartPage(webapp.RequestHandler):
   def get(self):
     self.response.out.write(template.render('index.html', {}))
     
 class PlayerPage(webapp.RequestHandler):
   def get(self):
+    user = utils.get_current_user()
+    if not user:
+      user = models.User(google_user=users.get_current_user())
+      user.put()
     self.response.out.write(template.render('player.html', {'user':users.get_current_user(),'rando': random.random(), 'login_url': users.create_login_url("/app"), 'logout_url':users.create_logout_url("/")}))
 
 class Playlist(webapp.RequestHandler):
@@ -39,24 +36,28 @@ class Playlist(webapp.RequestHandler):
     self.response.out.write(utils.serialize_playlist(playlist))
   
   def post(self):
-    method = self.request.get("_method")
-    key = utils.url_to_playlist_key(self.request.uri)
-    logging.info(key)
-    playlist = db.get(db.Key(key))
+    try:
+      method = self.request.get("_method")
+      key = utils.url_to_playlist_key(self.request.uri)
+      playlist = db.get(db.Key(key))
     
-    if method == "PUT":
-      if(self.request.get('name')):
-        playlist.name = self.request.get('name')
-      if(self.request.get('position')):
-        playlist.position = self.request.get('position')
-      if(self.request.get('tracks')):
-        playlist.tracks = self.request.get('tracks')
-      playlist.put()
+      if method == "PUT":
+        if(self.request.get('name')):
+          playlist.name = self.request.get('name')
+        if(self.request.get('position')):
+          playlist.position = self.request.get('position')
+        if(self.request.get('tracks')):
+          playlist.tracks = self.request.get('tracks')
       
-    elif method == "DELETE":
-      playlist.delete()
+        playlist.put()
     
-    
+      elif method == "DELETE":
+        playlist.delete()
+
+      self.response.set_status(200)
+    except Error:
+      self.error(500)      
+      
 class Playlists(webapp.RequestHandler):
   def get(self):
     self.response.out.write(utils.serialize_playlists(utils.get_playlists()))
@@ -67,14 +68,12 @@ class Playlists(webapp.RequestHandler):
     
     playlist.put()
     self.response.out.write(utils.serialize_playlist(playlist))
-    
 
 def main():
   application = webapp.WSGIApplication([
                                       ('/playlists', Playlists), 
                                       ('/playlists/', Playlists), 
                                       ('/playlists/.*', Playlist), 
-                                      ('/user', UserHandler), 
                                       ('/', StartPage), 
                                       ('/app', PlayerPage)
                                       ],
