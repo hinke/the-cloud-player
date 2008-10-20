@@ -24,7 +24,7 @@ class StartPage(webapp.RequestHandler):
 class PlayerPage(webapp.RequestHandler):
   def get(self):
     user = utils.get_current_user()
-    if not user:
+    if users.get_current_user() and not user:
       user = models.User(google_user=users.get_current_user())
       user.put()
     self.response.out.write(template.render('player.html', {'user':users.get_current_user(),'rando': random.random(), 'login_url': users.create_login_url("/app"), 'logout_url':users.create_logout_url("/")}))
