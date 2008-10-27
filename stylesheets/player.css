@@ -1,31 +1,37 @@
 body {
-  background-color: black;
-  background-image: url(/images/fade.svg);
+  background-color: #ddd;
   -webkit-background-size: 100% 100%;
   font-family: "Lucida Grande";
-  color : white;
+  color : #333;
   padding : 24px 0 24px 0;
   margin: 0;
 }
 
 #login {
   position: absolute;
-  right: 5px;
-  top: 3px;
+  right: 10px;
+  top: 5px;
   font-size: 12px;
 }
 
+#login a {
+  color: #555;
+  text-decoration: none;
+}
+
 a {
-  color: white;
+  color: black;
+}
+
+#lists {
+  position: absolute;
+  top: 80px;
+  bottom: 50px;
+  right: 0;
+  left: 200px;
 }
 
 #lists > div {
-  width: 80%;
-  position: absolute;
-  top: 132px;
-  bottom: 0;
-  right: 0;
-  border-top: solid 2px #666;
 }
 
 #lists > div > div {
@@ -39,7 +45,6 @@ a {
 }
 
 tbody > div {
-  background-image: url(/images/fade.svg);
   padding : 200px;
   font-size: 20px;
   -webkit-background-size: 100% 100%;
@@ -55,6 +60,10 @@ tbody > div > div > marquee, tbody > div > div > div {
   float: left;
 }
 
+table.list-header {
+  width: 100%;
+}
+
 table {
   font-size: 12px;
   padding: 0 0px;
@@ -67,10 +76,10 @@ table {
   
   table thead tr {
     display: block;
-    background: rgba(0,255,255,0.1);
     text-align: left;
     font-size: 13px;
     padding-right: 16px;
+    background: #eee;
   }
   
   table thead tr th {
@@ -79,6 +88,10 @@ table {
     width: 15%;
     padding-right: 1%;
     overflow: hidden;
+  }
+  
+  #track-drag-holder {
+    overflow: visible;
   }
 
   table tbody tr {
@@ -109,15 +122,15 @@ table {
   }
 
   table tbody tr:nth-child(odd) {
-    background: rgba(255,255,255,0.02);
+    background: rgba(240,240,255,1);
   }
 
-  table tbody tr:nth-child(odd):hover {
+/*  table tbody tr:nth-child(odd):hover {
     background: rgba(255,255,150,0.2);
   }
-
+*/
   table tbody tr:nth-child(even) {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,1);
   }
 
   table tbody tr.private {
@@ -132,12 +145,12 @@ table {
     background: rgba(250,100,100,0.7);
   }
 
-  table tbody tr:nth-child(even):hover {
+/*  table tbody tr:nth-child(even):hover {
     background: rgba(255,255,150,0.2);
   }
-
+*/
   table tbody a {
-    color : white;
+    color : black;
     text-decoration: none;
     padding-left : 6px;
   }
@@ -150,22 +163,35 @@ table {
   display: none;
 }
 
+#check-track-on-sc {
+  position : absolute;
+  top: 49px;
+  left: 150px;
+}
+
+#check-track-on-sc a {
+  font-size: 9px;
+  color: #666;
+}
+
 #menu {
   position: absolute;
-  width: 20%;
+  border-right: 1px solid #aaa;
+  width: 190px;
   left: 0;
-  top: 132px;
+  top: 80px;
+  bottom: 50px;
   margin: 0;
-  background: url(/images/fade-rev.svg);  
+  padding: 5px 0 0 9px;
+  overflow-y: auto;
   -webkit-background-size: 100% 100%;  
 }
 
   #menu li {
     display: block;
-    -webkit-border-top-left-radius: 10px;
-    -webkit-border-top-right-radius: 10px;    
+    -webkit-border-radius: 3px;
     -webkit-background-size: 100% 100%;
-    margin: 0 1em 0 0;
+    margin: 0 10px 3px 0;
     font-size: 13px;
   }
 
@@ -178,32 +204,29 @@ table {
   }
 
   #menu li.droppable-hover {
-    background-image: url(/images/fade-hilite-2.svg);    
-  }
+    background: #999;
+/*    background-image: url(/images/fade-hilite-2.svg);    
+*/  }
 
   #menu li.active {
-    background-color: red;
-    background-image: url(/images/fade-hilite.svg);
-    -webkit-border-top-left-radius: 10px;
-    -webkit-border-top-right-radius: 10px;    
-    -webkit-background-size: 100% 100%;
-        
+    background-color: #bbb;
+/*    background-image: url(/images/fade-hilite.svg);*/    
+    -webkit-background-size: 100% 100%;        
   }
   
   #menu li:hover {
-    background-color: yellow;
-    background-image: url(/images/fade-hilite.svg);
-    -webkit-border-top-left-radius: 10px;
-    -webkit-border-top-right-radius: 10px;    
     -webkit-background-size: 100% 100%;    
-    color: #bbb;
   }
   
   #menu li a {
     display: block;
     padding: 5px;
-    color: #eee;
+    color: #333;
     text-decoration: none;
+  }
+  
+  #menu li a.delete {
+    float : right;
   }
 
 #header img {
@@ -215,14 +238,17 @@ table {
 }
 
 #progress {
-  float : left;
-  width: 50%;
+  position: absolute;
+  top: 10px;
+  left: 150px;
+  width: 500px;
   height: 44px;
-  background-image: url(/images/fade-wave.svg);
-  -webkit-background-size: 100% 100%;
+/*  background-image: url(/images/fade-wave.svg);
+*/  -webkit-background-size: 100% 100%;
   -webkit-border-radius: 5px;
   -webkit-border: solid #c4c4c4 2px;
   position: relative;
+  background: #ccc;
 }
 
 #progress:hover {
@@ -241,17 +267,17 @@ table {
 
   #progress div.inner {
     opacity: 0.4;
-    width: 50%;
+    width: 0%;
     height: 44px;
-    background: yellow;
+    background: #aaa;
     -webkit-border-radius: 5px;
   }
 
   #progress div.loading {
     opacity: 0.4;
-    width: 50%;
+    width: 0%;
     height: 3px;
-    background: blue;
+    background: #555;
     bottom: 0;
     position: absolute;
     -webkit-border-radius: 5px;
@@ -283,50 +309,100 @@ table {
     z-index: 200;
   }
 
+#logo {
+  position : absolute;
+  top: 7px;
+}
+
+#add-normal-playlist {
+  position : absolute;
+  bottom: 0;
+}
+
+#add-genre-playlist {
+  position : absolute;
+  bottom: 2em;
+}
+
+#add-fav-playlist {
+  position : absolute;
+  bottom: 4em;
+}
+
 #q {
-  float : right;
-  margin: 0.5em 1em 0 0;
-  width: 20%;
-  color: #777;
-  width: 100%;
-  font-size: 16px;
-  opacity: 0.9;
+  position: absolute;
+  right: 10px;
+  top: 30px;
   width: 200px;
+  color: #777;
+  font-size: 16px;
 }
 #q:focus {
   color: black;
 }
 
 #header {
-  background: url(/images/fade.svg);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 79px;
+  border-bottom: 1px solid #aaa;
+  background: url(/images/fade-new.svg);
   -webkit-background-size: 100% 100%;
-  padding: 0em 0em 2em 0em;
+  padding: 0em 0em 0 0em;
+}
+
+#footer {
+  position: absolute;
+  bottom: 0;
+  height: 49px;
+  left: 0;
+  right: 0;
+  border-top: 1px solid #aaa;
+  background: #ccc;
+}
+
+#volume {
+  position: absolute;
+  top: 20px;
+  left: 150px;
+  background: #aaa;
+  width: 100px;
+  height: 10px;
+}
+
+.ui-slider-handle {
+  background: #888;
+  width: 5px;
+  height: 10px;
+  position: absolute;
 }
 
 button#play {
-  margin: 0 0 0 1em;
+  margin: 5px 0 0 7px;
   float: left;
-  width: 46px;
-  height: 46px;
-  -webkit-border-radius: 23px;
-  font-size : 30px;
-  color: white;
-  background: url(/images/fade.svg);
-  -webkit-background-size: 100% 100%;
+  width: 36px;
+  height: 36px;
+  -webkit-border-radius: 18px;
+  font-size : 20px;
+  color: black;
+/*  background: url(/images/fade.svg);
+*/  -webkit-background-size: 100% 100%;
   -webkit-box-shadow : 2px 2px 2px rgba(0,0,0,0.5);
 }
 
 button#next,button#prev, button#tempo-up, button#tempo-down, button#reverse, button#loop-in , button#loop-out, button#loop-toggle {
-  margin: 0 0 0 1em;
+  margin: 10px 0 0 7px;
   float: left;
   width: 26px;
   height: 26px;
   -webkit-border-radius: 13px;
   font-size : 17px;
   line-height: 11px;
-  color: white;
-  background: url(/images/fade.svg);
-  -webkit-background-size: 100% 100%;
+  color: black;
+/*  background: url(/images/fade.svg);
+*/  -webkit-background-size: 100% 100%;
   -webkit-box-shadow : 2px 2px 2px rgba(0,0,0,0.5);
 }
 
@@ -348,6 +424,7 @@ button#play:hover, button#next:hover, button#prev:hover {
   opacity: 0;
   -webkit-transform: scale(0.7,0.0) skew(0deg);
   position : fixed;
+  z-index: 10000;
   bottom: 100px;
   width: 100%;
   -webkit-transition-property: all;
@@ -365,11 +442,11 @@ button#play:hover, button#next:hover, button#prev:hover {
   #flash div {
     margin: 0 auto;
     max-width: 50%;
-    background: rgba(255,255,255,0.7);
-    color: #333;
+    background: rgba(0,0,0,0.7);
+    color: white;
     padding: 1em;
     -webkit-border-radius: 5px;
-    -webkit-box-shadow : 0px 0px 8px rgba(255,255,100,0.3);
+    -webkit-box-shadow : 3px 3px 5px rgba(0,0,0,0.3);
   }
 
 /* clearing */

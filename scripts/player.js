@@ -15,6 +15,16 @@ SC.Player.prototype = {
       self.togglePlay();
     });
 
+    // volume
+    $("#volume").slider({
+      startValue : 50,
+      min : 0,
+      max : 100,
+      slide : function(e, ui) {
+        self.track.volume = ui.value / 100;
+      }
+    });
+
     $('#next').click(function() {
       self.currentPlaylist.next();
     });
@@ -77,8 +87,8 @@ SC.Player.prototype = {
         if(ev.keyCode === 13) {
           self.removeTab("search1");
           var q = $("#q").val();
-          self.trackLists[hex_md5("s" + q)] = new SC.TrackList("Search for '" + q + "'",null,self,"http://api.soundcloud.com/tracks.js?q="+ q +"&callback=?",false,hex_md5("s" + q));
-          self.switchTab(hex_md5(q));
+          self.trackLists[hex_md5("s" + q)] = new SC.TrackList("Search for '" + q + "'",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&q="+ q +"&callback=?",false,hex_md5("s" + q));
+          self.switchTab(hex_md5("s" + q));
         }
       });
     
@@ -97,7 +107,7 @@ SC.Player.prototype = {
     $("#menu li a.genre-playlist").click(function() {
       var name = prompt("Please pick a genre", "Ambient");
       if(name) {
-        self.trackLists[hex_md5("gen" + name)] = new SC.TrackList("Genre '" + name + "'",null,self,"http://api.soundcloud.com/tracks.js?order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&genres=" + name +"&callback=?",false,hex_md5("gen" + name));
+        self.trackLists[hex_md5("gen" + name)] = new SC.TrackList("Genre '" + name + "'",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&genres=" + name +"&callback=?",false,hex_md5("gen" + name));
       }
       return false;
     });
@@ -106,7 +116,7 @@ SC.Player.prototype = {
     $("#menu li a.favorites-playlist").click(function() {
       var name = prompt("Please enter a user url (e.g. 'forss')", "forss");
       if(name) {
-        self.trackLists[hex_md5("fav"+name)] = new SC.TrackList("Favorites from '" + name + "'",null,self,"http://api.soundcloud.com/users/" + name + "/favorites.js?callback=?",false,hex_md5("fav"+name));
+        self.trackLists[hex_md5("fav"+name)] = new SC.TrackList("Favorites from '" + name + "'",null,self,"http://api.soundcloud.com/users/" + name + "/favorites.js?filter=streamable&callback=?",false,hex_md5("fav"+name));
       }
       return false;
     });
@@ -122,7 +132,7 @@ SC.Player.prototype = {
     $.getJSON("/playlists",function(playlists) {
       $.each(playlists,function() {
         //console.log(this)
-        self.trackLists[this.id] = new SC.TrackList(this.name,null,self,"http://api.soundcloud.com/tracks.js?ids=" + this.tracks + "&callback=?",false,this.id);
+        self.trackLists[this.id] = new SC.TrackList(this.name,null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.tracks + "&callback=?",false,this.id);
       });
     });
     
@@ -143,7 +153,7 @@ SC.Player.prototype = {
     now.setDate(now.getDate()-1);
 
     var utcYesterday = SC.utcDate(now);
-    self.trackLists['Hot'] = new SC.TrackList("Hot Tracks",null,self,"http://api.soundcloud.com/tracks.js?&order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&callback=?",false,'hot');
+    self.trackLists['Hot'] = new SC.TrackList("Hot Tracks",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&callback=?",false,'hot');
 
     self.switchTab("hot");
 
@@ -153,6 +163,7 @@ SC.Player.prototype = {
   },
   checkIfEnded: function() {
     var self = this;
+    // ugly, fix
     setInterval(function() {
       if (self.isPlaying && self.track.ended) {
         self.isPlaying = false;
@@ -168,6 +179,7 @@ SC.Player.prototype = {
     //console.log(track.user.username)
     $("#artist").hide().html(track.user.username + " - " + track.title).fadeIn();
     $("#timecodes").hide().fadeIn();
+    $("#check-track-on-sc").hide().html("<a href='" + track.permalink_url + "' target='_blank'>Check this track on SoundCloud »</a>").fadeIn("slow");
     $("#progress span.marker").remove();
     $.getJSON("http://api.soundcloud.com/tracks/"+track.id+"/comments.js?callback=?",function(comments) {
       $.each(comments,function() {
@@ -251,14 +263,14 @@ SC.Player.prototype = {
   },
   addTab : function(id, name, pane) {
     var self = this;
-    $("<li listId='" + id + "'><a href='#'>"+name+"</a> <a href='/playlists/" + id + "'>[x]</a></li>")
-      .find('a:first').click(function() {
+    $("<li listId='" + id + "'><a class='delete' href='/playlists/" + id + "'>x</a><a href='#'>"+name+"</a></li>")
+      .find('a:last').click(function() {
         self.switchTab(id);
         return false;
       })
       .attr('pane',pane)
       .end()
-      .find('a:last').click(function() {
+      .find('a:first').click(function() {
         if(confirm("Do you want to delete this playlist?")) {
           var self = this;
           $.post(this.href,{"_method":"DELETE"},function() {
@@ -309,14 +321,13 @@ SC.Player.prototype = {
     this.isPlaying = true;
     this.playButton.html('■');
     var self = this;
-    window.foos = self.track;
     this.redrawTimer = setInterval(function(){
       self.progress.css('width',(self.track.currentTime/self.track.duration)*100+"%");
       //console.log(self.track.buffered.end(),self.track.duration)
       self.loading.css('width',(self.track.buffered.end()/self.track.duration)*100+"%");
       $('span:first',self.timecodes).html(SC.formatMs(self.track.currentTime*1000));
       $('span:last',self.timecodes).html(SC.formatMs(self.track.duration*1000));
-    },30);
+    },200);
   },
   stop: function() {
     this.track.pause();    
@@ -349,6 +360,15 @@ SC.TrackList.prototype = {
     this.dom = $("#lists > div:last"); // a bit ugly
 
     this.list = $("tbody",this.dom);
+
+    $(this.list)
+    			.columnSizing({
+    				viewResize : false, 
+    				viewGhost : false, 
+    				selectCells : "tr:first>*:not(:first)"
+    				})
+    			.end()
+
 
     // add tab
     this.player.addTab(id,name,this.dom);
@@ -489,8 +509,8 @@ SC.TrackList.prototype = {
       .draggable({
         helper: 'clone',
         scroll: true,
-        opacity: 0.6,
-        appendTo: "#menu"
+        opacity: 0.8,
+        appendTo: "#track-drag-holder"
       });
     $("tr:last",this.list)[0].track = track;
     if(single) {

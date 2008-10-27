@@ -8,14 +8,16 @@
     <link href="/stylesheets/player.css" media="screen" rel="stylesheet" type="text/css" />
     <script src="/scripts/jquery-1.2.6.js" type="text/javascript"></script>
     <script type="text/javascript" src="/scripts/md5.js"></script>
-    <script type="text/javascript" src="/scripts/jquery.dimensions.js"></script>
-    <script type="text/javascript" src="/scripts/ui.base.js"></script>
+    <script type="text/javascript" src="/scripts/jquery-ui-personalized-1.6rc2.js"></script>
+    <!-- <script type="text/javascript" src="/scripts/ui.base.js"></script>
+      <script type="text/javascript" src="/scripts/jquery.dimensions.js"></script>
     <script type="text/javascript" src="/scripts/ui.draggable.js"></script>
     <script type="text/javascript" src="/scripts/ui.draggable.ext.js"></script>
     <script type="text/javascript" src="/scripts/ui.droppable.js"></script>
     <script type="text/javascript" src="/scripts/ui.droppable.ext.js"></script>
-    <script type="text/javascript" src="/scripts/ui.sortable.js"></script>
+    <script type="text/javascript" src="/scripts/ui.sortable.js"></script> -->
     <script src="/scripts/utils.js" type="text/javascript"></script>
+    <script src="/scripts/jquery.grid.columnSizing.js" type="text/javascript"></script>
     <script src="/scripts/player.js?v={{rando}}" type="text/javascript"></script>
   </head>
   <body>
@@ -23,12 +25,12 @@
     <div id="header">
       <div id="login">
         {% if user %}
-          Signed in as {{user.email}} <a href="{{logout_url}}">Sign out</a>
+          Signed in as {{user.email}} | <a href="{{logout_url}}">Sign out</a>
         {% else %}
           <a href="{{login_url}}">Sign in with your Google Account</a>        
         {% endif %}
       </div>
-      <img src="images/logo.png" />
+      <img id="logo" src="images/logo.png" />
       <input accesskey="f" type="search" name="q" id="q" value="Search" />
       <div id="progress">
         <div class="inner"></div>
@@ -36,23 +38,33 @@
         <div id="timecodes"><span></span> / <span></span></div>
         <div id="artist"></div>
       </div>
-    	<button id="prev">«</button>
-    	<button id="play">➤</button>
-    	<button id="next">»</button>
+      <div id="check-track-on-sc"></div>
+    </div>
+    <div id="lists">
+
+      	<table id="track-drag-holder">
+        </table>
+
     </div>
     <ul id="menu">
-      <li><a href="#">Add playlist...</a></li>
-      <li><a href="#" class="genre-playlist">Add genre playlist...</a></li>
-      <li><a href="#" class="favorites-playlist">Add favorites playlist...</a></li>
+      <li id="add-normal-playlist"><a href="#">Add playlist...</a></li>
+      <li id="add-genre-playlist"><a href="#" class="genre-playlist">Add genre playlist...</a></li>
+      <li id="add-fav-playlist"><a href="#" class="favorites-playlist">Add favorites playlist...</a></li>
     </ul>
-    <div id="lists">
+    <div id="footer">
+    	<button id="prev">«</button>
+    	<button id="play">➤</button>
+    	<button id="next">»</button>      
+      <div id="volume" class="ui-slider-1">
+      <div class="ui-slider-handle"></div>	
+      </div>
     </div>
   
     <!-- TEMPLATES -->
     <div id="templates">
 
       <div id="tracklist">
-      	<table>
+      	<table class="list-header">
           <thead>
             <tr>
               <th>Title</th>
