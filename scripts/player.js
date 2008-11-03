@@ -258,7 +258,7 @@ SC.Player.prototype = {
     if(window.fluid) {
       window.fluid.showGrowlNotification({
           title: track.title, 
-          description: "artist - " + track.title, 
+          description: track.user.username + " - " + track.title, 
           priority: 1, 
           sticky: false,
           identifier: "foo",
