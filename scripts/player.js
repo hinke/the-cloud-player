@@ -176,17 +176,17 @@ SC.Player.prototype = {
             }
           }
           return false;
-        } else if (ev.keyCode === 39) { // arrow next, play next if playing
-          if(self.isPlaying)
-            currentTrackList.next();
-        } else if (ev.keyCode === 37) { // arrow prev, play prev if playing
-          if(self.isPlaying)
-            currentTrackList.prev();        
-        } else if (ev.keyCode === 70) { // cmd-f for search
-          if(ev.metaKey) {
-            $("#q").focus();
-            return false;
-          }
+        } else if (ev.keyCode === 39 && self.isPlaying) { // arrow next, play next if playing
+          currentTrackList.next();
+        } else if (ev.keyCode === 37 && self.isPlaying) { // arrow prev, play prev if playing
+          currentTrackList.prev();
+        } else if (ev.keyCode === 70 && ev.metaKey) { // cmd-f for search
+          $("#q").focus();
+          return false;
+        }
+      } else {
+        if (ev.keyCode === 70 && ev.metaKey) { // cancel normal browser behaviour for cmd-f
+          return false;
         }
       }
     });
