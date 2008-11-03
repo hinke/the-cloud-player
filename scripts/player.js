@@ -17,7 +17,7 @@ SC.Player.prototype = {
 
     // volume
     $("#volume").slider({
-      startValue : 50,
+      startValue : 100,
       min : 0,
       max : 100,
       slide : function(e, ui) {
@@ -33,7 +33,7 @@ SC.Player.prototype = {
       self.currentPlaylist.prev();
     });
 
-    $('#tempo-up').click(function() {
+/*    $('#tempo-up').click(function() {
       self.tempoUp();
     });
 
@@ -56,20 +56,19 @@ SC.Player.prototype = {
     $('#loop-toggle').click(function() {
       self.setLoopToggleX();
     });
-    
-    $(window).keydown(function(ev) {
-      if(ev.keyCode === 32) {
-        self.togglePlay();
-      }
-      else if (ev.keyCode === 39) {
-        self.currentPlaylist.next();
-      }
-      else if (ev.keyCode === 37) {
-        self.currentPlaylist.prev();        
-      }
-    });
-        
+*/            
     this.playlist = [];
+
+    // artist info close btn
+    $("#artist-info a.close").click(function() {
+      self.hideArtistPane();
+      return false;
+    });
+
+    // artwork loading callback
+    $("#artwork img, #artist-info img").load(function() {
+      $(this).addClass("loaded");
+    });
 
     $("#progress").click(function(ev) {
       var percent = (ev.clientX-$(ev.target).offset().left)/($("#progress").width());
@@ -78,9 +77,18 @@ SC.Player.prototype = {
 
     $("#q")
       .focus(function() {
+        this.focused = true;
+        var self = this;
         $(this).val('');
+        $(window).click(function(ev) {
+          if(ev.target != self) {
+            $("#q").blur();
+            $(window).unbind("click");
+          }
+        });
       })
       .blur(function() {
+        this.focused = false;
         $(this).val('Search');
       })
       .keydown(function(ev) {
@@ -89,6 +97,8 @@ SC.Player.prototype = {
           var q = $("#q").val();
           self.trackLists[hex_md5("s" + q)] = new SC.TrackList("Search for '" + q + "'",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&q="+ q +"&callback=?",false,hex_md5("s" + q));
           self.switchTab(hex_md5("s" + q));
+        } else if (ev.keyCode === 27) {
+          $("#q").blur();
         }
       });
     
@@ -97,7 +107,8 @@ SC.Player.prototype = {
       if(name) {
         $.post("/playlists",{'name':name,'position': 0},function(data) {
           var playlist = eval('(' + data + ')');
-          self.trackLists[playlist.id] = new SC.TrackList(name, null, self,null,false,playlist.id);
+          self.trackLists[playlist.id] = new SC.TrackList(name, null, self,null,false,playlist.id,true);
+          self.switchTab(playlist.id);
         });
       }
       return false;
@@ -107,7 +118,8 @@ SC.Player.prototype = {
     $("#menu li a.genre-playlist").click(function() {
       var name = prompt("Please pick a genre", "Ambient");
       if(name) {
-        self.trackLists[hex_md5("gen" + name)] = new SC.TrackList("Genre '" + name + "'",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&genres=" + name +"&callback=?",false,hex_md5("gen" + name));
+        self.trackLists[hex_md5("gen" + name)] = new SC.TrackList("Genre '" + name + "'",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&genres=" + name +"&callback=?",false,hex_md5("gen" + name));
+        self.switchTab(hex_md5("gen" + name));
       }
       return false;
     });
@@ -117,48 +129,100 @@ SC.Player.prototype = {
       var name = prompt("Please enter a user url (e.g. 'forss')", "forss");
       if(name) {
         self.trackLists[hex_md5("fav"+name)] = new SC.TrackList("Favorites from '" + name + "'",null,self,"http://api.soundcloud.com/users/" + name + "/favorites.js?filter=streamable&callback=?",false,hex_md5("fav"+name));
+        self.switchTab(hex_md5("fav" + name));
       }
       return false;
     });
 
-    $(window).keypress(function(ev) {
-      $("#lists > div:visible tbody tr.marked").remove();
+    // remove playlist items on press delete
+    $(window).keydown(function(ev) {
+      if(!$("#q")[0].focused) { // don't listen to key events if search field is focused
+        var currentTrackList = self.trackLists[$("#menu li.active:first").attr('listId')]; // optimize?
+        if(ev.keyCode === 8) {
+          if($("tr.selected",currentTrackList.list).length > 0) {
+            $("tr.selected",currentTrackList.list).remove();
+            currentTrackList.save();
+            return false;          
+          }
+        } else if(ev.keyCode === 32) { // start/stop play
+          self.togglePlay();
+        } else if (ev.keyCode === 13) { // start selected track
+          if($("tr.selected",currentTrackList.list).length > 0) {
+            var idx = $("tr", currentTrackList.list).index($("tr.selected",currentTrackList.list));            
+          } else {
+            $("tr", currentTrackList.list).eq(0).addClass("selected");
+            var idx = 0;
+          }
+          currentTrackList.loadTrack(idx);
+        } else if (ev.keyCode === 40) { // arrow down, select next
+          var sel = $("tr.selected:last",currentTrackList.list);
+          if(sel.length > 0 && sel.next().length > 0) { // check so that el exists
+            if(ev.shiftKey) { // select next track
+              $("tr.selected",currentTrackList.list).next().addClass("selected");
+            } else {
+              $("tr", currentTrackList.list).removeClass("selected");
+              sel.next().addClass("selected");
+            }
+          }
+          return false;
+        } else if (ev.keyCode === 38) { // arrow up, select prev
+          var sel = $("tr.selected:first",currentTrackList.list);
+          if(sel.length > 0 && sel.prev().length > 0) { // check so that el exists
+            if(ev.shiftKey) { // select prev track
+              $("tr.selected",currentTrackList.list).prev().addClass("selected");
+            } else {
+              $("tr", currentTrackList.list).removeClass("selected");
+              sel.prev().addClass("selected");
+            }
+          }
+          return false;
+        } else if (ev.keyCode === 39) { // arrow next, play next if playing
+          if(self.isPlaying)
+            currentTrackList.next();
+        } else if (ev.keyCode === 37) { // arrow prev, play prev if playing
+          if(self.isPlaying)
+            currentTrackList.prev();        
+        } else if (ev.keyCode === 70) { // cmd-f for search
+          if(ev.metaKey) {
+            $("#q").focus();
+            return false;
+          }
+        }
+      }
     });
 
     this.trackLists = {};
 
     // load playlists for user
-    
     $.getJSON("/playlists",function(playlists) {
       $.each(playlists,function() {
-        //console.log(this)
-        self.trackLists[this.id] = new SC.TrackList(this.name,null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.tracks + "&callback=?",false,this.id);
+        self.trackLists[this.id] = new SC.TrackList(this.name,null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.tracks + "&callback=?",false,this.id,true);
       });
     });
     
-    // var myPlaylists = [{name:'my playlist 1', id: 'id1',tracks: '43118,24984,44276'},
-    // {name:'my playlist 2', id: 'id2',tracks: '44276,24984'},
-    // {name:'my playlist 3', id: 'id3',tracks: '43118,24984'}];
-    //console.log("foo")
-
     //self.trackLists['Dashboard'] = new SC.TrackList("Dashboard",null,self,"http://api.soundcloud.com/events.js?filter=tracks&callback=?", true);
     //self.trackLists['Favorites'] = new SC.TrackList("Favorites",null,self,"http://api.soundcloud.com/me/favorites.js?callback=?");
     //self.trackLists['MyTracks'] = new SC.TrackList("MyTracks",null,self,"http://api.soundcloud.com/me/tracks.js?callback=?");
 
     // hot tracks
-    var now = new Date();
-    var utcNow = SC.utcDate(now);
-
-	  // yesterday
-    now.setDate(now.getDate()-1);
-
-    var utcYesterday = SC.utcDate(now);
-    self.trackLists['Hot'] = new SC.TrackList("Hot Tracks",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + utcYesterday + "&to_date=" + utcNow + "&callback=?",false,'hot');
+    self.trackLists['hot'] = new SC.TrackList("Hot Tracks",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&callback=?",false,'hot');
 
     self.switchTab("hot");
 
     // ugly hack until we figure out callbacks
     this.checkIfEnded();
+    
+    $("#menu").sortable({
+      placeholder : "droppable-placeholder",
+      helper : function(e,el) {
+        return el.clone(); // ghosted drag helper
+      },
+      opacity: 0.7,
+      delay: 30,
+      start : function(e,ui) {
+        ui.item.css("display","block"); //prevent dragged element from getting hidden
+      }
+    });
 
   },
   checkIfEnded: function() {
@@ -201,10 +265,17 @@ SC.Player.prototype = {
           onclick: function() {}
       })      
     }
+    
+    if(track.artwork_url && !track.artwork_url.match(/default/)) {
+      this.loadArtwork(track);
+    } else {
+      this.hideArtworkPane();
+    }
+    
     this.play();
     this.loadWaveform(track);
   },
-  tempoUp: function() {
+/*  tempoUp: function() {
     if(this.track.playbackRate >= -0.1 && this.track.playbackRate < 0) {
       this.track.playbackRate = 1;
     } else {
@@ -245,7 +316,7 @@ SC.Player.prototype = {
       $("#loop-toggle").html("on").fadeIn();;
     }
   },
-  flash: function(message) {
+*/  flash: function(message) {
     $("#flash").find("div").text(message).end().addClass("on");
     setTimeout(function(){$("#flash").removeClass("on")},1500);
   },
@@ -255,13 +326,54 @@ SC.Player.prototype = {
       self.progressParent.css("background-image","url("+track.waveform_url+")");
     });
   },
-  switchTab : function(id) {
+  loadArtistInfo: function(uri) {
+    var self = this;
+    $.getJSON(uri + ".js?callback=?",function(user) {
+      if(!user.city) {
+        user.city = "";
+      };
+      if(!user.country) {
+        user.country = "";
+      };
+      user.description = (user.description ? user.description.replace(/(<([^>]+)>)/ig,"") : "");
+      $("#artist-info")
+        .find("h3").html(user.username + " <span>" + user.city + ", " + user.country + "</span>").end()
+        .find("img").removeClass("loaded").attr("src",user.avatar_url).end()
+        .find("p:first").html(user.description).end()
+        .find("p:last").html("<a href='" + user.permalink_url + "' target='_blank'>Check this artist on SoundCloud »</a>").end()
+      self.showArtistPane();
+    });
+  },
+  showArtistPane: function() {
+    $("#lists").animate({top:236});
+    $("#artist-info").animate({height:"show"});
+  },
+  hideArtistPane: function() {
+    $("#lists").animate({top:80});
+    $("#artist-info").animate({height: "hide"});
+  },
+  loadArtwork: function(track) {
+    $("#artwork img")
+      .removeClass("loaded")
+      .attr("src",track.artwork_url)
+      .attr("title",track.description);
+    this.showArtworkPane();
+  },
+  showArtworkPane: function() {
+    $("#menu").animate({bottom:251});
+    $("#artwork").animate({height:"show"});
+  },
+  hideArtworkPane: function() {
+    $("#menu").animate({bottom:50});
+    $("#artwork").animate({height: 'hide'});
+  },
+  switchTab: function(id) {
     $("#lists > div").hide();
     $("#lists > #list-"+id).show();
     $("#menu li").removeClass("active");
     $("#menu li[listId="+id+"]").addClass("active");
   },
-  addTab : function(id, name, pane) {
+  addTab: function(id, name, pane) {
     var self = this;
     $("<li listId='" + id + "'><a class='delete' href='/playlists/" + id + "'>x</a><a href='#'>"+name+"</a></li>")
       .find('a:last').click(function() {
@@ -272,10 +384,7 @@ SC.Player.prototype = {
       .end()
       .find('a:first').click(function() {
         if(confirm("Do you want to delete this playlist?")) {
-          var self = this;
-          $.post(this.href,{"_method":"DELETE"},function() {
-            $(self).parents("li").fadeOut('fast');
-          });
+          self.trackLists[$(this).parents("li").attr("listId")].destroy();
         }        
         return false;
       })
@@ -293,7 +402,6 @@ SC.Player.prototype = {
   			hoverClass: 'droppable-hover',
   			tolerance: 'pointer',
   			drop: function(ev, ui) {
-  			  console.log($(this)[0])
   				var listId = $(this).attr('listId');
   				self.trackLists[listId].addTrack($(ui.draggable)[0].track,true);
           self.flash("The track " + $(ui.draggable)[0].track.title + " was added to the playlist");
@@ -320,6 +428,7 @@ SC.Player.prototype = {
     this.track.play();
     this.isPlaying = true;
     this.playButton.html('■');
+    $("body").addClass("playing");
     var self = this;
     this.redrawTimer = setInterval(function(){
       self.progress.css('width',(self.track.currentTime/self.track.duration)*100+"%");
@@ -333,6 +442,7 @@ SC.Player.prototype = {
     this.track.pause();    
     this.isPlaying = false;
     this.playButton.html('➤');
+    $("body").removeClass("playing");
     clearInterval(this.redrawTimer);
   }
 };
@@ -340,7 +450,8 @@ SC.Player.prototype = {
 // todo: better internal data structure for playlists, know position in list, remove track etc
 SC.TrackList = SC.Class();
 SC.TrackList.prototype = {
-  initialize: function(name,tracks,player,tracksUrl,events,id) {
+  initialize: function(name,tracks,player,tracksUrl,events,id,persisted) { //ugly constructor, refactor
+    if (player.trackLists[id]) { return; }
     var self = this;
     this.name = name;
     this.id = id;
@@ -350,6 +461,7 @@ SC.TrackList.prototype = {
     this.loading = false; // cheap mans queueing
     this.events = events; // if mode is events, then event entries will be parsed for tracks
     this.currentPos = 0; // this is the current position in the list at which a track is playing, needed for continous play through playlists
+    this.persisted = persisted;
 
     $('#tracklist')
       .clone()
@@ -368,7 +480,6 @@ SC.TrackList.prototype = {
     				selectCells : "tr:first>*:not(:first)"
     				})
     			.end()
-
 
     // add tab
     this.player.addTab(id,name,this.dom);
@@ -404,18 +515,51 @@ SC.TrackList.prototype = {
         if(data.length < 50) {
           self.endOfList = true;
         }
+        // if persisted playlist we must sort the tracks array here according to the ids-string sort order
+        // kind of ugly but impossible to persist sort order since sql can't return ordered list based on id params in query
+        if(self.persisted) {
+          var trackIds = self.tracksUrl.match(/ids=([^&]*)/)[1].split(",");
+          trackIds.pop(); // remove last ","
+          var newData = new Array();
+          $.each(trackIds,function() {
+            var id = this;
+            $.each(data,function() {
+              if(this.id == id) {
+                newData.push(this);
+                return;
+              }
+            });
+          });
+          data = newData; // replace data array with sorted array
+        }
+        
         // if events mode, then parse out the tracks first
         if(self.events) {
           $.each(data,function() {
             if(this.type === 'Track') {
               self.tracks.push(this.track);
             }
-          });          
-        }
-        else {
+          });
+        } else {
           self.tracks = data;
         }
         $("> div:last",self.list).remove();
+        
+        $(self.list).sortable({
+          appendTo: "#track-drag-holder",
+          placeholder : "droppable-placeholder",
+          helper : function(e,el) {
+            return el.clone(); // ghosted drag helper
+          },
+          opacity: 0.7,
+          delay: 30,
+          start : function(e,ui) {
+            ui.item.css("display","block"); //prevent dragged element from getting hidden
+          },
+          stop : function() {
+            self.save();
+          }
+        });
 
         $.each(self.tracks,function() {
           self.addTrack(this);
@@ -431,9 +575,21 @@ SC.TrackList.prototype = {
     $("tr",this.list).each(function() {
       tracks += this.track.id + ",";
     });
+    if($("tr",this.list).length == 0) {
+      tracks = "0";
+    }
     $.post("/playlists/" + this.id ,{"_method":"PUT","tracks":tracks},function() {
-      console.log('i has saved!!!11!!')
+      console.log('i has saved!!!11!! with '+ tracks)
     });
+  },
+  destroy : function() {
+    console.log("deleting...")
+    if(this.persisted) {
+      $.post("/playlists/" + this.id,{"_method":"DELETE"},function() {
+        console.log('deleted from server...')
+      });      
+    }
+    $("#menu li[listid=" + this.id + "]").fadeOut('fast');
   },
   length : function() {
     return $("tr",this.list).length;
@@ -461,12 +617,13 @@ SC.TrackList.prototype = {
   },
   loadTrack : function(pos) {
     $("tr",this.list).removeClass("playing");
-    $("tr:nth-child("+(this.currentPos+1)+")",this.list).addClass("playing");
-    var track = $("tr:nth-child("+(this.currentPos+1)+")",this.list)[0].track;
-    this.player.load(track);
+    var tr = $("tr",this.list).eq(pos);
+    tr.addClass("playing");
+    this.currentPos = pos;
+    this.player.load(tr[0].track);
   },
   addTrack : function(track,single) {
-    track.description = (track.description != null ? track.description.substr(0,50) + "..." : "");
+    track.description = (track.description ? track.description.replace(/(<([^>]+)>)/ig,"") : "");
 
     if (track.bpm == null) {
       track.bpm = "";
@@ -484,34 +641,52 @@ SC.TrackList.prototype = {
       .dblclick(function() {
         self.player.currentPlaylist = self;
         // find out at which position we are at in the playlist, and store that as the currentPos
-        var trs = $(this).parents("tbody").find("tr");
-        var e = 0;
-        var that = this;
-        $.each(trs,function(i) {
-          if(this === that) {
-            self.currentPos = i;
-            return;
-          }
-        });
+        self.currentPos = $(this).parents("tbody").find("tr").index(this);
+        $(this).toggleClass("selected");
         self.loadTrack(self.currentPos);
       })
-      .click(function() {
-        $(this).toggleClass("marked");
+      .click(function(e) {
+        if(e.shiftKey) {
+          if($(this).siblings(".selected").length > 0) {
+            var list = self.list;
+            var oldIdx = $("tr",list).index($(this).siblings(".selected")[0]);
+            var newIdx = $("tr",list).index(this);
+            var start = (oldIdx - newIdx < 0 ? oldIdx : newIdx);
+            var stop = (oldIdx - newIdx < 0 ? newIdx : oldIdx);
+            for(var i = start;i <= stop;i++) {
+              $("tr",list).eq(i).addClass("selected");              
+            }
+          }
+        } else if (e.metaKey) {
+          $(this).toggleClass("selected");
+        } else {
+          $(this).siblings().removeClass("selected").end().toggleClass("selected");          
+        }
       })
       .find("td:nth-child(1)").text(track.title).end()
-      .find("td:nth-child(2)").text(track.user.username).end() // fix this with new field in tracks API
+      .find("td:nth-child(2)").html("<a href='#'>" + track.user.username + "</a>")
+        .find("a")
+        .click(function() {
+          self.player.trackLists[hex_md5("user" + track.user.permalink)] = new SC.TrackList("Artist '" + track.user.username + "'",null,self.player, track.user.uri + "/tracks.js?filter=streamable&order=hotness&callback=?",false,hex_md5("user" + track.user.permalink),false);
+          self.player.switchTab(hex_md5("user" + track.user.permalink));
+          self.player.loadArtistInfo(track.user.uri);
+          return false;
+        }).end()
+      .end()
       .find("td:nth-child(3)").text(SC.formatMs(track.duration)).end()
-      .find("td:nth-child(4)").text(track.description).end()
+      .find("td:nth-child(4)").html(track.description).attr("title",track.description).end()
       .find("td:nth-child(5)").text(track.bpm).end()
-      .find("td:nth-child(6)").text(track.genre).end()
+      .find("td:nth-child(6)").html("<a href='#'>" + track.genre + "</a>")
+        .find("a")
+        .click(function() {
+          var name = this.innerHTML
+          self.player.trackLists[hex_md5("gen" + name)] = new SC.TrackList("Genre '" + name + "'",null,self.player,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&genres=" + name +"&callback=?",false,hex_md5("gen" + name));
+          self.player.switchTab(hex_md5("gen" + name));
+          return false;
+        }).end()
+      .end()
       .addClass("track-hidden")
-      .appendTo(this.list)
-      .draggable({
-        helper: 'clone',
-        scroll: true,
-        opacity: 0.8,
-        appendTo: "#track-drag-holder"
-      });
+      .appendTo(this.list);
     $("tr:last",this.list)[0].track = track;
     if(single) {
       $("tr:last",this.list).removeClass("track-hidden");

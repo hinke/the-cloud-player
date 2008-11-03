@@ -35,6 +35,14 @@ $.extend(SC, {
 	utcDate: function(date) {
 	  return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
 	},
+	utcNow : function() {
+    return this.utcDate(new Date());
+	},
+	utcYesterday : function () {
+    var now = new Date();
+    now.setDate(now.getDate()-1);
+    return SC.utcDate(now);	  
+	},
   stop: function(e) { e.preventDefault && e.preventDefault(); return false; },
   noop: function() { return this; } // identity func and terminator for our namespace
 });

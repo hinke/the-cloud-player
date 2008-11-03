@@ -21,6 +21,56 @@ body {
 
 a {
   color: black;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+img {
+  display: block;
+}
+
+#artwork {
+  position: absolute;
+  bottom: 50px;
+  height: 200px;
+  width: 199px;
+  left: 0;
+  border-top: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+  background-image: url(/images/fade-2.png);
+  -webkit-background-size: 100% 100%;  
+  background-size: 100% 100%;
+  -moz-background-size: 100% 100%;
+  display: none;
+  overflow: hidden;
+}
+
+#artwork img {
+  margin: 20px auto;
+  width: 50%;
+  opacity: 0;
+  -webkit-box-reflect: below 3px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(white));
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
+#artwork img.loaded {
+  width: 70%;
+  opacity: 1;
+}
+
+/* animation artwork/avatar */
+#artwork img, #artist-info img {
+  -webkit-transform: scale(0.7,0.0) skew(0deg);
+  -webkit-transition-property: all;
+  -webkit-transition-duration: .3s;
+  -webkit-transition-timing-function: ease-out;
+}
+
+#artwork img.loaded, #artist-info img.loaded {
+  -webkit-transform: scale(1.0,1.0) skew(0deg);
 }
 
 #lists {
@@ -29,6 +79,7 @@ a {
   bottom: 50px;
   right: 0;
   left: 200px;
+  background: white;
 }
 
 #lists > div {
@@ -41,7 +92,7 @@ a {
   left: 0;
   right: 0;
   overflow-y: scroll;
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 
 tbody > div {
@@ -102,9 +153,9 @@ table {
     display: block;
     cursor: pointer;
     padding: 0px 0 0 0;
-    -webkit-transition-property: background-color, opacity;
-    -webkit-transition-duration: .5s, .5s;
-    -webkit-transition-timing-function: cubic-bezier(0.0, 0.0, 0.8, 1.0);
+/*    -webkit-transition-property: background-color, opacity;
+    -webkit-transition-duration: .2s, .2s;
+    -webkit-transition-timing-function: cubic-bezier(0.0, 0.0, 0.8, 1.0);*/
   }
 
   table tbody tr.track-hidden {
@@ -118,6 +169,7 @@ table {
   table tbody tr td {
     width: 15%;
     padding-right: 1%;
+    padding-left: 0;
     display: block;
     float: left;
     overflow: hidden;
@@ -125,8 +177,13 @@ table {
     text-overflow:ellipsis;
   }
 
+  table tbody tr td:first-child {
+    width: 13.5%;
+    padding-left: 1.5%;
+  }
+
   table tbody tr:nth-child(odd) {
-    background: rgba(240,240,255,1);
+    background-color: rgba(240,240,255,1);
   }
 
 /*  table tbody tr:nth-child(odd):hover {
@@ -134,19 +191,31 @@ table {
   }
 */
   table tbody tr:nth-child(even) {
-    background: rgba(255,255,255,1);
+    background-color: rgba(255,255,255,1);
   }
 
   table tbody tr.private {
-    background: rgba(250,180,18,0.4);
+    background-color: rgba(250,180,18,0.4);
   }
 
   table tbody tr.playing {
-    background: rgba(50,240,50,0.2);
+    background-image: url(/images/speaker-icon.png);
+    background-repeat: no-repeat;
+    background-position: 1px -22px;
   }
 
-  table tbody tr.marked {
-    background: rgba(250,100,100,0.7);
+  body.playing table tbody tr.playing {
+    background-image: url(/images/speaker-icon.png);
+    background-repeat: no-repeat;
+    background-position: 1px 2px;
+  }
+
+  table tbody tr.selected {
+    background-color: rgba(63,111,211,1);
+  }
+
+  table tbody tr.selected td, table tbody tr.selected td a {
+    color: white;
   }
 
 /*  table tbody tr:nth-child(even):hover {
@@ -178,6 +247,72 @@ table {
   color: #333;
 }
 
+#artist-info {
+  position: absolute;
+  border-bottom: 1px solid #aaa;
+  right: 0;
+  left: 200px;
+  top: 80px;
+  height: 150px;
+  margin: 0;
+  padding: 5px 0 0 9px;
+  background-image: url(/images/fade-2.png);
+  -webkit-background-size: 100% 100%;  
+  background-size: 100% 100%;
+  -moz-background-size: 100% 100%;
+  display: none;
+  overflow: hidden;
+}
+
+  #artist-info a.close {
+    float: right;
+    margin-right: 20px;
+    text-decoration: none;
+  }
+
+  #artist-info div:first-child {
+    position: absolute;
+    left: 150px;
+    right: 0;
+  }
+
+  #artist-info img {
+    position : absolute;
+    left: 65px;
+    margin-left: -55px;
+    opacity: 0;
+    width: 55px;
+    border: 1px solid rgba(0,0,0,0.2);
+    -webkit-box-reflect: below 3px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(white));
+  }
+  
+  #artist-info img.loaded {
+    width: 110px;
+    opacity: 1;
+  }
+
+  #artist-info h3 {
+    margin: 10px 0 0 0;
+  }
+
+  #artist-info h3 span {
+    font-size: 14px;
+    color: #555;
+  }
+
+  #artist-info p {
+    font-size: 12px;
+    padding-right: 20px;
+    max-height: 70px;
+    overflow: hidden;
+    text-overflow:ellipsis;
+  }
+  
+  #artist-info .check-on-sc {
+    font-size: 10px;
+    color: #555;
+  }
+
 #menu {
   position: absolute;
   border-right: 1px solid #aaa;
@@ -188,15 +323,18 @@ table {
   margin: 0;
   padding: 5px 0 0 9px;
   overflow-y: auto;
+  overflow-x: hidden;
   background-image: url(/images/fade-2.png);
   -webkit-background-size: 100% 100%;  
+  background-size: 100% 100%;
+  -moz-background-size: 100% 100%;
 }
 
   #menu li {
     display: block;
     -webkit-border-radius: 3px;
     -webkit-background-size: 100% 100%;
-    margin: 0 10px 3px 0;
+    margin: 0px 10px 0px 0;
     font-size: 13px;
   }
 
@@ -253,7 +391,7 @@ table {
 }
 
   #progress span.marker {
-    background: rgba(0,170,0,0.5);
+    background: rgba(0,0,0,0.3);
     -webkit-box-shadow: 0px 0px 3px rgba(255,255,255,0.2);
     height: 44px;
     position: absolute;
@@ -329,6 +467,7 @@ table {
 }
 
 #q {
+  -moz-border-radius : 3px;
   position: absolute;
   right: 10px;
   top: 30px;
@@ -336,6 +475,7 @@ table {
   color: #777;
   font-size: 16px;
 }
+
 #q:focus {
   color: black;
 }
@@ -450,6 +590,22 @@ button#play:hover, button#next:hover, button#prev:hover {
     -webkit-border-radius: 5px;
     -webkit-box-shadow : 3px 3px 5px rgba(0,0,0,0.3);
   }
+
+.droppable-placeholder {
+  height: 0px;
+  display: block;
+  width: 100%;
+  border-top: 1px solid rgba(0,0,0,0.4);
+}
+
+#track-drag-holder tr {
+  background: white;
+  border : 1px solid #555;
+}
+
+.ui-droppable.ui-sortable-helper {
+  width: 100%;
+}
 
 /* clearing */
 #header:after,#menu:after, #lists table tr:after {
