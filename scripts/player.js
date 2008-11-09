@@ -493,7 +493,7 @@ SC.Player.prototype = {
   			drop: function(ev, ui) {
   				var listId = $(this).attr('listId');
   			  if(ui.draggable.siblings(".selected").length > 0) {
-    				var items = ui.draggable.siblings(".selected").add(ui.draggable);
+    				var items = ui.draggable.parents("tbody").find("tr.selected");
     				$.each(items,function() {
       				self.trackLists[listId].addTrack(this.track,true);
     				});
