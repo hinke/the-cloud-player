@@ -331,6 +331,11 @@ SC.Player.prototype = {
       .fadeIn();
     $("#timecodes").hide().fadeIn();
     $("#check-track-on-sc").hide().html("<a href='" + track.permalink_url + "' target='_blank'>Check this track on SoundCloud »</a>" + "&nbsp;&nbsp;&nbsp;<a href='" + track.permalink_url + "/stats' target='_blank'>Stats »</a>").fadeIn("slow");
+    
+    if(track.purchase_url) {
+      $("#check-track-on-sc").append("&nbsp;&nbsp;&nbsp;<a href='" + track.purchase_url + "' target='_blank'>Buy Track »</a>");
+    }
+    
     $("#progress span.marker").remove();
     $.getJSON("http://api.soundcloud.com/tracks/"+track.id+"/comments.js?callback=?",function(comments) {
       $.each(comments,function() {
