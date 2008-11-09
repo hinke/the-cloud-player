@@ -5,6 +5,7 @@ body {
   color : #333;
   padding : 24px 0 24px 0;
   margin: 0;
+  -khtml-user-select : none;
 }
 
 #login {
@@ -46,6 +47,7 @@ img {
   -moz-background-size: 100% 100%;
   display: none;
   overflow: hidden;
+  -moz-user-select : none;
 }
 
 #artwork img {
@@ -80,6 +82,7 @@ img {
   right: 0;
   left: 200px;
   background: white;
+  -moz-user-select : none;
 }
 
 #lists > div {
@@ -125,6 +128,10 @@ table {
     display: block;
   }
   
+  table thead {
+    overflow: hidden;
+  }
+  
   table thead tr {
     display: block;
     text-align: left;
@@ -140,8 +147,10 @@ table {
   table thead tr th {
     display : block;
     float: left;
-    width: 15%;
-    padding-right: 1%;
+    width: 120px;
+    padding-left: 3px;
+    margin: 0;
+    border-right: 3px solid #aaa;
     overflow: hidden;
   }
   
@@ -153,6 +162,8 @@ table {
     display: block;
     cursor: pointer;
     padding: 0px 0 0 0;
+    white-space: nowrap;
+    overflow: hidden;
 /*    -webkit-transition-property: background-color, opacity;
     -webkit-transition-duration: .2s, .2s;
     -webkit-transition-timing-function: cubic-bezier(0.0, 0.0, 0.8, 1.0);*/
@@ -167,9 +178,11 @@ table {
   }
 
   table tbody tr td {
-    width: 15%;
-    padding-right: 1%;
-    padding-left: 0;
+    width: 120px;
+    padding-right: 4px;
+    height: 17px;
+    padding-left: 2px;
+    border-right: 1px solid rgba(0,0,0,0.1);
     display: block;
     float: left;
     overflow: hidden;
@@ -177,9 +190,8 @@ table {
     text-overflow:ellipsis;
   }
 
-  table tbody tr td:first-child {
-    width: 13.5%;
-    padding-left: 1.5%;
+  table tbody tr td:first-child, table thead tr th:first-child {
+    width: 30px;
   }
 
   table tbody tr:nth-child(odd) {
@@ -201,13 +213,13 @@ table {
   table tbody tr.playing {
     background-image: url(/images/speaker-icon.png);
     background-repeat: no-repeat;
-    background-position: 1px -22px;
+    background-position: 3px -22px;
   }
 
   body.playing table tbody tr.playing {
     background-image: url(/images/speaker-icon.png);
     background-repeat: no-repeat;
-    background-position: 1px 2px;
+    background-position: 3px 2px;
   }
 
   table tbody tr.selected {
@@ -225,7 +237,6 @@ table {
   table tbody a {
     color : black;
     text-decoration: none;
-    padding-left : 6px;
   }
 
   table tbody a:hover {
@@ -238,7 +249,7 @@ table {
 
 #check-track-on-sc {
   position : absolute;
-  top: 49px;
+  top: 60px;
   left: 150px;
 }
 
@@ -262,6 +273,7 @@ table {
   -moz-background-size: 100% 100%;
   display: none;
   overflow: hidden;
+  -moz-user-select : none;
 }
 
   #artist-info a.close {
@@ -328,6 +340,7 @@ table {
   -webkit-background-size: 100% 100%;  
   background-size: 100% 100%;
   -moz-background-size: 100% 100%;
+  -moz-user-select : none;
 }
 
   #menu li {
@@ -336,6 +349,9 @@ table {
     -webkit-background-size: 100% 100%;
     margin: 0px 10px 0px 0;
     font-size: 13px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow:ellipsis;    
   }
 
   #menu li:first-child {
@@ -374,16 +390,17 @@ table {
 
 #progress {
   position: absolute;
-  top: 10px;
+  top: 40px;
   left: 150px;
   width: 500px;
-  height: 44px;
+  height: 25px;
 /*  background-image: url(/images/fade-wave.svg);
 */  -webkit-background-size: 100% 100%;
   -webkit-border-radius: 5px;
   -webkit-border: solid #c4c4c4 2px;
   position: relative;
   background: #ccc;
+  display: none;
 }
 
 #progress:hover {
@@ -393,7 +410,7 @@ table {
   #progress span.marker {
     background: rgba(0,0,0,0.3);
     -webkit-box-shadow: 0px 0px 3px rgba(255,255,255,0.2);
-    height: 44px;
+    height: 25px;
     position: absolute;
     width: 1px;
     display: block;
@@ -403,7 +420,7 @@ table {
   #progress div.inner {
     opacity: 0.4;
     width: 0%;
-    height: 44px;
+    height: 24px;
     background: #aaa;
     -webkit-border-radius: 5px;
   }
@@ -431,17 +448,24 @@ table {
     display: none;
   }
 
-  #progress #artist {
+  #artist {
     position: absolute;
-    top: 12px;
-    left: 30px;
-    background: rgba(255,255,255,0.6);
+    top: 0px;
+    left: 150px;
     -webkit-border-radius: 5px;
-    font-size: 13px;
+    font-size: 16px;
     color: #333;
     padding: 2px;
     display: none;
     z-index: 200;
+  }
+  
+  #artist a {
+    display: block;
+  }
+  
+  .artist-link {
+    font-size: 13px;
   }
 
 #logo {
@@ -490,6 +514,7 @@ table {
   background: url(/images/fade-2.png);
   -webkit-background-size: 100% 100%;
   padding: 0em 0em 0 0em;
+  -moz-user-select : none;
 }
 
 #footer {
@@ -502,6 +527,7 @@ table {
   background-color: #ccc;
   background-image: url(/images/fade-2.png);
   -webkit-background-size: 100% 100%;
+  -moz-user-select : none;
 }
 
 #volume {
@@ -589,6 +615,7 @@ button#play:hover, button#next:hover, button#prev:hover {
     padding: 1em;
     -webkit-border-radius: 5px;
     -webkit-box-shadow : 3px 3px 5px rgba(0,0,0,0.3);
+    -moz-box-shadow : 3px 3px 5px rgba(0,0,0,0.3);
   }
 
 .droppable-placeholder {
@@ -601,6 +628,24 @@ button#play:hover, button#next:hover, button#prev:hover {
 #track-drag-holder tr {
   background: white;
   border : 1px solid #555;
+  width: 700px;
+  height: 17px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  display: block;
+}
+
+#track-drag-holder tr td {
+  margin: 0;
+  padding: 0;
+  height: 17px;
+  overflow: hidden;
+  display: block;
+  float: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow:ellipsis;
 }
 
 .ui-droppable.ui-sortable-helper {

@@ -15,6 +15,67 @@ SC.Player.prototype = {
       self.togglePlay();
     });
 
+/*    // make all tables unselectable
+    $("#lists,#menu,#header,#footer,#artwork,#artist-info")
+      .attr('unselectable', 'on') // ie
+      .css('MozUserSelect', 'none') // ff
+      .css('-khtml-user-select', 'none'); // webkit
+*/
+
+    // resizable playlists pane
+    function withinPlaylistPaneDragArea(el,e) {
+      var left = e.clientX-$(el).offset().left-($(el).width()+5);
+      if(left > 0 && left < 4) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    
+    // init width from cookie
+    var playlistPaneWidth = parseInt($.cookie('playlist_pane_width'));
+    if(!playlistPaneWidth) {
+      playlistPaneWidth = 250;
+    }
+    
+    $("#menu").width(playlistPaneWidth);
+    $("#lists, #artist-info").css("left",playlistPaneWidth+9);
+    $("#artwork").width(playlistPaneWidth+9);
+    $("#artwork").height(playlistPaneWidth+9);
+
+    $("#menu")
+      .mousemove(function(e) {
+        if(withinPlaylistPaneDragArea(this,e)) {
+          $(this).css("cursor","col-resize !important");
+        } else {
+          $(this).css("cursor","default");
+        }
+      })
+      .mousedown(function(e) {
+        var $pane = $(this);
+        var $artwork = $("#artwork");
+        var $lists = $("#lists, #artist-info");
+        if(withinPlaylistPaneDragArea(this,e)) {
+          $(document)
+            .mouseup(function() {
+              $(document).unbind("mousemove");
+            })
+            .mousemove(function(ev) {
+              var colWidth = ev.clientX - ($pane.offset().left+8);
+              $pane.width(colWidth);
+              if(self.showingArtwork) {
+                $pane.css("bottom",colWidth+59);
+              }
+              $artwork.width(colWidth+9);
+              $artwork.height(colWidth+9);
+              $lists.css("left",colWidth+9);                
+            });
+        }
+      })
+      .mouseup(function() {
+        $.cookie('playlist_pane_width',$(this).width());
+      });
+
     // volume
     $("#volume").slider({
       startValue : 100,
@@ -157,6 +218,12 @@ SC.Player.prototype = {
         } else if (ev.keyCode === 40) { // arrow down, select next
           var sel = $("tr.selected:last",currentTrackList.list);
           if(sel.length > 0 && sel.next().length > 0) { // check so that el exists
+            
+            // a bit messy code that scrolls with the selected element
+            if(sel.next().offset().top > (($("> div:last",currentTrackList.dom).height()+$("> div:last",currentTrackList.dom).offset().top) - 17) ) {
+              $("> div:last",currentTrackList.dom)[0].scrollTop += 17;
+            }
+            
             if(ev.shiftKey) { // select next track
               $("tr.selected",currentTrackList.list).next().addClass("selected");
             } else {
@@ -168,6 +235,12 @@ SC.Player.prototype = {
         } else if (ev.keyCode === 38) { // arrow up, select prev
           var sel = $("tr.selected:first",currentTrackList.list);
           if(sel.length > 0 && sel.prev().length > 0) { // check so that el exists
+
+            // a bit messy code that scrolls with the selected element
+            if(sel.prev().offset().top < ($("> div:last",currentTrackList.dom).offset().top) ) {
+              $("> div:last",currentTrackList.dom)[0].scrollTop -= 17;
+            }
+
             if(ev.shiftKey) { // select prev track
               $("tr.selected",currentTrackList.list).prev().addClass("selected");
             } else {
@@ -182,6 +255,9 @@ SC.Player.prototype = {
           currentTrackList.prev();
         } else if (ev.keyCode === 70 && ev.metaKey) { // cmd-f for search
           $("#q").focus();
+          return false;
+        } else if (ev.keyCode === 65 && ev.metaKey) { // cmd-a for select all
+          $("tr",currentTrackList.list).addClass("selected");
           return false;
         }
       } else {
@@ -239,11 +315,22 @@ SC.Player.prototype = {
     this.track.pause();
     this.track = null;
     this.track = new Audio(track.stream_url + "?stream_token=84d939bca386ec6f54f1d68d8d9b9bf3");
-    console.log(track.stream_url + "?stream_token=84d939bca386ec6f54f1d68d8d9b9bf3")
-    //console.log(track.user.username)
-    $("#artist").hide().html(track.user.username + " - " + track.title).fadeIn();
+    var self = this;
+
+    $("#progress").fadeIn("fast");
+    $("#artist")
+      .hide()
+      .html("<a href='#' class='artist-link'>" + track.user.username + "</a><div>" + track.title + "</div>")
+      .find("a")
+        .click(function() { // ugly, this code is duplicated from artist playlist generator
+          self.trackLists[hex_md5("user" + track.user.permalink)] = new SC.TrackList("Artist '" + track.user.username + "'",null,self, track.user.uri + "/tracks.js?filter=streamable&order=hotness&callback=?",false,hex_md5("user" + track.user.permalink),false);
+          self.switchTab(hex_md5("user" + track.user.permalink));
+          self.loadArtistInfo(track.user.uri);
+          return false;
+        }).end()
+      .fadeIn();
     $("#timecodes").hide().fadeIn();
-    $("#check-track-on-sc").hide().html("<a href='" + track.permalink_url + "' target='_blank'>Check this track on SoundCloud »</a>").fadeIn("slow");
+    $("#check-track-on-sc").hide().html("<a href='" + track.permalink_url + "' target='_blank'>Check this track on SoundCloud »</a>" + "&nbsp;&nbsp;&nbsp;<a href='" + track.permalink_url + "/stats' target='_blank'>Stats »</a>").fadeIn("slow");
     $("#progress span.marker").remove();
     $.getJSON("http://api.soundcloud.com/tracks/"+track.id+"/comments.js?callback=?",function(comments) {
       $.each(comments,function() {
@@ -335,7 +422,7 @@ SC.Player.prototype = {
       if(!user.country) {
         user.country = "";
       };
-      user.description = (user.description ? user.description.replace(/(<([^>]+)>)/ig,"") : "");
+      user.description = (user.description ? user.description : "");
       $("#artist-info")
         .find("h3").html(user.username + " <span>" + user.city + ", " + user.country + "</span>").end()
         .find("img").removeClass("loaded").attr("src",user.avatar_url).end()
@@ -360,12 +447,14 @@ SC.Player.prototype = {
     this.showArtworkPane();
   },
   showArtworkPane: function() {
-    $("#menu").animate({bottom:251});
+    $("#menu").animate({bottom:$("#artwork").width()+50});
     $("#artwork").animate({height:"show"});
+    this.showingArtwork = true;
   },
   hideArtworkPane: function() {
     $("#menu").animate({bottom:50});
     $("#artwork").animate({height: 'hide'});
+    this.showingArtwork = false;
   },
   switchTab: function(id) {
     $("#lists > div").hide();
@@ -403,8 +492,16 @@ SC.Player.prototype = {
   			tolerance: 'pointer',
   			drop: function(ev, ui) {
   				var listId = $(this).attr('listId');
-  				self.trackLists[listId].addTrack($(ui.draggable)[0].track,true);
-          self.flash("The track " + $(ui.draggable)[0].track.title + " was added to the playlist");
+  			  if(ui.draggable.siblings(".selected").length > 0) {
+    				var items = ui.draggable.siblings(".selected").add(ui.draggable);
+    				$.each(items,function() {
+      				self.trackLists[listId].addTrack(this.track,true);
+    				});
+            self.flash(items.length + " tracks were added to the playlist");
+  			  } else {
+    				self.trackLists[listId].addTrack($(ui.draggable)[0].track,true);
+            self.flash("The track " + $(ui.draggable)[0].track.title + " was added to the playlist");  			    
+  			  }
           self.trackLists[listId].save();
   			}
   		});
@@ -451,6 +548,7 @@ SC.Player.prototype = {
 SC.TrackList = SC.Class();
 SC.TrackList.prototype = {
   initialize: function(name,tracks,player,tracksUrl,events,id,persisted) { //ugly constructor, refactor
+    console.log(player)
     if (player.trackLists[id]) { return; }
     var self = this;
     this.name = name;
@@ -471,15 +569,70 @@ SC.TrackList.prototype = {
       
     this.dom = $("#lists > div:last"); // a bit ugly
 
-    this.list = $("tbody",this.dom);
+    this.list = $("tbody", this.dom);
 
-    $(this.list)
-    			.columnSizing({
-    				viewResize : false, 
-    				viewGhost : false, 
-    				selectCells : "tr:first>*:not(:first)"
-    				})
-    			.end()
+    this.colWidths = new Array(20,250,130,50,250,50,100); // default col widths
+    
+    // load colWidths from cookies
+    $.each(this.colWidths,function(i) {
+      var c = parseInt($.cookie('playlist_col_width_' + i));
+      if(c) {
+        self.colWidths[i] = c;
+      }
+    });
+    
+    // header colWidths
+    $("table.list-header th",this.dom).each(function(i) {
+      $(this).width(self.colWidths[i]);
+    });
+
+    // header width
+    $("table.list-header tr",this.dom).width(SC.arraySum(self.colWidths)+7*7);
+    
+    function withinHeaderDragArea(el,e) {
+      var left = e.clientX-$(el).offset().left-($(el).width()+3);
+      if(left > 0 && left < 4) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    $("table.list-header th",this.dom)
+      .mousemove(function(e) {
+        if(withinHeaderDragArea(this,e)) {
+          $(this).css("cursor","col-resize");
+        } else {
+          $(this).css("cursor","default");
+        }
+      })
+      .mousedown(function(e) {
+        var $col = $(this);
+        var oldColWidth = $col.width();
+        var colIdx = $(this).parents("thead").find("th").index(this) + 1;
+        var rowWidth = $(this).parents("tr").width();
+        var $row = $(this).parents("tr");
+        var $rows = $("tr",self.list);
+
+        if(withinHeaderDragArea(this,e)) {
+          $(document)
+            .mouseup(function() {
+              $(document).unbind("mousemove");
+            })
+            .mousemove(function(ev) {
+              var colWidth = ev.clientX - $col.offset().left;
+              $col.width(colWidth);
+              // resize all the cells in the same col
+              $("td:nth-child(" + colIdx + ")", self.list).width(colWidth);
+              $row.width(rowWidth+(colWidth-oldColWidth));
+              $rows.width(rowWidth+(colWidth-oldColWidth));
+            });
+        }
+      })
+      .mouseup(function(e) {
+        var colIdx = $(this).parents("thead").find("th").index(this) + 1;
+        $.cookie('playlist_col_width_' + (colIdx-1),$(this).width());
+      });
 
     // add tab
     this.player.addTab(id,name,this.dom);
@@ -548,15 +701,25 @@ SC.TrackList.prototype = {
         $(self.list).sortable({
           appendTo: "#track-drag-holder",
           placeholder : "droppable-placeholder",
+          tolerance : "pointer",
           helper : function(e,el) {
-            return el.clone(); // ghosted drag helper
+            if(el.siblings(".selected").length > 0) { // dragging more than one track
+              var els = el.parents("tbody").find(".selected").clone();
+              return $("<div></div>").prepend(els);
+              //return $("<tr><td style='padding-left:5px'>" + (el.siblings(".selected").length + 1) + " tracks selected</td></tr>");
+            } else {
+              return el.clone(); // ghosted drag helper              
+            }
           },
           opacity: 0.7,
           delay: 30,
           start : function(e,ui) {
             ui.item.css("display","block"); //prevent dragged element from getting hidden
           },
-          stop : function() {
+          stop : function(e,ui) {
+            if(ui.item.siblings(".selected").length > 0) {
+              console.log('foo')
+            }
             self.save();
           }
         });
@@ -634,10 +797,11 @@ SC.TrackList.prototype = {
     if(!track.genre) {
       track.genre = "";
     }
-    
+            
     //populate table
     $('#tracklist-row table tr')
       .clone()
+      .css("width",SC.arraySum(self.colWidths)+7*7)
       .dblclick(function() {
         self.player.currentPlaylist = self;
         // find out at which position we are at in the playlist, and store that as the currentPos
@@ -663,8 +827,9 @@ SC.TrackList.prototype = {
           $(this).siblings().removeClass("selected").end().toggleClass("selected");          
         }
       })
-      .find("td:nth-child(1)").text(track.title).end()
-      .find("td:nth-child(2)").html("<a href='#'>" + track.user.username + "</a>")
+      .find("td:nth-child(1)").css("width",self.colWidths[0]).end()
+      .find("td:nth-child(2)").css("width",self.colWidths[1]).text(track.title).end()
+      .find("td:nth-child(3)").css("width",self.colWidths[2]).html("<a href='#'>" + track.user.username + "</a>")
         .find("a")
         .click(function() {
           self.player.trackLists[hex_md5("user" + track.user.permalink)] = new SC.TrackList("Artist '" + track.user.username + "'",null,self.player, track.user.uri + "/tracks.js?filter=streamable&order=hotness&callback=?",false,hex_md5("user" + track.user.permalink),false);
@@ -673,10 +838,10 @@ SC.TrackList.prototype = {
           return false;
         }).end()
       .end()
-      .find("td:nth-child(3)").text(SC.formatMs(track.duration)).end()
-      .find("td:nth-child(4)").html(track.description).attr("title",track.description).end()
-      .find("td:nth-child(5)").text(track.bpm).end()
-      .find("td:nth-child(6)").html("<a href='#'>" + track.genre + "</a>")
+      .find("td:nth-child(4)").css("width",self.colWidths[3]).text(SC.formatMs(track.duration)).end()
+      .find("td:nth-child(5)").css("width",self.colWidths[4]).html(track.description).attr("title",track.description).end()
+      .find("td:nth-child(6)").css("width",self.colWidths[5]).text(track.bpm).end()
+      .find("td:nth-child(7)").css("width",self.colWidths[6]).html("<a href='#'>" + track.genre + "</a>")
         .find("a")
         .click(function() {
           var name = this.innerHTML

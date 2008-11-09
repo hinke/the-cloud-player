@@ -43,6 +43,13 @@ $.extend(SC, {
     now.setDate(now.getDate()-1);
     return SC.utcDate(now);	  
 	},
+  arraySum : function(a) {
+    var sum = 0
+    $.each(a,function(i) {
+      sum += a[i];
+    });
+    return sum;
+  },
   stop: function(e) { e.preventDefault && e.preventDefault(); return false; },
   noop: function() { return this; } // identity func and terminator for our namespace
 });
