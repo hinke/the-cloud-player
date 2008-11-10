@@ -6,6 +6,7 @@ body {
   padding : 24px 0 24px 0;
   margin: 0;
   -khtml-user-select : none;
+  overflow: hidden;
 }
 
 #login {
