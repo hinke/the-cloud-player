@@ -2604,6 +2604,8 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 
 		var o = this.options;
 		this.currentContainer = this;
+		
+		this._noFinalSort = o._noFinalSort; // ERIC MOD to support multi-sortable
 
 		//We only need to call refreshPositions, because the refreshItems call has been moved to mouseCapture
 		this.refreshPositions();
@@ -2884,6 +2886,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 
 		//We first have to update the dom position of the actual currentItem
 		if(!this._noFinalSort) this.placeholder.before(this.currentItem);
+
 		this._noFinalSort = null;
 
 		if(this.options.helper == "original")
@@ -2932,6 +2935,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 $.extend($.ui.sortable, {
 	getter: "serialize toArray",
 	defaults: {
+	  _noFinalSort : false, // ERIC MOD to support multi-sortable
 		helper: "original",
 		tolerance: "guess",
 		distance: 1,

@@ -281,10 +281,10 @@ SC.Player.prototype = {
     //self.trackLists['MyTracks'] = new SC.TrackList("MyTracks",null,self,"http://api.soundcloud.com/me/tracks.js?callback=?");
 
     // hot tracks
-    self.trackLists['hot'] = new SC.TrackList("Hot Tracks",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&callback=?",false,'hot');
+/*    self.trackLists['hot'] = new SC.TrackList("Hot Tracks",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&callback=?",false,'hot');
 
     self.switchTab("hot");
-
+*/
     // ugly hack until we figure out callbacks
     this.checkIfEnded();
     
@@ -496,6 +496,7 @@ SC.Player.prototype = {
   			hoverClass: 'droppable-hover',
   			tolerance: 'pointer',
   			drop: function(ev, ui) {
+  			  self.justDropped = true;  // ugly, but I can't find a proper callback;
   				var listId = $(this).attr('listId');
   			  if(ui.draggable.siblings(".selected").length > 0) {
     				var items = ui.draggable.parents("tbody").find("tr.selected");
@@ -534,7 +535,6 @@ SC.Player.prototype = {
     var self = this;
     this.redrawTimer = setInterval(function(){
       self.progress.css('width',(self.track.currentTime/self.track.duration)*100+"%");
-      //console.log(self.track.buffered.end(),self.track.duration)
       self.loading.css('width',(self.track.buffered.end()/self.track.duration)*100+"%");
       $('span:first',self.timecodes).html(SC.formatMs(self.track.currentTime*1000));
       $('span:last',self.timecodes).html(SC.formatMs(self.track.duration*1000));
@@ -553,7 +553,6 @@ SC.Player.prototype = {
 SC.TrackList = SC.Class();
 SC.TrackList.prototype = {
   initialize: function(name,tracks,player,tracksUrl,events,id,persisted) { //ugly constructor, refactor
-    console.log(player)
     if (player.trackLists[id]) { return; }
     var self = this;
     this.name = name;
@@ -707,11 +706,11 @@ SC.TrackList.prototype = {
           appendTo: "#track-drag-holder",
           placeholder : "droppable-placeholder",
           tolerance : "pointer",
+          _noFinalSort : true, // mod to support multi-sortable
           helper : function(e,el) {
             if(el.siblings(".selected").length > 0) { // dragging more than one track
               var els = el.parents("tbody").find(".selected").clone();
-              return $("<div></div>").prepend(els);
-              //return $("<tr><td style='padding-left:5px'>" + (el.siblings(".selected").length + 1) + " tracks selected</td></tr>");
+              return $("<div></div>").prepend(els); // wrap all selected elements in a div
             } else {
               return el.clone(); // ghosted drag helper              
             }
@@ -721,10 +720,14 @@ SC.TrackList.prototype = {
           start : function(e,ui) {
             ui.item.css("display","block"); //prevent dragged element from getting hidden
           },
-          stop : function(e,ui) {
-            if(ui.item.siblings(".selected").length > 0) {
-              console.log('foo')
+          beforeStop : function(e,ui) {
+            if(self.player.justDropped) { // disable sort behavior if dropping in another playlist. ugly, but I can't seem to find a proper callback;
+              self.player.justDropped = false; // ugly, but I can't find a proper callback;
+            } else {
+              ui.placeholder.after(ui.item.parents("tbody").find("tr.selected")); // multi-select-hack, move all selected items to new location                            
             }
+          },
+          stop : function(e,ui) {
             self.save();
           }
         });
@@ -747,11 +750,10 @@ SC.TrackList.prototype = {
       tracks = "0";
     }
     $.post("/playlists/" + this.id ,{"_method":"PUT","tracks":tracks},function() {
-      console.log('i has saved!!!11!! with '+ tracks)
+      console.log('saved with '+ tracks)
     });
   },
   destroy : function() {
-    console.log("deleting...")
     if(this.persisted) {
       $.post("/playlists/" + this.id,{"_method":"DELETE"},function() {
         console.log('deleted from server...')
