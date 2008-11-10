@@ -117,6 +117,13 @@ tbody > div > div > marquee, tbody > div > div > div {
 
 table.list-header {
   width: 100%;
+  background-color: #ddd;
+  background-image: url(/images/fade-2.png);
+  -webkit-background-size: 100% 100%;
+}
+
+table.list-header th {
+  height: 18px;
 }
 
 table {
@@ -138,12 +145,9 @@ table {
     text-align: left;
     font-size: 13px;
     padding-right: 16px;
-    background: #eee;
-    background-color: #ccc;
-    background-image: url(/images/fade-2.png);
-    -webkit-background-size: 100% 100%;
     height: 20px;
   }
+
   
   table thead tr th {
     display : block;
@@ -391,17 +395,18 @@ table {
 
 #progress {
   position: absolute;
-  top: 40px;
+  top: 38px;
   left: 150px;
-  width: 500px;
-  height: 25px;
+  right: 250px;
+  height: 23px;
 /*  background-image: url(/images/fade-wave.svg);
 */  -webkit-background-size: 100% 100%;
   -webkit-border-radius: 5px;
   -webkit-border: solid #c4c4c4 2px;
-  position: relative;
-  background: #ccc;
+  background: rgba(126,144,192,1);
   display: none;
+  /*-webkit-box-shadow: 0px 0px 7px rgba(255,255,255,0.5);*/
+  -webkit-box-reflect: below 3px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(white));
 }
 
 #progress:hover {
@@ -409,9 +414,9 @@ table {
 }
 
   #progress span.marker {
-    background: rgba(0,0,0,0.3);
+    background: rgba(0,0,0,0.2);
     -webkit-box-shadow: 0px 0px 3px rgba(255,255,255,0.2);
-    height: 25px;
+    height: 23px;
     position: absolute;
     width: 1px;
     display: block;
@@ -421,7 +426,7 @@ table {
   #progress div.inner {
     opacity: 0.4;
     width: 0%;
-    height: 24px;
+    height: 23px;
     background: #aaa;
     -webkit-border-radius: 5px;
   }
@@ -430,7 +435,7 @@ table {
     opacity: 0.4;
     width: 0%;
     height: 3px;
-    background: #555;
+    background: rgba(0,0,0,0.3);
     bottom: 0;
     position: absolute;
     -webkit-border-radius: 5px;
@@ -440,20 +445,21 @@ table {
     position: absolute;
     top: 4px;
     right: 4px;
-    background: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.5);
     -webkit-border-radius: 5px;
     font-size: 10px;
     color: #333;
     padding: 2px;
     z-index: 200;
     display: none;
+    -webkit-box-shadow: 0px 0px 7px rgba(255,255,255,0.5);
   }
 
   #artist {
     position: absolute;
     top: 0px;
     left: 150px;
-    -webkit-border-radius: 5px;
+    text-shadow: 0px 0px 5px rgba(0,0,0,0.3);
     font-size: 16px;
     color: #333;
     padding: 2px;
@@ -462,6 +468,7 @@ table {
   }
   
   #artist a {
+    color: #333;
     display: block;
   }
   
@@ -474,6 +481,7 @@ table {
   top: 12px;
   left: 35px;
   width: 80px;
+  -webkit-box-reflect: below 3px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(white));
 }
 
 #add-normal-playlist {
@@ -495,10 +503,11 @@ table {
   -moz-border-radius : 3px;
   position: absolute;
   right: 10px;
-  top: 30px;
-  width: 200px;
+  top: 35px;
+  width: 210px;
   color: #777;
   font-size: 16px;
+  -webkit-box-reflect: below 3px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(white));
 }
 
 #q:focus {
@@ -538,6 +547,7 @@ table {
   background: #aaa;
   width: 100px;
   height: 10px;
+  -webkit-box-reflect: below 3px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(white));
 }
 
 .ui-slider-handle {

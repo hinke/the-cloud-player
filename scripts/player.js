@@ -2,8 +2,12 @@ SC.Player = SC.Class();
 SC.Player.prototype = {
   isPlaying: false,
   initialize: function() {
-    if($.browser.safari)
-      this.track = new Audio("http://soundcloud.com/forss/soulhack.mp3");
+    if($.browser.safari) {
+      this.track = new Audio("null.mp3");
+    } else {
+      this.flash("Sorry, this player only works in Safari for now!");
+    }
+    
     this.progress = $('#progress div:first');
     this.loading = $('#progress div.loading');
     this.progressParent = $('#progress');
@@ -76,13 +80,22 @@ SC.Player.prototype = {
         $.cookie('playlist_pane_width',$(this).width());
       });
 
+    // set volume from cookie
+    this.volume = parseFloat($.cookie('volume'));
+    if(!this.volume) {
+      this.volume = 1;
+    }
+
     // volume
     $("#volume").slider({
-      startValue : 100,
+      startValue : this.volume*100,
       min : 0,
       max : 100,
       slide : function(e, ui) {
-        self.track.volume = ui.value / 100;
+        self.track.volume = self.volume = ui.value / 100;
+      },
+      change : function(e, ui) {
+        $.cookie('volume',ui.value / 100); // save the volume in a cookie
       }
     });
 
@@ -315,9 +328,10 @@ SC.Player.prototype = {
     this.track.pause();
     this.track = null;
     this.track = new Audio(track.stream_url + "?stream_token=84d939bca386ec6f54f1d68d8d9b9bf3");
+    this.track.volume = this.volume;
     var self = this;
 
-    $("#progress").fadeIn("fast");
+    //$("#progress").fadeIn("fast");
     $("#artist")
       .hide()
       .html("<a href='#' class='artist-link'>" + track.user.username + "</a><div>" + track.title + "</div>")
@@ -365,7 +379,9 @@ SC.Player.prototype = {
     }
     
     this.play();
-    this.loadWaveform(track);
+    $("#progress").fadeOut("slow",function() {
+      self.loadWaveform(track);
+    });
   },
 /*  tempoUp: function() {
     if(this.track.playbackRate >= -0.1 && this.track.playbackRate < 0) {
@@ -414,8 +430,11 @@ SC.Player.prototype = {
   },
   loadWaveform: function(track) {
     var self = this;
+    self.progressParent.css("background-image","url("+track.waveform_url+")");
+    $("#progress").fadeIn("slow");
     $.getJSON("http://api.soundcloud.com/users/"+track.user_id+".js?callback=?",function(user) {
-      self.progressParent.css("background-image","url("+track.waveform_url+")");
+      //self.progressParent.css("background-image","url("+track.waveform_url+")");
+      $("#progress").fadeIn("slow");
     });
   },
   loadArtistInfo: function(uri) {
