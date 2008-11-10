@@ -622,6 +622,7 @@ button#play:hover, button#next:hover, button#prev:hover {
     margin: 0 auto;
     max-width: 50%;
     background: rgba(0,0,0,0.7);
+    text-align: center;
     color: white;
     padding: 1em;
     -webkit-border-radius: 5px;
