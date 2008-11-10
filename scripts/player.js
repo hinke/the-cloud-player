@@ -281,10 +281,10 @@ SC.Player.prototype = {
     //self.trackLists['MyTracks'] = new SC.TrackList("MyTracks",null,self,"http://api.soundcloud.com/me/tracks.js?callback=?");
 
     // hot tracks
-/*    self.trackLists['hot'] = new SC.TrackList("Hot Tracks",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&callback=?",false,'hot');
+    self.trackLists['hot'] = new SC.TrackList("Hot Tracks",null,self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&callback=?",false,'hot');
 
     self.switchTab("hot");
-*/
+
     // ugly hack until we figure out callbacks
     this.checkIfEnded();
     
