@@ -543,7 +543,7 @@ table {
 #volume {
   position: absolute;
   top: 20px;
-  left: 150px;
+  left: 190px;
   background: #aaa;
   width: 100px;
   height: 10px;
@@ -571,7 +571,7 @@ button#play {
   -webkit-box-shadow : 2px 2px 2px rgba(0,0,0,0.5);
 }
 
-button#next,button#prev, button#tempo-up, button#tempo-down, button#reverse, button#loop-in , button#loop-out, button#loop-toggle {
+button#next, button#prev, button#loop, button#rand {
   margin: 10px 0 0 7px;
   float: left;
   width: 26px;
@@ -586,11 +586,7 @@ button#next,button#prev, button#tempo-up, button#tempo-down, button#reverse, but
   -webkit-box-shadow : 2px 2px 2px rgba(0,0,0,0.5);
 }
 
-button#loop-in , button#loop-out, button#loop-toggle {
-  font-size : 9px;
-}
-
-button#play:hover, button#next:hover, button#prev:hover {
+button#play:hover, button#next:hover, button#prev:hover, button#rand.on, button#loop.on {
   background-color: #aaa;
   cursor: pointer;
 }
