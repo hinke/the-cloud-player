@@ -47,9 +47,56 @@ SC.Player.prototype = {
       $.cookie('loop_playlist', self.loopPlaylist);
     });
 
+
+    // create smart playlist, bpm slider
+    $("#pl-bpm-range-slider").slider({
+      startValue : 120,
+      min : 50,
+      max : 250,
+      slide : function(e, ui) {
+        console.log(ui.value);
+        //ui.value;
+      },
+      change : function(e, ui) {
+        $("#pl-bpm-range").val(ui.value);
+      }
+    });
+
+    // create smart playlist form
+    $("#pl-create-form").submit(function() {
+      var name = "smart pl" + Math.random(); // tmp should be replaced by naming box
+      
+      var base = "http://api.soundcloud.com/tracks.js?callback=?&filter=streamable";
+      
+      var q = "";
+      
+      if($("#pl-genre").val() != "") {
+        q += ("&genres=" + $("#pl-genre").val());
+      }
+
+      if($("#pl-search-term").val() != "") {
+        q += ("&q=" + $("#pl-search-term").val());
+      }
+      
+      // add bpm range here
+      
+      self.trackLists[hex_md5("gen" + name)] = new SC.TrackList("New Smart Playlist",self, base + q,false,hex_md5("gen" + name));
+      self.switchTab(hex_md5("gen" + name));
+      
+      $("#lists").animate({top:0});
+      $("#create-smart-playlist").animate({height: "hide"});
+      return false;
+    });
+    
+    $("#pl-cancel").click(function() {
+      $("#lists").animate({top:0});
+      $("#create-smart-playlist").animate({height: "hide"});
+      return false;
+    });
+
     // resizable playlists pane
     function withinPlaylistPaneDragArea(el,e) {
-      var left = e.clientX-$(el).offset().left-($(el).width()+5);
+      var left = e.clientX-$(el).offset().left-($(el).width()-5);
       if(left > 0 && left < 4) {
         return true;
       } else {
@@ -64,9 +111,9 @@ SC.Player.prototype = {
     }
     
     $("#menu").width(playlistPaneWidth);
-    $("#lists, #artist-info").css("left",playlistPaneWidth+9);
-    $("#artwork").width(playlistPaneWidth+9);
-    $("#artwork").height(playlistPaneWidth+9);
+    $("#main-container").css("left",playlistPaneWidth);
+    $("#artwork").width(playlistPaneWidth);
+    $("#artwork").height(playlistPaneWidth);
 
     $("#menu")
       .mousemove(function(e) {
@@ -79,21 +126,21 @@ SC.Player.prototype = {
       .mousedown(function(e) {
         var $pane = $(this);
         var $artwork = $("#artwork");
-        var $lists = $("#lists, #artist-info");
+        var $cont = $("#main-container");
         if(withinPlaylistPaneDragArea(this,e)) {
           $(document)
             .mouseup(function() {
               $(document).unbind("mousemove");
             })
             .mousemove(function(ev) {
-              var colWidth = ev.clientX - ($pane.offset().left+8);
+              var colWidth = ev.clientX - ($pane.offset().left);
               $pane.width(colWidth);
               if(self.showingArtwork) {
                 $pane.css("bottom",colWidth+59);
               }
               $artwork.width(colWidth+9);
               $artwork.height(colWidth+9);
-              $lists.css("left",colWidth+9);                
+              $cont.css("left",colWidth);
             });
         }
       })
@@ -209,13 +256,13 @@ SC.Player.prototype = {
       return false;
     });
 
-    // quick hack to add genre playlists
-    $("#menu li a.genre-playlist").click(function() {
-      var name = prompt("Please pick a genre", "Ambient");
-      if(name) {
-        self.trackLists[hex_md5("gen" + name)] = new SC.TrackList("Genre '" + name + "'",self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&genres=" + name +"&callback=?",false,hex_md5("gen" + name));
-        self.switchTab(hex_md5("gen" + name));
-      }
+    // smart playlists button
+    $("#menu li a.smart-playlist").click(function() {
+      $("#lists").animate({top:140});
+      $("#artist-info").animate({height:"hide"});
+      $("#create-smart-playlist").animate({height:"show"},function() {
+        $("#pl-genre").val("Ambient").select().focus();
+      });
       return false;
     });
 
@@ -469,11 +516,11 @@ SC.Player.prototype = {
     });
   },
   showArtistPane: function() {
-    $("#lists").animate({top:236});
+    $("#lists").animate({top:156});
     $("#artist-info").animate({height:"show"});
   },
   hideArtistPane: function() {
-    $("#lists").animate({top:80});
+    $("#lists").animate({top:0});
     $("#artist-info").animate({height: "hide"});
   },
   loadArtwork: function(track) {

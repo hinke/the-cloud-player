@@ -34,25 +34,67 @@
       </div>
       <div id="check-track-on-sc"></div>
     </div>
-    <div id="artist-info">
-      <div>
-        <a href="#close" class="close">x</a>
-        <h3>This is the artist</h3>
-        <p>This is the desc</p>
-        <p class="check-on-sc"><a href="#">Go to the artist on SoundCloud »</a></p>
+
+    <div id="main-container">
+      <div id="artist-info">
+        <div>
+          <a href="#close" class="close">x</a>
+          <h3>This is the artist</h3>
+          <p>This is the desc</p>
+          <p class="check-on-sc"><a href="#">Go to the artist on SoundCloud »</a></p>
+        </div>
+        <img src="http://a1.soundcloud.com/avatars/0001/1308/i039964_big.jpg">
       </div>
-      <img src="http://a1.soundcloud.com/avatars/0001/1308/i039964_big.jpg">
-    </div>
-    <div id="lists">
+      
+      <div id="create-smart-playlist">
+        <h4>Create a smart playlist</h4>
+        <form id="pl-create-form">
+          <label for="pl-genre">Genre</label>
+          <input type="text" id="pl-genre">
+          <label for="pl-tags">Tags</label>
+          <input type="text" id="pl-tags">
+          <label for="pl-order">Order by</label>
+          <select id="pl-order">
+            <option>Hotness</option>
+            <option>Latest</option>
+          </select>
+          <label for="pl-search-term">Search term</label>
+          <input type="text" id="pl-search-term">
+          <label for="pl-uploaded">Uploaded</label>
+          <select id="pl-uploaded">
+            <option>No restriction</option>
+            <option>A week ago</option>
+            <option>A month ago</option>
+            <option>A year ago</option>
+          </select>
+          <input type="hidden" id="pl-bpm-range">
+          <label>BPM Range</label>
+           <div class="ui-slider-1" id="pl-bpm-range-slider">
+            50 <div class="ui-slider-handle"></div>	250
+          </div>
+  <!--        <label>Duration</label>
+          <div class="ui-slider-1">
+            <div class="ui-slider-handle"></div>	
+          </div>-->
 
-      	<table id="track-drag-holder">
-        </table>
+          <div class="buttons">
+            <input type="submit" value="Create" id="pl-create">
+            <a href="#cancel" id="pl-cancel">Cancel</a>
+          </div>
+        </form>
+      </div>
+      
+      <div id="lists">
 
+        	<table id="track-drag-holder">
+          </table>
+
+      </div>
     </div>
     <ul id="menu">
-      <li id="add-normal-playlist"><a href="#">Add playlist...</a></li>
-      <li id="add-genre-playlist"><a href="#" class="genre-playlist">Add genre playlist...</a></li>
-      <li id="add-fav-playlist"><a href="#" class="favorites-playlist">Add favorites playlist...</a></li>
+      <li id="add-normal-playlist"><a href="#">+ Playlist</a></li>
+      <li id="add-smart-playlist"><a href="#" class="smart-playlist">+ Smart Playlist</a></li>
+      <!--<li id="add-fav-playlist"><a href="#" class="favorites-playlist">Add favorites playlist...</a></li>-->
     </ul>
     <div id="artwork">
       <img src="http://a1.soundcloud.com/avatars/0001/1308/i039964_big.jpg">

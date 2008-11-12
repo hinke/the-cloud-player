@@ -7,6 +7,7 @@ body {
   margin: 0;
   -khtml-user-select : none;
   overflow: hidden;
+  font-size: 12px;
 }
 
 #login {
@@ -76,12 +77,22 @@ img {
   -webkit-transform: scale(1.0,1.0) skew(0deg);
 }
 
-#lists {
+#main-container {
   position: absolute;
   top: 80px;
   bottom: 50px;
   right: 0;
   left: 200px;
+  background: white;
+  -moz-user-select : none;
+}
+
+#lists {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  right: 0;
+  left: 0px;
   background: white;
   -moz-user-select : none;
 }
@@ -263,12 +274,43 @@ table {
   color: #333;
 }
 
+#create-smart-playlist {
+  position: absolute;
+  border-bottom: 1px solid #aaa;
+  right: 0;
+  left: 0px;
+  top: 0px;
+  height: 140px;
+  margin: 0;
+  padding: 5px 0 0 9px;
+  background-image: url(/images/fade-2.png);
+  -webkit-background-size: 100% 100%;  
+  background-size: 100% 100%;
+  -moz-background-size: 100% 100%;
+  display: none;
+  overflow: hidden;
+  -moz-user-select : none;
+}
+
+#pl-bpm-range-slider {
+  width: 100px;
+  background: #aaa;
+}
+
+.buttons {
+
+}
+
+  .buttons input, .buttons a {
+    float: right;
+  }
+
 #artist-info {
   position: absolute;
   border-bottom: 1px solid #aaa;
   right: 0;
-  left: 200px;
-  top: 80px;
+  left: 0px;
+  top: 0px;
   height: 150px;
   margin: 0;
   padding: 5px 0 0 9px;
@@ -333,12 +375,12 @@ table {
 #menu {
   position: absolute;
   border-right: 1px solid #aaa;
-  width: 190px;
+  width: 199px;
   left: 0;
   top: 80px;
   bottom: 50px;
   margin: 0;
-  padding: 5px 0 0 9px;
+  padding: 0px 0 0 0px;
   overflow-y: auto;
   overflow-x: hidden;
   background-image: url(/images/fade-2.png);
@@ -350,9 +392,8 @@ table {
 
   #menu li {
     display: block;
-    -webkit-border-radius: 3px;
-    -webkit-background-size: 100% 100%;
-    margin: 0px 10px 0px 0;
+    margin: 0px 0px 0px 0;
+    padding: 0 0px 0 0;
     font-size: 13px;
     overflow: hidden;
     white-space: nowrap;
@@ -373,8 +414,8 @@ table {
 */  }
 
   #menu li.active {
-    background-color: #bbb;
-/*    background-image: url(/images/fade-hilite.svg);*/    
+    background-color: rgba(240,240,255,1);
+    background-image: url(/images/fade-2.png);
     -webkit-background-size: 100% 100%;        
   }
   
@@ -489,7 +530,7 @@ table {
   bottom: 0;
 }
 
-#add-genre-playlist {
+#add-smart-playlist {
   position : absolute;
   bottom: 2em;
 }
@@ -661,7 +702,7 @@ button#play:hover, button#next:hover, button#prev:hover, button#rand.on, button#
 }
 
 /* clearing */
-#header:after,#menu:after, #lists table tr:after {
+#header:after,#menu:after, #lists table tr:after, .buttons:after {
   content: ".";
   display: block;
   height: 0;
