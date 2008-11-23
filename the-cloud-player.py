@@ -58,48 +58,48 @@ class Playlist(webapp.RequestHandler):
     self.response.out.write(library_item.serialize())
 
   def post(self):
-    try:
-      method = self.request.get("_method")
-      key = utils.url_to_playlist_key(self.request.uri)
-      playlist = db.get(db.Key(key))
-      current_user = utils.get_current_user()
-      
-      #Get corresponding link or create it
-      library_item = playlist.library_item_for_current_user()
-      
-      if method == "PUT":
-        if not library_item:
-          library_item = models.Library(user=current_user, playlist=playlist, is_owner=False)
-          library_item.put()
-
-        if(self.request.get('name')):
-          playlist.name = self.request.get('name')
-        if(self.request.get('tracks')):
-          playlist.tracks = self.request.get('tracks')
-        if(self.request.get('position')):
-          library_item.position = self.request.get('position')
-      
-        playlist.put()        
+    #try:
+    method = self.request.get("_method")
+    key = utils.url_to_playlist_key(self.request.uri)
+    playlist = db.get(db.Key(key))
+    current_user = utils.get_current_user()
     
-      elif method == "DELETE":
-        if library_item.is_owner and not playlist.collaborative:
-          users_connected_to_playlist = playlist.users()
-          for item in users_connected_to_playlist:
-            item.delete()
-            
+    #Get corresponding link or create it
+    library_item = playlist.library_item_for_current_user()
+    
+    if method == "PUT":
+      if not library_item:
+        library_item = models.Library(user=current_user, playlist=playlist, is_owner=False)
+        library_item.put()
+
+      if(self.request.get('name')):
+        playlist.name = self.request.get('name')
+      if(self.request.get('tracks')):
+        playlist.tracks = self.request.get('tracks')
+      if(self.request.get('position')):
+        library_item.position = self.request.get('position')
+    
+      playlist.put()        
+  
+    elif method == "DELETE":
+      if library_item.is_owner and not playlist.collaborative:
+        users_connected_to_playlist = playlist.users()
+        for item in users_connected_to_playlist:
+          item.delete()
+          
+        playlist.delete()
+        
+      elif playlist.collaborative:
+        library_item.delete()
+        if len(playlist.users()) == 0:
           playlist.delete()
           
-        elif playlist.collaborative:
-          library_item.delete()
-          if len(playlist.users()) == 0:
-            playlist.delete()
-            
-        elif not library_item.is_owner:
-          library_item.delete()
+      elif not library_item.is_owner:
+        library_item.delete()
 
-      self.response.set_status(200)
-    except Error:
-      self.error(500)      
+    #self.response.set_status(200)
+    #except StandardError:
+      #self.error(500)      
       
 class Playlists(webapp.RequestHandler):
   def get(self):
@@ -109,7 +109,7 @@ class Playlists(webapp.RequestHandler):
     playlist = models.Playlist(name = self.request.get("name"))
         
     playlist.put()
-    library_item = models.Library(user=utils.get_current_user(), playlist=playlist, is_owner=True)
+    library_item = models.Library(user=utils.get_current_user(), playlist=playlist, is_owner=True, position = int(self.request.get("position")))
     library_item.put()
     
     self.response.out.write(playlist.serialize())

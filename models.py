@@ -1,6 +1,6 @@
 from google.appengine.ext import db
 import logging
-
+import utils
 
 class User(db.Model):
   google_user = db.UserProperty(required=True)
@@ -22,7 +22,6 @@ class Playlist(db.Model):
   collaborative = db.BooleanProperty(default=False)  
   tracks = db.TextProperty(default="0")
   smart = db.BooleanProperty(default=False)
-  smart_filter = db.StringProperty()
   
   def serialize(self):
     s = "{"
@@ -34,7 +33,7 @@ class Playlist(db.Model):
     s += "}"
     return s
     
-  def library_item_for_current_user():
+  def library_item_for_current_user(self):
     q = db.GqlQuery("SELECT * FROM Library WHERE user = :user AND playlist = :playlist", user=utils.get_current_user(), playlist=self)  
     return q.get()
 
