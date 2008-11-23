@@ -129,7 +129,7 @@ tbody > div > div > marquee, tbody > div > div > div {
 table.list-header {
   width: 100%;
   background-color: #ddd;
-  background-image: url(/images/fade-2.png);
+  background-image: url(/images/fade-22px.png);
   -webkit-background-size: 100% 100%;
 }
 
@@ -372,13 +372,21 @@ table {
     color: #555;
   }
 
-#menu {
+#sidebar {
   position: absolute;
   border-right: 1px solid #aaa;
   width: 199px;
   left: 0;
   top: 80px;
   bottom: 50px;
+}
+
+#playlists {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0px;
+  bottom: 25px;
   margin: 0;
   padding: 0px 0 0 0px;
   overflow-y: auto;
@@ -392,30 +400,43 @@ table {
   -moz-user-select : none;
 }
 
-  #menu li {
+  #playlists li {
     display: block;
     margin: 0px 0px 0px 0;
-    padding: 0 0px 0 0;
+    padding: 0 0px 0 20px;
     font-size: 13px;
     overflow: hidden;
     white-space: nowrap;
-    text-overflow:ellipsis;    
+    text-overflow:ellipsis;
+    position: relative;
   }
 
-  #menu li:first-child {
+  /* playlist icons */
+  #playlists li span {
+    background-image: url(/images/icons.png);
+    background-position: -209px -98px;
+    display: block;
+    position: absolute;
+    left: 4px;
+    top: 3px;
+    width: 17px;
+    height: 20px;
+  }
+
+  #playlists li:first-child {
 
   }
 
-  #menu li.droppable-active {
+  #playlists li.droppable-active {
     /*background: url(/images/fade-hilite-2.svg);*/
   }
 
-  #menu li.droppable-hover {
+  #playlists li.droppable-hover {
     background: #999;
 /*    background-image: url(/images/fade-hilite-2.svg);    
 */  }
 
-  #menu li.active {
+  #playlists li.active {
     font-weight: bold;
     background-color: rgba(63,111,211,1);
     background-image: url(/images/playlist-fade.png);
@@ -423,23 +444,43 @@ table {
     -webkit-background-size: 100% 100%;
   }
   
-  #menu li.active a {
+  #playlists li.active a {
     color: white;
   }
   
-  #menu li:hover {
+  #playlists li:hover {
     -webkit-background-size: 100% 100%;    
   }
   
-  #menu li a {
+  #playlists li a {
     display: block;
     padding: 5px;
     color: #333;
     text-decoration: none;
   }
   
-  #menu li a.delete {
-    float : right;
+  #playlists li a.delete {
+    position: absolute;
+    right: 5px;
+    top: 7px;
+    display: block;
+    width: 11px;
+    height: 11px;
+    background-image: url(/images/icons.png);
+    background-position: -289px -6px;
+    padding: 0;
+  }
+
+  #playlists li a.share {
+    position: absolute;
+    right: 21px;
+    top: 7px;
+    display: block;
+    width: 12px;
+    height: 12px;
+    background-image: url(/images/icons.png);
+    background-position: -311px -6px;
+    padding: 0;
   }
 
 #player-display {
@@ -484,7 +525,8 @@ table {
       width: 0%;
       height: 23px;
       background: #aaa;
-      -webkit-border-radius: 5px;
+      border-right: 1px solid black;
+      -webkit-border-radius: 0px;
     }
 
     #progress div.loading {
@@ -554,24 +596,42 @@ table {
 
 #logo {
   position : absolute;
-  top: 12px;
-  left: 35px;
-  width: 80px;
+  top: -8px;
+  left: 10px;
+  width: 134px;
 }
 
-#add-normal-playlist {
+#create-playlists {
   position : absolute;
-  bottom: 0;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+#add-playlist, #add-smart-playlist {
+  display : block;
+  float: left;
+  height: 19px;
+  background-image: url(/images/icons.png);
+  margin: 1px 5px 0 2px;
+  padding: 3px 0 0 25px;
+  font-size: 11px;
+  color: #555;
+  outline: 0;
+}
+
+#add-playlist {
+  width: 50px;
+  background-position: -395px -68px;
+}
+
+#add-playlist:hover, #add-smart-playlist:hover {
+  text-decoration: none;
 }
 
 #add-smart-playlist {
-  position : absolute;
-  bottom: 2em;
-}
-
-#add-fav-playlist {
-  position : absolute;
-  bottom: 4em;
+  width: 79px;
+  background-position: -272px -68px;
 }
 
 #q {
@@ -821,7 +881,7 @@ table {
 }
 
 /* clearing */
-#header:after,#menu:after, #lists table tr:after, .buttons:after {
+#header:after,#playlists:after, #lists table tr:after, .buttons:after {
   content: ".";
   display: block;
   height: 0;

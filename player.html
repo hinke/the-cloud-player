@@ -24,7 +24,7 @@
           <a href="{{login_url}}">Sign in with your Google Account</a>        
         {% endif %}
       </div>
-      <img id="logo" src="images/logo.png" />
+      <img id="logo" src="images/logo-new.png" />
       <input accesskey="f" type="search" name="q" id="q" value="Search" />
       <div id="player-display">
         <div id="timecodes"><span></span> / <span></span></div>
@@ -95,11 +95,14 @@
 
       </div>
     </div>
-    <ul id="menu">
-      <li id="add-normal-playlist"><a href="#">Add Playlist</a></li>
-      <li id="add-smart-playlist"><a href="#" class="smart-playlist">Add Smart Playlist</a></li>
-      <!--<li id="add-fav-playlist"><a href="#" class="favorites-playlist">Add favorites playlist...</a></li>-->
-    </ul>
+    <div id="sidebar">
+      <ul id="playlists">
+      </ul>
+      <div id="create-playlists">
+        <a id="add-playlist" href="#">Playlist</a>
+        <a id="add-smart-playlist" href="#" class="smart-playlist">Smart Playlist</a>
+      </div>
+    </div>
     <div id="artwork">
       <img src="http://a1.soundcloud.com/avatars/0001/1308/i039964_big.jpg">
     </div>
