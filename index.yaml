@@ -17,7 +17,7 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used 113 times in query history.
+# Used 109 times in query history.
 - kind: Library
   properties:
   - name: user
