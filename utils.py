@@ -4,6 +4,18 @@ from google.appengine.api import users
 from google.appengine.ext import db
 import models
 
+def init_new_user():
+  app_user = models.User(google_user=users.get_current_user())
+  app_user.put()
+  
+  hot = models.Playlist(name = "Hot Tracks", smart = True, order = "hotness")
+  hot.put()
+  
+  library_item = models.Library(user=app_user, playlist=hot, is_owner=True, position = 1)
+  library_item.put()
+  
+  return app_user
+
 def get_current_user():
   return get_user(users.get_current_user())
 

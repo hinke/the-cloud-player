@@ -1,1 +1,2 @@
-By Henrik Berggren & Eric Wahlforss
+The Cloud Player is a mashup built on the SoundCloud API. The Cloud Player let's you create playlists with your favorite tracks and share them with your friends. All using SoundCloud's excellent catalogue of music.
+The Cloud Player is written by Henrik Berggren & Eric Wahlforss using Google AppEngine, Python, jQuery, SoundCloud and SoundManager.

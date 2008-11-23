@@ -14,12 +14,12 @@
     <script src="/scripts/player.js?v={{rando}}" type="text/javascript"></script>
     <link href="/images/favicon.ico" rel="shortcut icon" />
   </head>
-  <body unselectable="on">
+  <body unselectable="on" class="{% if user %}logged-in{% endif %}">
     <div id="flash"><div></div></div>
     <div id="header">
       <div id="login">
         {% if user %}
-          Signed in as {{user.email}} | <a href="{{logout_url}}">Sign out</a>
+          Signed in as {{user.google_user.email}} | <a href="{{logout_url}}">Sign out</a>
         {% else %}
           <a href="{{login_url}}">Sign in with your Google Account</a>        
         {% endif %}
@@ -99,8 +99,8 @@
       <ul id="playlists">
       </ul>
       <div id="create-playlists">
-        <a id="add-playlist" href="#">Playlist</a>
-        <a id="add-smart-playlist" href="#" class="smart-playlist">Smart Playlist</a>
+        <a id="add-playlist" href="{{login_url}}">Playlist</a>
+        <a id="add-smart-playlist" href="{{login_url}}" class="smart-playlist">Smart Playlist</a>
       </div>
     </div>
     <div id="artwork">

@@ -344,11 +344,13 @@ SC.Player.prototype = {
     //self.trackLists['Favorites'] = new SC.TrackList("Favorites",self,"http://api.soundcloud.com/me/favorites.js?callback=?");
     //self.trackLists['MyTracks'] = new SC.TrackList("MyTracks",self,"http://api.soundcloud.com/me/tracks.js?callback=?");
 
-    // hot tracks
-/*    self.trackLists['hot'] = new SC.TrackList("Hot Tracks",self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&callback=?",false,'hot');
+    // load hot tracks if not logged in user
+    if(!$("body").hasClass("logged-in")) {
+      self.trackLists['hot'] = new SC.TrackList("Hot Tracks",self,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&callback=?",false,'hot');
 
-    self.switchTab("hot");
-*/
+      self.switchTab("hot");      
+    }
+    
     $("#playlists").sortable({
       placeholder : "droppable-placeholder",
       helper : function(e,el) {
