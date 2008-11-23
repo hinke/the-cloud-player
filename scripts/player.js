@@ -353,7 +353,7 @@ SC.Player.prototype = {
     // load playlists for user
     $.getJSON("/playlists",function(playlists) {
       $.each(playlists,function() {
-        self.trackLists[this.id] = new SC.TrackList(this.playlist.name,self,"http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.playlist.tracks + "&callback=?",false,this.playlist.id,true);
+        self.trackLists[this.playlist.id] = new SC.TrackList(this.playlist.name,self,"http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.playlist.tracks + "&callback=?",false,this.playlist.id,true);
       });
     });
     

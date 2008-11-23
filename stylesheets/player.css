@@ -416,8 +416,9 @@ table {
   #menu li.active {
     font-weight: bold;
     background-color: rgba(63,111,211,1);
-    background-image: url(/images/fade-2.png);
-    -webkit-background-size: 100% 100%;
+    background-image: url(/images/playlist-fade.png);
+    background-repeat: repeat-x;
+/*    -webkit-background-size: 100% 100%;*/
   }
   
   #menu li.active a {
