@@ -357,6 +357,13 @@ SC.Player.prototype = {
       });
     });
     
+    // click behaviour for transport buttons
+    $("#play,#prev,#next,#rand,#loop").mousedown(function() {
+      $(this).addClass("click");
+    }).mouseup(function() {
+      $(this).removeClass("click");
+    });
+    
     //self.trackLists['Dashboard'] = new SC.TrackList("Dashboard",self,"http://api.soundcloud.com/events.js?filter=tracks&callback=?", true);
     //self.trackLists['Favorites'] = new SC.TrackList("Favorites",self,"http://api.soundcloud.com/me/favorites.js?callback=?");
     //self.trackLists['MyTracks'] = new SC.TrackList("MyTracks",self,"http://api.soundcloud.com/me/tracks.js?callback=?");
@@ -609,7 +616,6 @@ SC.Player.prototype = {
   play: function() {
     this.track.play();
     this.isPlaying = true;
-    this.playButton.html('■');
     $("body").addClass("playing");
     var self = this;
     this.redrawTimer = setInterval(function(){
@@ -622,7 +628,6 @@ SC.Player.prototype = {
   stop: function() {
     this.track.pause();    
     this.isPlaying = false;
-    this.playButton.html('➤');
     $("body").removeClass("playing");
     clearInterval(this.redrawTimer);
   }
@@ -744,7 +749,7 @@ SC.TrackList.prototype = {
     var self = this;
     var url = this.tracksUrl + "&offset=" + this.offset;
     if(!this.endOfList && !this.loading) {
-      $("<div><div><div>Loading</div><marquee direction='right'>...<marquee></div></div>").appendTo(self.list);
+      $("<div><div style='position:relative'><div id='throbber'></div></div></div>").appendTo(self.list);
       self.loading = true;
       self.tracks = [];
       $.getJSON(url, function(data) {

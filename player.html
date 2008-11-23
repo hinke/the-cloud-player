@@ -26,11 +26,15 @@
       </div>
       <img id="logo" src="images/logo.png" />
       <input accesskey="f" type="search" name="q" id="q" value="Search" />
-      <div id="artist"></div>
-      <div id="progress">
-        <div class="inner"></div>
-        <div class="loading"></div>
+      <div id="player-display">
         <div id="timecodes"><span></span> / <span></span></div>
+        <div id="artist">
+        
+        </div>
+        <div id="progress">
+          <div class="inner"></div>
+          <div class="loading"></div>
+        </div>
       </div>
       <div id="check-track-on-sc"></div>
     </div>
@@ -92,22 +96,24 @@
       </div>
     </div>
     <ul id="menu">
-      <li id="add-normal-playlist"><a href="#">+ Playlist</a></li>
-      <li id="add-smart-playlist"><a href="#" class="smart-playlist">+ Smart Playlist</a></li>
+      <li id="add-normal-playlist"><a href="#">Add Playlist</a></li>
+      <li id="add-smart-playlist"><a href="#" class="smart-playlist">Add Smart Playlist</a></li>
       <!--<li id="add-fav-playlist"><a href="#" class="favorites-playlist">Add favorites playlist...</a></li>-->
     </ul>
     <div id="artwork">
       <img src="http://a1.soundcloud.com/avatars/0001/1308/i039964_big.jpg">
     </div>
     <div id="footer">
-    	<button id="prev">«</button>
-    	<button id="play">➤</button>
-    	<button id="next">»</button>      
-    	<button id="rand" title="Shuffle Playlist">∝</button>
-    	<button id="loop" title="Repeat Playlist">∞</button>
+    	<input type="image" id="prev" value="&nbsp;" src="/images/empty.png" />
+    	<input type="image" id="play" value="&nbsp;" src="/images/empty.png" />
+    	<input type="image" id="next" value="&nbsp;" src="/images/empty.png" />
+    	<input type="image" id="rand" title="Shuffle Playlist" value="&nbsp;" src="/images/empty.png" />
+    	<input type="image" id="loop" title="Repeat Playlist" value="&nbsp;" src="/images/empty.png" />
+      <div id="speaker-mute"></div>
       <div id="volume" class="ui-slider-1">
-      <div class="ui-slider-handle"></div>	
+        <div class="ui-slider-handle"></div>	
       </div>
+      <div id="speaker"></div>
     </div>
   
     <!-- TEMPLATES -->
