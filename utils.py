@@ -68,5 +68,5 @@ def generate_share_hash():
 def status_code_json(code):
   return "{'response':"+ str(code) +"}"
   
-def in_production_enviroment():
-  return os.environ["SERVER_SOFTWARE"] == "Google Apphosting/1.0"
+def in_development_enviroment():
+  return os.environ["SERVER_SOFTWARE"] != "Google Apphosting/1.0"

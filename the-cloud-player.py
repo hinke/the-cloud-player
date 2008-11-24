@@ -30,7 +30,7 @@ class PlayerPage(webapp.RequestHandler):
     if users.get_current_user() and not app_user:
       app_user = utils.init_new_user()
     
-    self.response.out.write(template.render('player.html', {'user':app_user,'rando': random.random(), 'login_url': users.create_login_url("/"), 'logout_url':users.create_logout_url("/")}))
+    self.response.out.write(template.render('player.html', {'user':app_user,'rando': random.random(), 'login_url': users.create_login_url("/"), 'logout_url':users.create_logout_url("/"), 'in_development_enviroment':utils.in_development_enviroment()}))
 
 class SharePlaylist(webapp.RequestHandler):
   def get(self):
