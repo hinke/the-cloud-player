@@ -39,14 +39,15 @@ class SharePlaylist(webapp.RequestHandler):
       if users.get_current_user() and not app_user:
         app_user = utils.init_new_user()
         
-      key = utils.url_to_playlist_key(self.request.uri)
-      playlist = db.get(db.Key(key))
+      share_hash = utils.url_to_playlist_key(self.request.uri)
+      q = db.GqlQuery("SELECT * FROM Playlist WHERE share_hash = :share_hash", share_hash=share_hash)  
+      playlist = q.get()
+      
       if not app_user.has_playlist(playlist):
         library_item = models.Library(user=app_user, playlist=playlist, is_owner=False)
         library_item.put()
   
-      self.redirect("/app?flash=add_shared_playlist")  
-
+      self.redirect("/app?flash=add_shared_playlist")
 
 class Playlist(webapp.RequestHandler):  
   def get(self):
@@ -129,7 +130,7 @@ class Playlists(webapp.RequestHandler):
     self.response.out.write(utils.serialize_library(utils.get_current_user().playlists()))
 
   def post(self):  #Create new playlist
-    playlist = models.Playlist(name = self.request.get("name"), smart = bool(self.request.get("smart")))
+    playlist = models.Playlist(name = self.request.get("name"), smart = bool(self.request.get("smart")), share_hash = utils.generate_share_hash())
         
     playlist.put()
     library_item = models.Library(user=utils.get_current_user(), playlist=playlist, is_owner=True, position = int(self.request.get("position")))
@@ -143,7 +144,7 @@ def main():
                                       ('/playlists/', Playlists), 
                                       ('/playlists/.*', Playlist), 
                                       ('/share/.*', SharePlaylist), 
-                                      ('/', StartPage), 
+                                      ('/', PlayerPage), 
                                       ('/app', PlayerPage),
                                       ('/app/', PlayerPage)
                                       ], debug=True)

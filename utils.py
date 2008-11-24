@@ -3,12 +3,13 @@
 from google.appengine.api import users
 from google.appengine.ext import db
 import models
+from datetime import datetime
 
 def init_new_user():
   app_user = models.User(google_user=users.get_current_user())
   app_user.put()
   
-  hot = models.Playlist(name = "Hot Tracks", smart = True, order = "hotness")
+  hot = models.Playlist(name = "Hot Tracks", smart = True, order = "hotness", share_hash = generate_share_hash())
   hot.put()
   
   library_item = models.Library(user=app_user, playlist=hot, is_owner=True, position = 1)
@@ -52,4 +53,7 @@ def serialize_library(library):
     
   s += "]"
 
-  return s      
+  return s
+
+def generate_share_hash():
+  return str(hex(abs(hash(str(datetime.now()))))).replace("0x","", 1)
