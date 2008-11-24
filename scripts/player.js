@@ -350,7 +350,7 @@ SC.Player.prototype = {
       });
 
       if(playlists.length > 0) {
-        self.switchPlaylist[playlists[0].playlist.id];        
+        self.switchPlaylist(playlists[0].playlist.id);
       }
     });
     
