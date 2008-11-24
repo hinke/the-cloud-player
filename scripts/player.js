@@ -507,9 +507,9 @@ SC.Player.prototype = {
     $("#playlists li").removeClass("active");
     $("#playlists li[listId="+id+"]").addClass("active");
   },
-  addPlaylist: function(id, name, pane) {
+  addPlaylist: function(id, name, share_hash, pane) {
     var self = this;
-    $("<li listId='" + id + "'><span></span><a class='share' title='Share Playlist' href='/share/" + id + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + id + "'>&nbsp;</a><a href='#'>"+name+"</a></li>")
+    $("<li listId='" + id + "'><span></span><a class='share' title='Share Playlist' href='/share/" + share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + id + "'>&nbsp;</a><a href='#'>"+name+"</a></li>")
       .find('a:last').click(function() {
         self.switchPlaylist(id);
         return false;
@@ -681,7 +681,7 @@ SC.Playlist.prototype = {
       });
 
     // add tab
-    this.player.addPlaylist(props.playlist.id,props.playlist.name,this.dom);
+    this.player.addPlaylist(props.playlist.id,props.playlist.name, props.playlist.share_hash,this.dom);
 
     
 /*    if(this.properties.playlist.smart) { // a bit messy
