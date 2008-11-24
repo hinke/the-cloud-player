@@ -164,9 +164,9 @@ table {
     display : block;
     float: left;
     width: 120px;
-    padding-left: 3px;
+    padding-left: 5px;
     margin: 0;
-    border-right: 3px solid #aaa;
+    border-right: 1px solid #aaa;
     overflow: hidden;
   }
   
@@ -283,7 +283,7 @@ table {
   height: 140px;
   margin: 0;
   padding: 5px 0 0 9px;
-  background-image: url(/images/fade-2.png);
+  background-image: url(/images/fade-160px.png);
   -webkit-background-size: 100% 100%;  
   background-size: 100% 100%;
   -moz-background-size: 100% 100%;
@@ -294,7 +294,13 @@ table {
 
 #pl-bpm-range-slider {
   width: 100px;
-  background: #aaa;
+  position: absolute;
+  top: 20px;
+  left: 149px;
+  background-image: url(/images/icons.png);
+  background-position: -150px 56px;
+  width: 104px;
+  height: 10px;
 }
 
 .buttons {
@@ -389,6 +395,7 @@ table {
   bottom: 25px;
   margin: 0;
   padding: 0px 0 0 0px;
+  border-bottom: 1px solid #aaa;
   overflow-y: auto;
   overflow-x: hidden;
   background-image: url(/images/fade-long.png);
@@ -463,19 +470,24 @@ table {
     position: absolute;
     right: 5px;
     top: 7px;
-    display: block;
     width: 11px;
     height: 11px;
     background-image: url(/images/icons.png);
     background-position: -289px -6px;
     padding: 0;
+    display: none;
+  }
+
+  /* auto-show action if logged-in */
+  .logged-in #playlists li a.delete, .logged-in #playlists li a.share {
+    display: block;
   }
 
   #playlists li a.share {
     position: absolute;
     right: 21px;
     top: 7px;
-    display: block;
+    display: none;
     width: 12px;
     height: 12px;
     background-image: url(/images/icons.png);
@@ -606,6 +618,7 @@ table {
   bottom: 0px;
   left: 0px;
   right: 0px;
+  padding-top: 2px;
 }
 
 #add-playlist, #add-smart-playlist {
@@ -613,7 +626,7 @@ table {
   float: left;
   height: 19px;
   background-image: url(/images/icons.png);
-  margin: 1px 5px 0 2px;
+  margin: 1px 2px 1px 2px;
   padding: 3px 0 0 25px;
   font-size: 11px;
   color: #555;
@@ -625,6 +638,10 @@ table {
   background-position: -395px -68px;
 }
 
+#add-playlist.click {
+  background-position: -395px -95px;
+}
+
 #add-playlist:hover, #add-smart-playlist:hover {
   text-decoration: none;
 }
@@ -632,6 +649,10 @@ table {
 #add-smart-playlist {
   width: 79px;
   background-position: -272px -68px;
+}
+
+#add-smart-playlist.click {
+  background-position: -272px -95px;
 }
 
 #q {
@@ -816,6 +837,7 @@ table {
 }
 
 #flash {
+  font-size: 16px;
   opacity: 0;
   -webkit-transform: scale(0.7,0.0) skew(0deg);
   position : fixed;
