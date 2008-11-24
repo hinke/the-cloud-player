@@ -479,7 +479,7 @@ table {
   }
 
   /* auto-show action if logged-in */
-  .logged-in #playlists li a.delete, .logged-in #playlists li a.share {
+  .logged-in #playlists li a.delete, .logged-in #playlists li a.share, .logged-in #playlists li a.collaborative {
     display: block;
   }
 
@@ -493,6 +493,22 @@ table {
     background-image: url(/images/icons.png);
     background-position: -311px -6px;
     padding: 0;
+  }
+
+  #playlists li a.collaborative {
+    position: absolute;
+    right: 40px;
+    top: 7px;
+    display: none;
+    width: 12px;
+    height: 12px;
+    background-image: url(/images/icons.png);
+    padding: 0;
+    background-position: -337px -26px;    
+  }
+
+  #playlists li.collaborative a.collaborative {
+    background-position: -337px -5px;
   }
 
 #player-display {

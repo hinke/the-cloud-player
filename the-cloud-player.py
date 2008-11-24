@@ -140,7 +140,7 @@ class Playlists(webapp.RequestHandler):
     library_item = models.Library(user=utils.get_current_user(), playlist=playlist, is_owner=True, position = int(self.request.get("position")))
     library_item.put()
     
-    self.response.out.write(playlist.serialize())
+    self.response.out.write(library_item.serialize())
 
 def main():
   application = webapp.WSGIApplication([
