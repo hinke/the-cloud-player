@@ -17,6 +17,8 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 import models
 import utils
 
+import os
+      
 class StartPage(webapp.RequestHandler):
   def get(self):
     self.response.out.write(template.render('index.html', {}))
@@ -79,7 +81,7 @@ class Playlist(webapp.RequestHandler):
         if(self.request.get('position')):
           library_item.position = int(self.request.get('position'))
         if(self.request.get('collaborative')):
-          playlist.collaborative = bool(self.request.get('collaborative'))
+          playlist.collaborative = utils.convert_javascript_bool_to_python(self.request.get('collaborative'))
         
         #smart filters  
         if(self.request.get('genre')):
@@ -109,7 +111,8 @@ class Playlist(webapp.RequestHandler):
           playlist.version += 1
           playlist.put()
           library_item.put()
-          self.response.out.write(status_code_json(200))
+        
+        self.response.out.write(utils.status_code_json(200))
       else:
         self.response.out.write(library_item.serialize())
         
@@ -134,7 +137,7 @@ class Playlists(webapp.RequestHandler):
     self.response.out.write(utils.serialize_library(utils.get_current_user().playlists()))
 
   def post(self):  #Create new playlist
-    playlist = models.Playlist(name = self.request.get("name"), smart = bool(self.request.get("smart")), share_hash = utils.generate_share_hash())
+    playlist = models.Playlist(name = self.request.get("name"), smart = utils.convert_javascript_bool_to_python(self.request.get("smart")), share_hash = utils.generate_share_hash())
         
     playlist.put()
     library_item = models.Library(user=utils.get_current_user(), playlist=playlist, is_owner=True, position = int(self.request.get("position")))

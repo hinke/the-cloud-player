@@ -4,6 +4,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 import models
 from datetime import datetime
+import os
 
 def init_new_user():
   app_user = models.User(google_user=users.get_current_user())
@@ -33,6 +34,12 @@ def url_to_playlist_key(url):
     return url_array[4]
   else:
     return ""
+
+def convert_javascript_bool_to_python(s):
+  if s.lower() == "true":
+    return True
+  else:
+    return False
     
 def serialize_library(library):
   s = "["
@@ -59,4 +66,7 @@ def generate_share_hash():
   return str(hex(abs(hash(str(datetime.now()))))).replace("0x","", 1)
   
 def status_code_json(code):
-  return "{'response':"+ code +"}"
+  return "{'response':"+ str(code) +"}"
+  
+def in_production_enviroment():
+  return os.environ["SERVER_SOFTWARE"] == "Google Apphosting/1.0"
