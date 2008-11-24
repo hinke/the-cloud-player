@@ -28,7 +28,7 @@ class PlayerPage(webapp.RequestHandler):
     if users.get_current_user() and not app_user:
       app_user = utils.init_new_user()
     
-    self.response.out.write(template.render('player.html', {'user':app_user,'rando': random.random(), 'login_url': users.create_login_url("/app"), 'logout_url':users.create_logout_url("/")}))
+    self.response.out.write(template.render('player.html', {'user':app_user,'rando': random.random(), 'login_url': users.create_login_url("/"), 'logout_url':users.create_logout_url("/")}))
 
 class SharePlaylist(webapp.RequestHandler):
   def get(self):
@@ -47,7 +47,7 @@ class SharePlaylist(webapp.RequestHandler):
         library_item = models.Library(user=app_user, playlist=playlist, is_owner=False)
         library_item.put()
   
-      self.redirect("/app?flash=add_shared_playlist")
+      self.redirect("/?flash=add_shared_playlist")
 
 class Playlist(webapp.RequestHandler):  
   def get(self):
@@ -66,9 +66,10 @@ class Playlist(webapp.RequestHandler):
     library_item = playlist.library_item_for_current_user()
     
     if method == "PUT":
-      if not library_item:
-        library_item = models.Library(user=current_user, playlist=playlist, is_owner=False)
-        library_item.put()
+      
+      #if not library_item: don't really want this check
+      #  library_item = models.Library(user=current_user, playlist=playlist, is_owner=False)
+      #  library_item.put()
       
       if(int(self.request.get('version')) == playlist.version):
         if(self.request.get('name')):
@@ -103,11 +104,14 @@ class Playlist(webapp.RequestHandler):
           playlist.duration_from = int(self.request.get('duration_from'))
         if(self.request.get('duration_to')):
           playlist.duration_to = int(self.request.get('duration_to'))
-      
-        playlist.version += 1
-        playlist.put()        
+        
+        if (playlist.collaborative or library_item.is_owner): #Check rights, should also be fixed on client
+          playlist.version += 1
+          playlist.put()
+          library_item.put()
+          self.response.out.write(status_code_json(200))
       else:
-        self.response.out.write(playlist.serialize())
+        self.response.out.write(library_item.serialize())
         
     elif method == "DELETE":
       if library_item.is_owner and not playlist.collaborative:
@@ -144,9 +148,7 @@ def main():
                                       ('/playlists/', Playlists), 
                                       ('/playlists/.*', Playlist), 
                                       ('/share/.*', SharePlaylist), 
-                                      ('/', PlayerPage), 
-                                      ('/app', PlayerPage),
-                                      ('/app/', PlayerPage)
+                                      ('/', PlayerPage)
                                       ], debug=True)
   run_wsgi_app(application)
 
