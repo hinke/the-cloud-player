@@ -83,29 +83,8 @@ class Playlist(webapp.RequestHandler):
         if(self.request.get('collaborative')):
           playlist.collaborative = utils.convert_javascript_bool_to_python(self.request.get('collaborative'))
         
-        #smart filters  
-        if(self.request.get('genre')):
-          playlist.genre = self.request.get('genre')
-        if(self.request.get('tags')):
-          playlist.tags = self.request.get('tags')
-        if(self.request.get('uploaded_from')):
-          playlist.uploaded_from = self.request.get('uploaded_from')
-        if(self.request.get('uploaded_to')):
-          playlist.uploaded_to = self.request.get('uploaded_to')
-        if(self.request.get('bpm_from')):
-          playlist.bpm_from = int(self.request.get('bpm_from'))
-        if(self.request.get('bpm_to')):
-          playlist.bpm_to = int(self.request.get('bpm_to'))
-        if(self.request.get('search_term')):
-          playlist.search_term = self.request.get('search_term')
-        if(self.request.get('user_favorites')):
-          playlist.user_favorites = self.request.get('user_favorites')
-        if(self.request.get('order')):
-          playlist.order = self.request.get('order')
-        if(self.request.get('duration_from')):
-          playlist.duration_from = int(self.request.get('duration_from'))
-        if(self.request.get('duration_to')):
-          playlist.duration_to = int(self.request.get('duration_to'))
+        if playlist.smart:
+          utils.parse_smart_filters(playlist, self.request)
         
         if (playlist.collaborative or library_item.is_owner): #Check rights, should also be fixed on client
           playlist.version += 1
@@ -138,7 +117,10 @@ class Playlists(webapp.RequestHandler):
 
   def post(self):  #Create new playlist
     playlist = models.Playlist(name = self.request.get("name"), smart = utils.convert_javascript_bool_to_python(self.request.get("smart")), share_hash = utils.generate_share_hash())
-        
+    
+    if playlist.smart:
+      utils.parse_smart_filters(playlist, self.request)
+    
     playlist.put()
     library_item = models.Library(user=utils.get_current_user(), playlist=playlist, is_owner=True, position = int(self.request.get("position")))
     library_item.put()

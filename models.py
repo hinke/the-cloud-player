@@ -24,11 +24,11 @@ class Playlist(db.Model):
   tracks = db.TextProperty(default="0")
   smart = db.BooleanProperty(default=False)
   share_hash = db.StringProperty(required=True)
-
   version = db.IntegerProperty(default=0)
   
   #Smart playlist criteria
-  genre = db.StringProperty(default="")
+  genres = db.StringProperty(default="")
+  artist = db.StringProperty(default="")
   tags = db.StringProperty(default="")
   uploaded_from = db.DateTimeProperty()
   uploaded_to = db.DateTimeProperty()
@@ -52,7 +52,8 @@ class Playlist(db.Model):
     s += "'smart':" + str(self.smart).lower()
     if self.smart:
       s += ",'smart_filter':{"
-      s += "'genre':'" + self.genre + "',"
+      s += "'artist':'" + self.artist + "',"
+      s += "'genres':'" + self.genres + "',"
       s += "'tags':'" + self.tags + "',"
       s += "'uploaded_from':'" + str(self.uploaded_from) + "',"
       s += "'uploaded_to':'" + str(self.uploaded_to) + "',"

@@ -70,3 +70,30 @@ def status_code_json(code):
   
 def in_development_enviroment():
   return os.environ["SERVER_SOFTWARE"] != "Google Apphosting/1.0"
+
+def parse_smart_filters(playlist, request):
+  if(request.get('genres')):
+    playlist.genres = request.get('genres')
+  if(request.get('artist')):
+    playlist.artist = request.get('artist')
+  if(request.get('tags')):
+    playlist.tags = request.get('tags')
+  if(request.get('uploaded_from')):
+    playlist.uploaded_from = request.get('uploaded_from')
+  if(request.get('uploaded_to')):
+    playlist.uploaded_to = request.get('uploaded_to')
+  if(request.get('bpm_from')):
+    playlist.bpm_from = int(request.get('bpm_from'))
+  if(request.get('bpm_to')):
+    playlist.bpm_to = int(request.get('bpm_to'))
+  if(request.get('search_term')):
+    playlist.search_term = request.get('search_term')
+  if(request.get('user_favorites')):
+    playlist.user_favorites = request.get('user_favorites')
+  if(request.get('order')):
+    playlist.order = request.get('order')
+  if(request.get('duration_from')):
+    playlist.duration_from = int(request.get('duration_from'))
+  if(request.get('duration_to')):
+    playlist.duration_to = int(request.get('duration_to'))
+  return playlist
