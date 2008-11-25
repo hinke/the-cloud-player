@@ -320,8 +320,9 @@ table {
   height: 150px;
   margin: 0;
   padding: 5px 0 0 9px;
-  background-image: url(/images/fade-2.png);
-  -webkit-background-size: 100% 100%;  
+  background-image: url(/images/fade-160px.png);
+  -webkit-background-size: 100% 100%;
+  background-position : 0 100%;
   background-size: 100% 100%;
   -moz-background-size: 100% 100%;
   display: none;
@@ -482,6 +483,10 @@ table {
   .logged-in #playlists li a.delete, .logged-in #playlists li a.share, .logged-in #playlists li a.collaborative {
     display: block;
   }
+  
+  #playlists li.dont-persist a.delete, #playlists li.dont-persist a.share, #playlists li.dont-persist a.collaborative {
+    display: none;
+  }
 
   #playlists li a.share {
     position: absolute;
@@ -491,8 +496,8 @@ table {
     width: 12px;
     height: 12px;
     background-image: url(/images/icons.png);
-    background-position: -311px -6px;
     padding: 0;
+    background-position: -337px -5px;    
   }
 
   #playlists li a.collaborative {
@@ -504,11 +509,16 @@ table {
     height: 12px;
     background-image: url(/images/icons.png);
     padding: 0;
-    background-position: -337px -26px;    
+    background-position: -311px -28px;
+  }
+
+  #playlists li.search span {
+    background-position: -173px -68px;
+    width: 18px;
   }
 
   #playlists li.collaborative a.collaborative {
-    background-position: -337px -5px;
+    background-position: -311px -6px;
   }
 
 #player-display {

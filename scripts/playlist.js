@@ -13,8 +13,8 @@ SC.Playlist.prototype = {
     this.endOfList = false; // this is false until server returns less than 50 hits
     this.loading = false; // cheap mans queueing
     this.currentPos = 0; // this is the current position in the list at which a track is playing, needed for continous play through playlists
-    this.persisted = true; // the playlist is a user-sorted, persisted playlist, FIXME
-    
+    this.persisted = (props.playlist.dontPersist ? false : true);
+        
     $('#tracklist')
       .clone()
       .attr('id',"list-" + props.playlist.id)
@@ -111,10 +111,25 @@ SC.Playlist.prototype = {
 
   },
   generateTracksUrl : function() {
-    var tracksUrl = "";
-    if(!this.properties.playlist.smart) {
-      tracksUrl = "http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks + "&callback=?";
+    var tracksUrl = "http://api.soundcloud.com/";
+    var pl = this.properties.playlist;
+    console.log(pl)
+    if(pl.smart) { // check for all smart playlist params
+      if(pl.artist) { // artist pl
+        tracksUrl += "/users/" + pl.artist + "/tracks.js?filter=streamable&order=hotness"
+      } else { // dynamic smart pl
+        tracksUrl += "tracks.js?filter=streamable";
+        if(pl.order) {
+          tracksUrl = tracksUrl + "&order=" + pl.order + "&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow()
+        }
+        if(pl.search_term) {
+          tracksUrl += "&q=" + pl.search_term;
+        }
+      }
+    } else { // this is normal playlist
+      tracksUrl = "http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks;
     }
+    tracksUrl += "&callback=?"; // add JSONP callback param
     return tracksUrl;
   },
   load : function() {
@@ -131,7 +146,7 @@ SC.Playlist.prototype = {
         }
         // if persisted playlist we must sort the tracks array here according to the ids-string sort order
         // kind of ugly but impossible to persist sort order since sql can't return ordered list based on id params in query
-        if(self.persisted) {
+        if(self.persisted && !self.properties.playlist.smart) {
           var trackIds = self.generateTracksUrl().match(/ids=([^&]*)/)[1].split(",");
           trackIds.pop(); // remove last ","
           var newData = new Array();
@@ -198,6 +213,7 @@ SC.Playlist.prototype = {
     }
   },
   save : function() {
+    var self = this;
     var tracks = "";
     $("tr",this.list).each(function() {
       tracks += this.track.id + ",";
@@ -209,8 +225,15 @@ SC.Playlist.prototype = {
     var pos = $("#playlists li").index($("#playlists li[listid=" + this.id + "]"));
     console.log(pos)
     
-    $.post("/playlists/" + this.id ,{"_method":"PUT","tracks":tracks,"version":this.version,"position":pos},function() {
-      console.log('saved with '+ tracks)
+    $.post("/playlists/" + this.id ,{"_method":"PUT","tracks":tracks,"version":this.version,"position":pos},function(dataJS) {
+      var data = eval('(' + dataJS + ')');
+      if(data.response == 200) {
+        self.version++;
+        console.log('saved with '+ tracks);
+      } else {
+        self.player.flash("Epic fail when savingz");
+        console.log('failed to save, playlist edited by somebody else');
+      }
     });
   },
   destroy : function() {
@@ -220,6 +243,12 @@ SC.Playlist.prototype = {
       });      
     }
     $("#playlists li[listid=" + this.id + "]").fadeOut('fast');
+    $("#lists #list-"+this.id).remove();
+
+    // select first playlist after delete, if exists
+    if($("#playlists li:first").length > 0) {
+      this.player.switchPlaylist($("#playlists li:first").attr("listid"));      
+    }
   },
   length : function() {
     return $("tr",this.list).length;
@@ -307,8 +336,18 @@ SC.Playlist.prototype = {
       .find("td:nth-child(3)").css("width",self.colWidths[2]).html("<a href='#'>" + track.user.username + "</a>")
         .find("a")
         .click(function() {
-          self.player.trackLists[hex_md5("user" + track.user.permalink)] = new SC.Playlist("Artist '" + track.user.username + "'",self.player, track.user.uri + "/tracks.js?filter=streamable&order=hotness&callback=?",false,hex_md5("user" + track.user.permalink),false);
-          self.player.switchPlaylist(hex_md5("user" + track.user.permalink));
+          var props = {
+            playlist : {
+              id : "artist",
+              name : "Artist: " + track.user.username,
+              artist : track.user.permalink,
+              smart: true,
+              dontPersist : true
+            }
+          }
+          self.player.removePlaylist("artist");
+          self.player.trackLists["artist"] = new SC.Playlist(props,self.player);
+          self.player.switchPlaylist("artist");
           self.player.loadArtistInfo(track.user.uri);
           return false;
         }).end()
@@ -330,7 +369,7 @@ SC.Playlist.prototype = {
   },
   addToPlaylistsList: function() {
     var self = this;
-    $("<li listId='" + this.id + "' class='" + (this.properties.playlist.collaborative ? "collaborative" : "") + "'><span></span><a class='collaborative' title='Make Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a><a href='#'>"+this.name+"</a></li>")
+    $("<li listId='" + this.id + "' class='" + (this.properties.playlist.collaborative ? "collaborative" : "") + " " + (this.persisted ? "" : "dont-persist") + " " + (this.properties.playlist.search ? "search" : "") + "'><span></span><a class='collaborative' title='Make Playlist Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a><a href='#'>"+this.name+"</a></li>")
       .find('a:last').click(function() {
         self.player.switchPlaylist(self.id);
         return false;
@@ -348,7 +387,6 @@ SC.Playlist.prototype = {
         return false;
       }).end()
       .find('a.collaborative').click(function() {
-        console.log(self.properties.playlist.collaborative)
         $.post("/playlists/" + self.id ,{"_method":"PUT","collaborative":!self.properties.playlist.collaborative,"version":self.version},function() {
           self.properties.playlist.collaborative = !self.properties.playlist.collaborative;
           $("#playlists li[listid=" + self.id + "]").toggleClass("collaborative");
