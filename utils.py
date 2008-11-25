@@ -63,7 +63,7 @@ def serialize_library(library):
   return s
 
 def generate_share_hash():
-  return str(hex(abs(hash(str(datetime.now()))))).replace("0x","", 1)
+  return str(hex(abs(hash(str(datetime.now())))))[2:7]
   
 def status_code_json(code):
   return "{'response':"+ str(code) +"}"

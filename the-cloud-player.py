@@ -16,8 +16,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 import models
 import utils
-
-import os
       
 class StartPage(webapp.RequestHandler):
   def get(self):
@@ -113,7 +111,8 @@ class Playlist(webapp.RequestHandler):
       
 class Playlists(webapp.RequestHandler):
   def get(self):
-    self.response.out.write(utils.serialize_library(utils.get_current_user().playlists()))
+    if utils.get_current_user():
+      self.response.out.write(utils.serialize_library(utils.get_current_user().playlists()))
 
   def post(self):  #Create new playlist
     playlist = models.Playlist(name = self.request.get("name"), smart = utils.convert_javascript_bool_to_python(self.request.get("smart")), share_hash = utils.generate_share_hash())
