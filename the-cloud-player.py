@@ -21,6 +21,16 @@ class StartPage(webapp.RequestHandler):
   def get(self):
     self.response.out.write(template.render('index.html', {}))
 
+class User(webapp.RequestHandler):
+  def post(self):
+    app_user = utils.get_current_user()
+    
+    if(self.request.get('nickname')):
+      app_user.nickname = self.request.get('nickname')
+    
+    app_user.put()
+    
+    self.response.out.write(utils.status_code_json(200))
     
 class PlayerPage(webapp.RequestHandler):
   def get(self):
@@ -39,7 +49,7 @@ class SharePlaylist(webapp.RequestHandler):
       if users.get_current_user() and not app_user:
         app_user = utils.init_new_user()
         
-      share_hash = utils.url_to_playlist_key(self.request.uri)
+      share_hash = utils.url_to_entity_key(self.request.uri)
       q = db.GqlQuery("SELECT * FROM Playlist WHERE share_hash = :share_hash", share_hash=share_hash)  
       playlist = q.get()
       
@@ -51,14 +61,14 @@ class SharePlaylist(webapp.RequestHandler):
 
 class Playlist(webapp.RequestHandler):  
   def get(self):
-    key = utils.url_to_playlist_key(self.request.uri)
+    key = utils.url_to_entity_key(self.request.uri)
     playlist = db.get(db.Key(key))
     library_item = playlist.library_item_for_current_user()
     self.response.out.write(library_item.serialize())
 
   def post(self):
     method = self.request.get("_method")
-    key = utils.url_to_playlist_key(self.request.uri)
+    key = utils.url_to_entity_key(self.request.uri)
     playlist = db.get(db.Key(key))
     current_user = utils.get_current_user()
     
@@ -131,6 +141,7 @@ def main():
                                       ('/playlists', Playlists), 
                                       ('/playlists/', Playlists), 
                                       ('/playlists/.*', Playlist), 
+                                      ('/user', User), 
                                       ('/share/.*', SharePlaylist), 
                                       ('/', PlayerPage)
                                       ], debug=True)

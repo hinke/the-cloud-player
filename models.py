@@ -6,6 +6,7 @@ import utils
 class User(db.Model):
   google_user = db.UserProperty(required=True)
   date_created = db.DateTimeProperty(auto_now_add=True)
+  nickname = db.StringProperty(required=True)
   
   def playlists(self):
     return (x for x in self.library_set.order("-position"))

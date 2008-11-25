@@ -20,7 +20,7 @@
     <div id="header">
       <div id="login">
         {% if user %}
-          Signed in as {{user.google_user.email}} | <a href="{{logout_url}}">Sign out</a>
+          Signed in as {{user.nickname}} | <a href="{{logout_url}}">Sign out</a>
         {% else %}
           <a href="{{login_url}}">Sign in with your Google Account</a>        
         {% endif %}

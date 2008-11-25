@@ -7,7 +7,9 @@ from datetime import datetime
 import os
 
 def init_new_user():
-  app_user = models.User(google_user=users.get_current_user())
+  google_user = users.get_current_user()
+  nickname = make_pretty_nickname_from_email(google_user.email())
+  app_user = models.User(google_user=google_user, nickname=nickname)
   app_user.put()
   
   hot = models.Playlist(name = "Hot Tracks", smart = True, order = "hotness", share_hash = generate_share_hash())
@@ -18,6 +20,15 @@ def init_new_user():
   
   return app_user
 
+def make_pretty_nickname_from_email(email):
+  parts = email.split("@")
+  if len(parts) > 1:
+    nickname = parts[0]
+    nickname = nickname.replace(".", " ").replace("-", " ").replace("_", " ")
+    nickname = nickname.title()
+    return nickname
+  else:
+    return email
 def get_current_user():
   return get_user(users.get_current_user())
 
@@ -28,7 +39,7 @@ def get_user(google_user):
 def utf8string(s):
   return unicode(s, 'utf-8')
   
-def url_to_playlist_key(url):
+def url_to_entity_key(url):
   url_array = url.split("/")
   if len(url_array) > 4:
     return url_array[4]
