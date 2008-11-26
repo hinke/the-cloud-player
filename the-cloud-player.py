@@ -52,13 +52,16 @@ class SharePlaylist(webapp.RequestHandler):
       share_hash = utils.url_to_entity_key(self.request.uri)
       q = db.GqlQuery("SELECT * FROM Playlist WHERE share_hash = :share_hash", share_hash=share_hash)  
       playlist = q.get()
+      if playlist:
+        if not app_user.has_playlist(playlist):
+          library_item = models.Library(user=app_user, playlist=playlist, is_owner=False)
+          library_item.put()
+        flash = "add_shared_playlist"
+      else:
+        flash = "playlist_not_found"
       
-      if not app_user.has_playlist(playlist):
-        library_item = models.Library(user=app_user, playlist=playlist, is_owner=False)
-        library_item.put()
-  
-      self.redirect("/?flash=add_shared_playlist")
-
+      self.redirect("/?flash="+flash)
+        
 class Playlist(webapp.RequestHandler):  
   def get(self):
     key = utils.url_to_entity_key(self.request.uri)
@@ -76,25 +79,22 @@ class Playlist(webapp.RequestHandler):
     library_item = playlist.library_item_for_current_user()
     
     if method == "PUT":
-      
-      #if not library_item: don't really want this check
-      #  library_item = models.Library(user=current_user, playlist=playlist, is_owner=False)
-      #  library_item.put()
-      
+  
       if(int(self.request.get('version')) == playlist.version):
-        if(self.request.get('name')):
-          playlist.name = self.request.get('name')
-        if(self.request.get('tracks')):
-          playlist.tracks = self.request.get('tracks')
-        if(self.request.get('position')):
+        if(self.request.get('position')): #Rights: Can always update this
           library_item.position = int(self.request.get('position'))
-        if(self.request.get('collaborative')):
-          playlist.collaborative = utils.convert_javascript_bool_to_python(self.request.get('collaborative'))
-        
-        if playlist.smart:
-          utils.parse_smart_filters(playlist, self.request)
-        
-        if (playlist.collaborative or library_item.is_owner): #Check rights, should also be fixed on client
+
+        if library_item.is_owner: #Rights: Only owner can update this
+          if(self.request.get('name')):
+            playlist.name = self.request.get('name')
+          if(self.request.get('collaborative')):
+            playlist.collaborative = utils.convert_javascript_bool_to_python(self.request.get('collaborative'))
+          if playlist.smart:
+            utils.parse_smart_filters(playlist, self.request)
+
+        if (playlist.collaborative or library_item.is_owner): #Rights: Owner or collaborators can update this
+          if(self.request.get('tracks')):
+            playlist.tracks = self.request.get('tracks')        
           playlist.version += 1
           playlist.put()
           library_item.put()
