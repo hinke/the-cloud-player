@@ -89,7 +89,10 @@ SC.Playlist.prototype = {
       });
 
     // add tab to list of playlists
-    this.addToPlaylistsList();
+    // but only do this if it's not simply an artist or genre playlist
+    if(!this.properties.playlist.dontShowPlaylistItem) {
+      this.addToPlaylistsList();      
+    }
     
 /*    if(this.properties.playlist.smart) { // a bit messy
       this.tracksUrl = tracksUrl
@@ -113,23 +116,37 @@ SC.Playlist.prototype = {
   generateTracksUrl : function() {
     var tracksUrl = "http://api.soundcloud.com/";
     var pl = this.properties.playlist;
-    console.log(pl)
     if(pl.smart) { // check for all smart playlist params
-      if(pl.artist) { // artist pl
-        tracksUrl += "/users/" + pl.artist + "/tracks.js?filter=streamable&order=hotness"
+      if(pl.smart_filter.user_favorites) { // user favs pl
+        tracksUrl += "users/" + pl.smart_filter.user_favorites + "/favorites.js?filter=streamable"
+      } else if(pl.smart_filter.artist) { // artist pl
+        tracksUrl += "users/" + pl.smart_filter.artist + "/tracks.js?filter=streamable"
       } else { // dynamic smart pl
         tracksUrl += "tracks.js?filter=streamable";
-        if(pl.order) {
-          tracksUrl = tracksUrl + "&order=" + pl.order + "&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow()
-        }
-        if(pl.search_term) {
-          tracksUrl += "&q=" + pl.search_term;
-        }
+      }
+
+      if(pl.smart_filter.order == "hotness") {
+        tracksUrl = tracksUrl + "&order=" + pl.smart_filter.order + "&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow();
+      } else if (pl.smart_filter.order == "created_at") {
+        tracksUrl = tracksUrl + "&order=" + pl.smart_filter.order;
+      }
+      if(pl.smart_filter.genres) {
+        tracksUrl = tracksUrl + "&genres=" + pl.smart_filter.genres;
+      }
+      if(pl.smart_filter.search_term) {
+        tracksUrl += "&q=" + pl.smart_filter.search_term;
+      }
+      if(pl.smart_filter.bpm_from && pl.smart_filter.bpm_from != 0) {
+        tracksUrl += "&bpm[from]=" + pl.smart_filter.bpm_from;
+      }
+      if(pl.smart_filter.bpm_to && pl.smart_filter.bpm_to != 250) {
+        tracksUrl += "&bpm[to]=" + pl.smart_filter.bpm_to;
       }
     } else { // this is normal playlist
       tracksUrl = "http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks;
     }
     tracksUrl += "&callback=?"; // add JSONP callback param
+    console.log(tracksUrl);
     return tracksUrl;
   },
   load : function() {
@@ -336,17 +353,20 @@ SC.Playlist.prototype = {
       .find("td:nth-child(3)").css("width",self.colWidths[2]).html("<a href='#'>" + track.user.username + "</a>")
         .find("a")
         .click(function() {
-          var props = {
+          self.player.removePlaylist("artist");
+          self.player.trackLists["artist"] = new SC.Playlist({
             playlist : {
               id : "artist",
               name : "Artist: " + track.user.username,
-              artist : track.user.permalink,
               smart: true,
-              dontPersist : true
+              smart_filter: {
+                artist : track.user.permalink,
+                order: "hotness"                
+              },
+              dontPersist : true,
+              dontShowPlaylistItem : true
             }
-          }
-          self.player.removePlaylist("artist");
-          self.player.trackLists["artist"] = new SC.Playlist(props,self.player);
+          },self.player);
           self.player.switchPlaylist("artist");
           self.player.loadArtistInfo(track.user.uri);
           return false;
@@ -358,18 +378,30 @@ SC.Playlist.prototype = {
       .find("td:nth-child(7)").css("width",self.colWidths[6]).html("<a href='#'>" + track.genre + "</a>")
         .find("a")
         .click(function() {
-          var name = this.innerHTML
-          self.player.trackLists[hex_md5("gen" + name)] = new SC.Playlist("Genre '" + name + "'",self.player,"http://api.soundcloud.com/tracks.js?filter=streamable&order=hotness&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow() + "&genres=" + name +"&callback=?",false,hex_md5("gen" + name));
-          self.player.switchPlaylist(hex_md5("gen" + name));
+          var genre = this.innerHTML;
+          self.player.removePlaylist("genre");
+          self.player.trackLists["genre"] = new SC.Playlist({
+            playlist : {
+              id : "genre",
+              smart: true,
+              smart_filter: {
+                genres : genre,
+                order: "hotness"                
+              },
+              dontPersist : true,
+              dontShowPlaylistItem : true
+            }
+          }, self.player);
+          self.player.switchPlaylist("genre");
           return false;
         }).end()
       .end()
       .appendTo(this.list);
     $("tr:last",this.list)[0].track = track;
   },
-  addToPlaylistsList: function() {
+  addToPlaylistsList: function() { // add the tab for the playlist
     var self = this;
-    $("<li listId='" + this.id + "' class='" + (this.properties.playlist.collaborative ? "collaborative" : "") + " " + (this.persisted ? "" : "dont-persist") + " " + (this.properties.playlist.search ? "search" : "") + "'><span></span><a class='collaborative' title='Make Playlist Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a><a href='#'>"+this.name+"</a></li>")
+    $("<li listId='" + this.id + "' class='" + (this.properties.playlist.collaborative ? "collaborative" : "") + " " + (this.persisted ? "" : "dont-persist") + " " + (this.properties.playlist.smart ? "smart" : "") + " " + (this.properties.playlist.search ? "search" : "") + "'><span></span><a class='collaborative' title='Make Playlist Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a><a href='#'>"+this.name+"</a></li>")
       .find('a:last').click(function() {
         self.player.switchPlaylist(self.id);
         return false;
@@ -390,6 +422,12 @@ SC.Playlist.prototype = {
         $.post("/playlists/" + self.id ,{"_method":"PUT","collaborative":!self.properties.playlist.collaborative,"version":self.version},function() {
           self.properties.playlist.collaborative = !self.properties.playlist.collaborative;
           $("#playlists li[listid=" + self.id + "]").toggleClass("collaborative");
+          if(self.properties.playlist.collaborative) {
+            self.player.flash("This playlist is now collaborative and can be edited by others");
+          } else {
+            self.player.flash("This playlist is not collaborative anymore and cannot be edited by others");
+          }
+          
           console.log('saved with '+ self.properties.playlist.collaborative);
         });
         return false;
@@ -398,29 +436,32 @@ SC.Playlist.prototype = {
       .hide()
       .fadeIn();
   	
-    $('#playlists li:last')
-  		.droppable({
-  			accept: function(draggable) {
-  				return $(draggable).is('tr');
-  			},
-  			activeClass: 'droppable-active',
-  			hoverClass: 'droppable-hover',
-  			tolerance: 'pointer',
-  			drop: function(ev, ui) {
-  			  self.player.justDropped = true;  // ugly, but I can't find a proper callback;
-  				var listId = $(this).attr('listId');
-  			  if(ui.draggable.siblings(".selected").length > 0) {
-    				var items = ui.draggable.parents("tbody").find("tr.selected");
-    				$.each(items,function() {
-      				self.addTrack(this.track,true);
-    				});
-            self.player.flash(items.length + " tracks were added to the playlist");
-  			  } else {
-    				self.addTrack($(ui.draggable)[0].track,true);
-            self.player.flash("The track " + $(ui.draggable)[0].track.title + " was added to the playlist");  			    
-  			  }
-          self.save();
-  			}
-  		});
+  	if(!this.properties.playlist.smart) { // if playlists are smart, they are read-only
+      $('#playlists li:last')
+    		.droppable({
+    			accept: function(draggable) {
+    				return $(draggable).is('tr');
+    			},
+    			activeClass: 'droppable-active',
+    			hoverClass: 'droppable-hover',
+    			tolerance: 'pointer',
+    			drop: function(ev, ui) {
+    			  self.player.justDropped = true;  // ugly, but I can't find a proper callback;
+    				var listId = $(this).attr('listId');
+    			  if(ui.draggable.siblings(".selected").length > 0) {
+      				var items = ui.draggable.parents("tbody").find("tr.selected");
+      				$.each(items,function() {
+        				self.addTrack(this.track,true);
+      				});
+              self.player.flash(items.length + " tracks were added to the playlist");
+    			  } else {
+      				self.addTrack($(ui.draggable)[0].track,true);
+              self.player.flash("The track " + $(ui.draggable)[0].track.title + " was added to the playlist");  			    
+    			  }
+            self.save();
+    			}
+    		});  	  
+  	}  		
+  		
   }
 }

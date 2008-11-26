@@ -37,12 +37,11 @@ img {
 
 #artwork {
   position: absolute;
-  bottom: 50px;
+  bottom: 0px;
   height: 200px;
-  width: 199px;
+  width: 100%;
   left: 0;
   border-top: 1px solid #aaa;
-  border-right: 1px solid #aaa;
   background-image: url(/images/fade-2.png);
   -webkit-background-size: 100% 100%;  
   background-size: 100% 100%;
@@ -280,7 +279,7 @@ table {
   right: 0;
   left: 0px;
   top: 0px;
-  height: 140px;
+  height: 135px;
   margin: 0;
   padding: 5px 0 0 9px;
   background-image: url(/images/fade-160px.png);
@@ -292,24 +291,130 @@ table {
   -moz-user-select : none;
 }
 
-#pl-bpm-range-slider {
-  width: 100px;
-  position: absolute;
-  top: 20px;
-  left: 149px;
-  background-image: url(/images/icons.png);
-  background-position: -150px 56px;
-  width: 104px;
-  height: 10px;
-}
-
-.buttons {
-
-}
-
-  .buttons input, .buttons a {
-    float: right;
+  h4 {
+    margin: 0;
   }
+
+  #create-smart-playlist label, #create-smart-playlist input {
+    display: block;
+  }
+  
+  #create-smart-playlist label {
+    margin: 2px 0 5px 0;
+    position: absolute;
+    left: 0;
+  }
+
+  #create-smart-playlist input[type=text], #create-smart-playlist select {
+    width: 50%;
+    display: block;
+    position: absolute;
+    left: 30%;
+    margin: 0;
+  }
+  
+  #create-smart-playlist select {
+    width: 30%;
+  }
+
+  #create-smart-playlist .col-1 {
+    position: absolute;
+    width : 45%;
+    top: 30px;
+    left: 5%;
+  }
+  
+    label[for=pl-genre] {
+      top: 0;
+    }
+
+    input#pl-genre {
+      top: 0;
+    }
+
+    label[for=pl-favorite], label[for=pl-artist] {
+      top: 30px;
+    }
+    
+    #pl-favorite, #pl-artist {
+      top: 30px;
+    }
+    
+    label#bpm-range-label, label[for=pl-order] {
+      top: 60px;
+    }
+
+    .col-2 input {
+      position: absolute;
+      left: 70px;
+    }
+    
+    #pl-order {
+      top: 60px;
+    }
+
+  #create-smart-playlist .col-2 {
+    position: absolute;
+    width : 50%;
+    top: 30px;
+    left: 50%;
+  }
+  
+  .bpm-range {
+    position: absolute;
+    top: 63px;
+    left: 30%;
+  }
+
+  #create-smart-playlist #bpm-range-start {
+    position: absolute;
+    left: 0;
+    margin: 0;
+    width: 20px;
+    text-align: right;
+  }
+
+  #create-smart-playlist #bpm-range-stop {
+    position: absolute;
+    left: 129px;
+    margin: 0;
+  }
+  
+  #pl-bpm-range-slider {
+    width: 100px;
+    position: absolute;
+    top: 3px;
+    left: 24px;
+    background-image: url(/images/icons.png);
+    background-position: -150px 56px;
+    width: 104px;
+    height: 10px;
+  }
+  
+  .ui-slider-range {
+    background: rgba(63,111,211,0.2);
+    height: 10px;
+  }
+
+  #create-smart-playlist .buttons {
+    position: absolute;
+    width: 100%;
+    bottom: 10px;
+    left: 0;
+  }
+
+  #create-smart-playlist .buttons a {
+    margin: 3px 10px 0 0;
+  }
+  
+  #create-smart-playlist .buttons input {
+    margin: 0 10px 0 0;
+  }
+
+    .buttons input, .buttons a {
+      float: right;
+      display: block;
+    }
 
 #artist-info {
   position: absolute;
@@ -512,6 +617,11 @@ table {
     background-position: -311px -28px;
   }
 
+  #playlists li.smart span {
+    background-position: -209px -68px;
+    width: 18px;
+  }
+
   #playlists li.search span {
     background-position: -173px -68px;
     width: 18px;
@@ -644,20 +754,22 @@ table {
   bottom: 0px;
   left: 0px;
   right: 0px;
+  height: 24px;
   padding-top: 2px;
+  overflow: hidden;
 }
 
-#add-playlist, #add-smart-playlist {
-  display : block;
-  float: left;
-  height: 19px;
-  background-image: url(/images/icons.png);
-  margin: 1px 2px 1px 2px;
-  padding: 3px 0 0 25px;
-  font-size: 11px;
-  color: #555;
-  outline: 0;
-}
+  #add-playlist, #add-smart-playlist {
+    display : block;
+    float: left;
+    height: 19px;
+    background-image: url(/images/icons.png);
+    margin: 1px 2px 1px 2px;
+    padding: 3px 0 0 25px;
+    font-size: 11px;
+    color: #555;
+    outline: 0;
+  }
 
 #add-playlist {
   width: 50px;
@@ -761,6 +873,7 @@ table {
   background-image: url(/images/icons.png);
   background-position: -151px 79px;
   position: absolute;
+  z-index: 10;
 }
 
 #footer input[type=image] {

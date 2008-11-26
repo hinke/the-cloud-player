@@ -20,7 +20,7 @@
     <div id="header">
       <div id="login">
         {% if user %}
-          Signed in as {{user.nickname}} | <a href="{{logout_url}}">Sign out</a>
+          Signed in as <a href="#" class="nickname">{{user.nickname}}</a> | <a href="{{logout_url}}">Sign out</a>
         {% else %}
           <a href="{{login_url}}">Sign in with your Google Account</a>        
         {% endif %}
@@ -54,34 +54,39 @@
       <div id="create-smart-playlist">
         <h4>Create a smart playlist</h4>
         <form id="pl-create-form">
-          <label for="pl-genre">Genre</label>
-          <input type="text" id="pl-genre">
-          <label for="pl-tags">Tags</label>
-          <input type="text" id="pl-tags">
-          <label for="pl-order">Order by</label>
-          <select id="pl-order">
-            <option>Hotness</option>
-            <option>Latest</option>
-          </select>
-          <label for="pl-search-term">Search term</label>
-          <input type="text" id="pl-search-term">
-          <label for="pl-uploaded">Uploaded</label>
-          <select id="pl-uploaded">
-            <option>No restriction</option>
-            <option>A week ago</option>
-            <option>A month ago</option>
-            <option>A year ago</option>
-          </select>
-          <input type="hidden" id="pl-bpm-range">
-          <label>BPM Range</label>
-           <div class="ui-slider-1" id="pl-bpm-range-slider">
-            50 <div class="ui-slider-handle"></div>	250
+          <div class="col-1">
+            <label for="pl-genre">Genre</label>
+            <input type="text" id="pl-genre">
+
+            <label for="pl-favorite">User favorite</label>
+            <input type="text" id="pl-favorite" value="Username">
+
+            <input type="hidden" id="pl-bpm-range-start">
+            <input type="hidden" id="pl-bpm-range-stop">
+            <label id="bpm-range-label">BPM Range</label>
+            <div class="bpm-range">
+              <label id="bpm-range-start">0</label>
+               <div class="ui-slider-1" id="pl-bpm-range-slider">
+                 <div class="ui-slider-handle" id="bpm-handle-start"></div>
+                 <div class="ui-slider-handle" id="bpm-handle-stop"></div>
+              </div>
+              <label id="bpm-range-stop">250</label>
+            </div>
+            
           </div>
-  <!--        <label>Duration</label>
-          <div class="ui-slider-1">
-            <div class="ui-slider-handle"></div>	
-          </div>-->
-          Or select <a href="#">User favorites</a> 
+          <div class="col-2">
+            <label for="pl-search-term">Search term</label>
+            <input type="text" id="pl-search-term">
+
+            <label for="pl-artist">Artist</label>
+            <input type="text" id="pl-artist">
+
+            <label for="pl-order">Order by</label>
+            <select id="pl-order">
+              <option value="hotness">Hotness</option>
+              <option value="created_at">Latest</option>
+            </select>
+          </div>
 
           <div class="buttons">
             <input type="submit" value="Create" id="pl-create">
@@ -104,9 +109,9 @@
         <a id="add-playlist" href="{{login_url}}">Playlist</a>
         <a id="add-smart-playlist" href="{{login_url}}" class="smart-playlist">Smart Playlist</a>
       </div>
-    </div>
-    <div id="artwork">
-      <img src="http://a1.soundcloud.com/avatars/0001/1308/i039964_big.jpg">
+      <div id="artwork">
+        <img src="http://a1.soundcloud.com/avatars/0001/1308/i039964_big.jpg">
+      </div>
     </div>
     <div id="footer">
     	<input type="image" id="prev" value="&nbsp;" src="/images/empty.png" />

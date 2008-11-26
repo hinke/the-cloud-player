@@ -59,7 +59,7 @@ class Playlist(db.Model):
       s += "'uploaded_from':'" + str(self.uploaded_from) + "',"
       s += "'uploaded_to':'" + str(self.uploaded_to) + "',"
       s += "'bpm_from':" + str(self.bpm_from) + ","
-      s += "'bpm_to':" + str(self.bpm_from) + ","
+      s += "'bpm_to':" + str(self.bpm_to) + ","
       s += "'search_term':'" + self.search_term + "',"
       s += "'user_favorites':'" + self.user_favorites + "',"
       s += "'order':'" + self.order + "',"

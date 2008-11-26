@@ -54,48 +54,43 @@ SC.Player.prototype = {
 
     // create smart playlist, bpm slider
     $("#pl-bpm-range-slider").slider({
-      startValue : 120,
-      min : 50,
+      min : 0,
       max : 250,
+      range: true,
       slide : function(e, ui) {
-        console.log(ui.value);
-        //ui.value;
+        $("#bpm-range-start").text($("#pl-bpm-range-slider").slider("value",0));
+        $("#bpm-range-stop").text(Math.floor($("#pl-bpm-range-slider").slider("value",0) + ui.range));
       },
       change : function(e, ui) {
-        $("#pl-bpm-range").val(ui.value);
+        $("#pl-bpm-range-start").val($("#pl-bpm-range-slider").slider("value",0));
+        $("#pl-bpm-range-stop").val($("#pl-bpm-range-slider").slider("value",0) + ui.range);
       }
     });
-
+    
     // create smart playlist form
     $("#pl-create-form").submit(function() {
-      var name = "smart pl" + Math.random(); // tmp should be replaced by naming box
-      
-      var base = "http://api.soundcloud.com/tracks.js?callback=?&filter=streamable";
-      
-      var q = "";
-      
-      if($("#pl-genre").val() != "") {
-        q += ("&genres=" + $("#pl-genre").val());
-      }
-
-      if($("#pl-search-term").val() != "") {
-        q += ("&q=" + $("#pl-search-term").val());
-      }
-      
-      // add bpm range here
+      var name = "smartpl" + Math.random(); // tmp should be replaced by naming box
       
       var props = {
-        playlist : {
-          genres : "ambient",
-          id : hex_md5("s" + q), // will not work
-          name : "New Smart Playlist",
-          version : 0,
-        }
+        position: 0,
+        smart : true,
+        name : "New Smart Playlist",
+        version : 0,
+        genres : $("#pl-genre").val(),
+        bpm_from : Math.floor($("#pl-bpm-range-start").val()),
+        bpm_to : Math.floor($("#pl-bpm-range-stop").val()),
+        user_favorites : $("#pl-favorite").val().toLowerCase().replace(/\s/,"-"),  // FIXME: cheap username->permalink algoritm
+        order : $("#pl-order").val(),
+        search_term : $("#pl-search-term").val(),
+        artist : $("#pl-artist").val().toLowerCase().replace(/\s/,"-") // FIXME: cheap username->permalink algoritm
       }
-      
-      // missing persistence in backend, so can't finish this
-      self.trackLists[hex_md5("gen" + name)] = new SC.Playlist(props,self);
-      self.switchPlaylist(hex_md5("gen" + name));
+
+      $.post("/playlists",props,function(data) {
+        var pl = eval('(' + data + ')');
+        self.trackLists[pl.playlist.id] = new SC.Playlist(pl,self);
+        self.switchPlaylist(pl.playlist.id);
+      });
+
       
       $("#lists").animate({top:0});
       $("#create-smart-playlist").animate({height: "hide"});
@@ -105,6 +100,18 @@ SC.Player.prototype = {
     $("#pl-cancel").click(function() {
       $("#lists").animate({top:0});
       $("#create-smart-playlist").animate({height: "hide"});
+      return false;
+    });
+
+    // change nickname
+    $("a.nickname:first").click(function() {
+      var nick = prompt("Change your nickname:", this.innerHTML);
+      var self = this;
+      if(nick) {
+        $.post("/user",{nickname:nick},function() {
+          self.innerHTML = nick;
+        });
+      }
       return false;
     });
 
@@ -126,8 +133,8 @@ SC.Player.prototype = {
     
     $("#sidebar").width(sidebarWidth);
     $("#main-container").css("left",sidebarWidth);
-    $("#artwork").width(sidebarWidth);
-    $("#artwork").height(sidebarWidth);
+/*    $("#artwork").width(sidebarWidth);
+*/    $("#artwork").height(sidebarWidth);
 
     $("#sidebar")
       .mousemove(function(e) {
@@ -141,6 +148,8 @@ SC.Player.prototype = {
         var $pane = $(this);
         var $artwork = $("#artwork");
         var $cont = $("#main-container");
+        var $playlists = $("#playlists");
+        var $createPlaylists = $("#create-playlists");
         if(withinPlaylistPaneDragArea(this,e)) {
           $(document)
             .mouseup(function() {
@@ -150,10 +159,11 @@ SC.Player.prototype = {
               var colWidth = ev.clientX - ($pane.offset().left);
               $pane.width(colWidth);
               if(self.showingArtwork) {
-                $pane.css("bottom",colWidth+59);
+                $playlists.css("bottom",colWidth+25);
+                $createPlaylists.css("bottom",colWidth+0);
               }
-              $artwork.width(colWidth+9);
-              $artwork.height(colWidth+9);
+//              $artwork.width(colWidth);
+              $artwork.height(colWidth);
               $cont.css("left",colWidth);
             });
         }
@@ -227,7 +237,8 @@ SC.Player.prototype = {
         if(ev.keyCode === 13) {
           self.removePlaylist("search1");
           var q = $("#q").val();
-          var props = {
+
+          self.trackLists["search1"] = new SC.Playlist({
             playlist: {
               id : "search1",
               name : "Search for '" + q + "'",
@@ -235,11 +246,11 @@ SC.Player.prototype = {
               dontPersist : true,
               search : true,
               smart : true,
-              search_term : q
+              smart_filter : {
+                search_term : q
+              }
             }
-          }
-
-          self.trackLists["search1"] = new SC.Playlist(props ,self);
+          },self);
           self.switchPlaylist("search1");
         } else if (ev.keyCode === 27) {
           $("#q").blur();
@@ -264,15 +275,20 @@ SC.Player.prototype = {
     // smart playlists button
     $("#add-smart-playlist").click(function() {
       if($("body").hasClass("logged-in")) {
-        $("#lists").animate({top:140});
+        $("#lists").animate({top:135});
         $("#artist-info").animate({height:"hide"});
         $("#create-smart-playlist").animate({height:"show"},function() {
-          $("#pl-genre").val("Ambient").select().focus();
+          setTimeout(function() { // ui.slider bug so have to delay execution here 1ms
+            $("#pl-bpm-range-slider").slider("moveTo",250,1);
+            $("#pl-bpm-range-slider").slider("moveTo",0,0);
+          },10);
+          $("#pl-genre,#pl-artist,#pl-favorite,#pl-search-term").val("")
+          $("#pl-genre").focus();
         });
         return false;
       }
     });
-
+    
     // remove playlist items on press delete
     $(window).keydown(function(ev) {
       if(!$("#q")[0].focused) { // don't listen to key events if search field is focused
@@ -368,19 +384,17 @@ SC.Player.prototype = {
         }
       });      
     } else { // not logged in, then load a few standard playlists without persisting
-      var props = {
+      self.trackLists['hot'] = new SC.Playlist({
         playlist: {
           id : "hot",
           name : "Hot Tracks",
           smart : true,
           version : 0,
-          search_term : "",
-          order : "hotness"
-          //dontPersist : true
+          smart_filter : {
+            order : "hotness"            
+          }
         }
-      }
-      
-      self.trackLists['hot'] = new SC.Playlist(props,self);
+      },self);
       self.switchPlaylist("hot");
     }
     
@@ -417,9 +431,22 @@ SC.Player.prototype = {
       .hide()
       .html("<a href='#' class='artist-link'>" + track.user.username + "</a><div>" + track.title + "</div>")
       .find("a")
-        .click(function() { // ugly, this code is duplicated from artist playlist generator
-          self.trackLists[hex_md5("user" + track.user.permalink)] = new SC.Playlist("Artist '" + track.user.username + "'",self, track.user.uri + "/tracks.js?filter=streamable&order=hotness&callback=?",false,hex_md5("user" + track.user.permalink),false);
-          self.switchPlaylist(hex_md5("user" + track.user.permalink));
+        .click(function() {
+          self.removePlaylist("artist");
+          self.trackLists["artist"] = new SC.Playlist({
+            playlist : {
+              id : "artist",
+              name : "Artist: " + track.user.username,
+              smart: true,
+              smart_filter: {
+                artist : track.user.permalink,                
+                order: "hotness"
+              },
+              dontPersist : true,
+              dontShowPlaylistItem : true
+            }
+          },self);
+          self.switchPlaylist("artist");
           self.loadArtistInfo(track.user.uri);
           return false;
         }).end()
@@ -496,6 +523,7 @@ SC.Player.prototype = {
     });
   },
   showArtistPane: function() {
+    $("#create-smart-playlist").animate({height: "hide"});
     $("#lists").animate({top:156});
     $("#artist-info").animate({height:"show"});
   },
@@ -511,12 +539,14 @@ SC.Player.prototype = {
     this.showArtworkPane();
   },
   showArtworkPane: function() {
-    $("#playlists").animate({bottom:$("#artwork").width()+50});
+    $("#playlists").animate({bottom:$("#artwork").width()+25});
+    $("#create-playlists").animate({bottom:$("#artwork").width()});
     $("#artwork").animate({height:"show"});
     this.showingArtwork = true;
   },
   hideArtworkPane: function() {
-    $("#playlists").animate({bottom:50});
+    $("#playlists").animate({bottom:25});
+    $("#create-playlists").animate({bottom:0});
     $("#artwork").animate({height: 'hide'});
     this.showingArtwork = false;
   },
