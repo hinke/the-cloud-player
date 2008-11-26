@@ -567,7 +567,7 @@ table {
   
   #playlists li a {
     display: block;
-    padding: 7px 0 3px 5px;
+    padding: 5px;
     color: #333;
     text-decoration: none;
   }
