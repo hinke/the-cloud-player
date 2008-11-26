@@ -26,6 +26,7 @@ class Playlist(db.Model):
   smart = db.BooleanProperty(default=False)
   share_hash = db.StringProperty(required=True)
   version = db.IntegerProperty(default=0)
+  owner = db.ReferenceProperty(User)
   
   #Smart playlist criteria
   genres = db.StringProperty(default="")
@@ -66,6 +67,12 @@ class Playlist(db.Model):
       s += "'duration_from':" + str(self.duration_from) + ","
       s += "'duration_to':" + str(self.duration_to) + ""
       s += "}"
+    
+    s += ",'owner':{"
+    s += "'nickname':'" + self.owner.nickname + "',"
+    s += "'email':'" + self.owner.google_user.email() + "'"
+    s += "}"
+    
     s += "}"
     return s
     
@@ -79,7 +86,7 @@ class Playlist(db.Model):
     return False  
     
   def users(self):
-    return (x for x in self.library_set)
+    return (x for x in self.library_set)    
 
 class Library(db.Model):
   user = db.ReferenceProperty(User)

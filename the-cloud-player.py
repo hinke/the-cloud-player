@@ -125,13 +125,14 @@ class Playlists(webapp.RequestHandler):
       self.response.out.write(utils.serialize_library(utils.get_current_user().playlists()))
 
   def post(self):  #Create new playlist
-    playlist = models.Playlist(name = self.request.get("name"), smart = utils.convert_javascript_bool_to_python(self.request.get("smart")), share_hash = utils.generate_share_hash())
+    current_user = utils.get_current_user()
+    playlist = models.Playlist(name = self.request.get("name"),owner=current_user, smart = utils.convert_javascript_bool_to_python(self.request.get("smart")), share_hash = utils.generate_share_hash())
     
     if playlist.smart:
       utils.parse_smart_filters(playlist, self.request)
     
     playlist.put()
-    library_item = models.Library(user=utils.get_current_user(), playlist=playlist, is_owner=True, position = int(self.request.get("position")))
+    library_item = models.Library(user=current_user, playlist=playlist, is_owner=True, position = int(self.request.get("position")))
     library_item.put()
     
     self.response.out.write(library_item.serialize())
