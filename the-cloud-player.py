@@ -82,8 +82,8 @@ class Playlist(webapp.RequestHandler):
   
       if(int(self.request.get('version')) == playlist.version):
         if(self.request.get('position')): #Rights: Can always update this
-          library_item.position = int(self.request.get('position'))
-
+          current_user.re_sort_playlists(library_item, int(self.request.get('position')))
+          
         if library_item.is_owner: #Rights: Only owner can update this
           if(self.request.get('name')):
             playlist.name = self.request.get('name')
@@ -97,7 +97,6 @@ class Playlist(webapp.RequestHandler):
             playlist.tracks = self.request.get('tracks')        
           playlist.version += 1
           playlist.put()
-          library_item.put()
         
         self.response.out.write(utils.status_code_json(200))
       else:

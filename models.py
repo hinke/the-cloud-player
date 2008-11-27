@@ -9,14 +9,32 @@ class User(db.Model):
   nickname = db.StringProperty(required=True)
   
   def playlists(self):
-    return (x for x in self.library_set.order("-position"))
+    return (x for x in self.library_set.order("position"))
   
   def has_playlist(self, playlist):
     for p in self.playlists():
-        if p.playlist and p.playlist.key().id() == playlist.key().id():
+        if p.playlist and p.playlist is playlist:
           return True
     return False
-    
+  
+  def re_sort_playlists(self, library_item, new_position):
+    playlists = self.playlists()
+    if library_item.position < new_position: #Moved down
+      for p in playlists:
+        if (p.position > library_item.position and (p.position < new_position or p.position == new_position)):
+          p.position -= 1
+          p.put() 
+      library_item.position = new_position
+      library_item.put()
+      
+    elif library_item.position > new_position: #Moved up
+      for p in playlists:
+        if (p.position < library_item.position and (p.position > new_position or p.position == new_position)):
+          p.position += 1
+          p.put() 
+      library_item.position = new_position
+      library_item.put()
+      
 
 class Playlist(db.Model):
   name = db.StringProperty(required=True, default='Playlist')
@@ -69,8 +87,7 @@ class Playlist(db.Model):
       s += "}"
     
     s += ",'owner':{"
-    s += "'nickname':'" + self.owner.nickname + "',"
-    s += "'email':'" + self.owner.google_user.email() + "'"
+    s += "'nickname':'" + self.owner.nickname + "'"
     s += "}"
     
     s += "}"

@@ -12,7 +12,7 @@ def init_new_user():
   app_user = models.User(google_user=google_user, nickname=nickname)
   app_user.put()
   
-  hot = models.Playlist(name = "Hot Tracks", smart = True, order = "hotness", share_hash = generate_share_hash())
+  hot = models.Playlist(name = "Hot Tracks", smart = True, owner=app_user, order = "hotness", share_hash = generate_share_hash())
   hot.put()
   
   library_item = models.Library(user=app_user, playlist=hot, is_owner=True, position = 1)
