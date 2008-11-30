@@ -264,14 +264,12 @@ SC.Player.prototype = {
     // add playlist button
     $("#add-playlist").click(function(ev) {
       if($("body").hasClass("logged-in")) {
-        var name = prompt("Please name your playlist", "My Playlist");
-        if(name) {
-          $.post("/playlists",{'name':name,'position': 0},function(data) {
-            var item = eval('(' + data + ')');
-            self.playlists[item.playlist.id] = new SC.Playlist(item, self);
-            self.switchPlaylist(item.playlist.id);
-          });
-        }
+        $.post("/playlists",{'name':"Untitled playlist",'position': 0},function(data) {
+          var item = eval('(' + data + ')');
+          self.playlists[item.playlist.id] = new SC.Playlist(item, self);
+          self.switchPlaylist(item.playlist.id);
+          $("#playlists li:last a:first").click();
+        });
         ev.preventDefault();
       }
     });
