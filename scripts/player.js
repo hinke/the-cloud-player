@@ -250,7 +250,8 @@ SC.Player.prototype = {
               search : true,
               smart : true,
               smart_filter : {
-                search_term : q
+                search_term : q,
+                order: "hotness"
               }
             }
           },self);
