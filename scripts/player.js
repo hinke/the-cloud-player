@@ -546,8 +546,8 @@ SC.Player.prototype = {
     });
   },
   flash: function(message) {
-    $("#flash").find("div").text(message).end().addClass("on");
-    setTimeout(function(){$("#flash").removeClass("on")},2000);
+    $("#flash").find("div").text(message).end().fadeIn();
+    setTimeout(function(){$("#flash").fadeOut();},1500);
   },
   loadArtistInfo: function(uri) {
     var self = this;

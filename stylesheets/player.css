@@ -1002,23 +1002,23 @@ table {
 
 #flash {
   font-size: 16px;
-  opacity: 0;
   position : fixed;
   z-index: 10000;
   bottom: 100px;
   width: 100%;
-  -webkit-transform: scale(0.7,0.0) skew(0deg);
-  -webkit-transition-property: all;
+/*  -webkit-transform: scale(0.7,0.0) skew(0deg);
+  -webkit-transition-property: -webkit-transform;
   -webkit-transition-duration: .2s;
-  -webkit-transition-timing-function: cubic-bezier(0.0, 0.0, 0.6, 1.0);
+  -webkit-transition-timing-function: cubic-bezier(0.0, 0.0, 0.6, 1.0);*/
+  display: none;
 }
 
 #flash.on {
-  -webkit-transform: scale(1.0,1.0) skew(0deg);
+/*  -webkit-transform: scale(1.0,1.0) skew(0deg);
   opacity: 1.0;
   position : fixed;
   bottom: 100px;
-  width: 100%;
+  width: 100%;*/
 }
   #flash div {
     margin: 0 auto;
