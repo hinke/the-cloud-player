@@ -68,10 +68,11 @@ class Playlist(db.Model):
       s += "'duration_to':" + str(self.duration_to) + ""
       s += "}"
     
-    s += ",'owner':{"
-    s += "'nickname':'" + self.owner.nickname + "',"
-    s += "'email':'" + self.owner.google_user.email() + "'"
-    s += "}"
+    if self.owner:
+      s += ",'owner':{"
+      s += "'nickname':'" + self.owner.nickname + "'"
+#      s += "'email':'" + self.owner.google_user.email() + "'"
+      s += "}"
     
     s += "}"
     return s
