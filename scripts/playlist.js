@@ -94,15 +94,6 @@ SC.Playlist.prototype = {
       this.addToPlaylistsList();      
     }
     
-/*    if(this.properties.playlist.smart) { // a bit messy
-      this.tracksUrl = tracksUrl
-      this.load();
-    } else {
-      this.tracksUrl = "http://api.soundcloud.com/tracks.js?ids=0&callback=?"; // here is ugly again, just load an empty url to init stuff that happens in the load method
-      this.load();
-    }
-*/
-
     this.load();
 
     $("> div",this.dom).scroll(function() {
@@ -113,7 +104,7 @@ SC.Playlist.prototype = {
     });
 
   },
-  generateTracksUrl : function() {
+  generateTracksUrl : function() { // generates the API url based on properties of the playlist
     var tracksUrl = "http://api.soundcloud.com/";
     var pl = this.properties.playlist;
     if(pl.smart) { // check for all smart playlist params
@@ -146,7 +137,6 @@ SC.Playlist.prototype = {
       tracksUrl = "http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks;
     }
     tracksUrl += "&callback=?"; // add JSONP callback param
-    console.log(tracksUrl);
     return tracksUrl;
   },
   load : function() {
@@ -274,7 +264,7 @@ SC.Playlist.prototype = {
     $("tr",this.list).removeClass("playing");
     if(this.player.randomPlaylist) { // random is on
       this.currentPos = Math.floor(Math.random()*$("tr",this.list).length); // refine random function later
-      this.loadTrack(this.currentPos);      
+      this.loadTrack(this.currentPos);
     } else {
       var nxt = $("tr:nth-child("+(this.currentPos+2)+")",this.list);
       if(nxt.length > 0) {
@@ -287,7 +277,7 @@ SC.Playlist.prototype = {
     }
   },
   prev : function() {
-    if (this.player.track.currentTime < 2) {
+    if (this.player.audio.position < 2000) {
       var prev = $("tr:nth-child("+(this.currentPos)+")",this.list);
       if(prev.length > 0) {
         $("tr",this.list).removeClass("playing");
@@ -296,7 +286,7 @@ SC.Playlist.prototype = {
       }      
     }
     else {
-      this.player.track.currentTime = 0;
+      this.player.audio.setPosition(0);
     }
   },
   loadTrack : function(pos) {

@@ -3,7 +3,7 @@ body {
   -webkit-background-size: 100% 100%;
   font-family: "Lucida Grande";
   color : #222;
-  padding : 24px 0 24px 0;
+  padding : 0;
   margin: 0;
   -khtml-user-select : none;
   overflow: hidden;
@@ -33,6 +33,7 @@ a:hover {
 
 img {
   display: block;
+  -moz-user-select : none;
 }
 
 #artwork {
@@ -42,8 +43,11 @@ img {
   width: 100%;
   left: 0;
   border-top: 1px solid #aaa;
-  background-image: url(/images/fade-2.png);
-  -webkit-background-size: 100% 100%;  
+  background-color: #eee;
+  background-image: url(/images/fade-160px.png);
+  background-repeat: repeat-x;
+  background-position : 0 100%;
+  -webkit-background-size: 100% 100%;
   background-size: 100% 100%;
   -moz-background-size: 100% 100%;
   display: none;
@@ -283,6 +287,7 @@ table {
   margin: 0;
   padding: 5px 0 0 9px;
   background-image: url(/images/fade-160px.png);
+  background-color: #eee;
   -webkit-background-size: 100% 100%;  
   background-size: 100% 100%;
   -moz-background-size: 100% 100%;
@@ -644,13 +649,10 @@ table {
     left: 0px;
     height: 23px;
     width: 100%;
-  /*  background-image: url(/images/fade-wave.svg);
-  */  -webkit-background-size: 100% 100%;
     -webkit-border-radius: 5px;
     -webkit-border: solid #c4c4c4 2px;
     background: rgba(126,144,192,1);
     display: none;
-    /*-webkit-box-shadow: 0px 0px 7px rgba(255,255,255,0.5);*/
     -webkit-box-reflect: below 3px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(white));
   }
 
@@ -667,7 +669,13 @@ table {
       display: block;
       top: 0;
     }
-
+    
+    #progress img {
+      position: absolute;
+      width: 100%;
+      height: 23px;
+    }
+    
     #progress div.inner {
       opacity: 0.4;
       width: 0%;
@@ -678,7 +686,6 @@ table {
     }
 
     #progress div.loading {
-      opacity: 0.4;
       width: 0%;
       height: 3px;
       background: rgba(0,0,0,0.3);
@@ -803,6 +810,7 @@ table {
   width: 210px;
   color: #777;
   font-size: 14px;
+  background: white url(/images/input-fade.png) repeat-x 0 0;
 }
 
 #q:focus {

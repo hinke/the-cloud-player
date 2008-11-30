@@ -50,6 +50,30 @@ $.extend(SC, {
     });
     return sum;
   },
+  throttle: function(delay, fn) {
+    var last = null,
+        partial = fn;
+
+    if (delay > 0) {
+      partial = function() {
+        var now = new Date(),
+            scope = this,
+            args = arguments;
+
+        // We are the last call made, so cancel the previous last call
+        clearTimeout(partial.futureTimeout);
+
+        if (last === null || now - last > delay) { 
+          fn.apply(scope, args);
+          last = now;
+        } else {
+          // guarentee that the method will be called after the right delay
+          partial.futureTimeout = setTimeout(function() { fn.apply(scope, args); }, delay);
+        }
+      };
+    }
+    return partial;
+  },
   stop: function(e) { e.preventDefault && e.preventDefault(); return false; },
   noop: function() { return this; } // identity func and terminator for our namespace
 });

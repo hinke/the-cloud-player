@@ -2,12 +2,8 @@ SC.Player = SC.Class();
 SC.Player.prototype = {
   isPlaying: false,
   initialize: function() {
-    if($.browser.safari) {
-      this.track = new Audio("null.mp3");
-    } else {
-      this.flash("Sorry, this player only works in Safari for now!");
-    }
-    
+
+    this.audioTracks = {}; // has for all sounds
     this.progress = $('#progress div:first');
     this.loading = $('#progress div.loading');
     this.progressParent = $('#progress');
@@ -69,6 +65,8 @@ SC.Player.prototype = {
     
     // create smart playlist form
     $("#pl-create-form").submit(function() {
+      $("input,select",this).blur();
+      
       var name = "smartpl" + Math.random(); // tmp should be replaced by naming box
       
       var props = {
@@ -133,8 +131,7 @@ SC.Player.prototype = {
     
     $("#sidebar").width(sidebarWidth);
     $("#main-container").css("left",sidebarWidth);
-/*    $("#artwork").width(sidebarWidth);
-*/    $("#artwork").height(sidebarWidth);
+    $("#artwork").height(sidebarWidth);
 
     $("#sidebar")
       .mousemove(function(e) {
@@ -162,7 +159,6 @@ SC.Player.prototype = {
                 $playlists.css("bottom",colWidth+25);
                 $createPlaylists.css("bottom",colWidth+0);
               }
-//              $artwork.width(colWidth);
               $artwork.height(colWidth);
               $cont.css("left",colWidth);
             });
@@ -175,19 +171,22 @@ SC.Player.prototype = {
     // set volume from cookie
     this.volume = parseFloat($.cookie('volume'));
     if(!this.volume) {
-      this.volume = 1;
+      this.volume = 100;
     }
 
     // volume
     $("#volume").slider({
-      startValue : this.volume*100,
+      startValue : this.volume,
       min : 0,
       max : 100,
       slide : function(e, ui) {
-        self.track.volume = self.volume = ui.value / 100;
+        if(self.audio) {
+          self.volume = ui.value;
+          self.audio.setVolume(self.volume);
+        }
       },
       change : function(e, ui) {
-        $.cookie('volume',ui.value / 100); // save the volume in a cookie
+        $.cookie('volume',ui.value); // save the volume in a cookie
       }
     });
 
@@ -214,7 +213,9 @@ SC.Player.prototype = {
 
     $("#progress").click(function(ev) {
       var percent = (ev.clientX-$(ev.target).offset().left)/($("#progress").width());
-      self.track.currentTime = self.track.duration*percent;
+      if(self.audio.durationEstimate*percent < self.audio.duration) {
+        self.audio.setPosition(self.audio.durationEstimate*percent);        
+      }
     });
 
     $("#q")
@@ -289,7 +290,7 @@ SC.Player.prototype = {
       }
     });
     
-    // remove playlist items on press delete
+    // main keyboard listener
     $(window).keydown(function(ev) {
       if(!$("#q")[0].focused) { // don't listen to key events if search field is focused
         var currentTrackList = self.trackLists[$("#playlists li.active:first").attr('listId')]; // optimize?
@@ -314,8 +315,8 @@ SC.Player.prototype = {
           if(sel.length > 0 && sel.next().length > 0) { // check so that el exists
             
             // a bit messy code that scrolls with the selected element
-            if(sel.next().offset().top > (($("> div:last",currentTrackList.dom).height()+$("> div:last",currentTrackList.dom).offset().top) - 17) ) {
-              $("> div:last",currentTrackList.dom)[0].scrollTop += 17;
+            if(sel.next().offset().top > (($("> div:last",currentTrackList.dom).height()+$("> div:last",currentTrackList.dom).offset().top) - 19) ) {
+              $("> div:last",currentTrackList.dom)[0].scrollTop += 19;
             }
             
             if(ev.shiftKey) { // select next track
@@ -332,7 +333,7 @@ SC.Player.prototype = {
 
             // a bit messy code that scrolls with the selected element
             if(sel.prev().offset().top < ($("> div:last",currentTrackList.dom).offset().top) ) {
-              $("> div:last",currentTrackList.dom)[0].scrollTop -= 17;
+              $("> div:last",currentTrackList.dom)[0].scrollTop -= 19;
             }
 
             if(ev.shiftKey) { // select prev track
@@ -415,18 +416,38 @@ SC.Player.prototype = {
 
   },
   load: function(track) {
-    this.track.pause();
-    this.track = null;
-    this.track = new Audio(track.stream_url + "?stream_token=84d939bca386ec6f54f1d68d8d9b9bf3");
-    this.track.volume = this.volume;
-    var self = this;
-
-    this.track.addEventListener("ended", function() {
-      self.isPlaying = false;
-      self.currentPlaylist.next();
+    var id = track.stream_url.substring(track.stream_url.lastIndexOf("/")+1);
+    this.audioTracks[id] = soundManager.createSound({
+      id: id,
+      url: track.stream_url + "?stream_token=player",
+      volume : this.volume,
+      whileloading : SC.throttle(200,function() {
+          self.loading.css('width',(self.audio.bytesLoaded/self.audio.bytesTotal)*100+"%");
+      }),
+      whileplaying : SC.throttle(200,function() {
+        self.progress.css('width',(self.audio.position/self.audio.durationEstimate)*100+"%");
+        $('span:first',self.timecodes).html(SC.formatMs(self.audio.position));
+        $('span:last',self.timecodes).html(SC.formatMs(self.audio.durationEstimate));
+      }),
+      onfinish : function() {
+        self.isPlaying = false;
+        self.currentPlaylist.next();        
+      }
     });
 
-    //$("#progress").fadeIn("fast");
+    if(this.audio) {
+      this.audio.stop();
+    }
+    this.audio = null;
+    this.audio = this.audioTracks[id]; // set current audio to the audio in the audioTracks hash
+    if(this.audio.loaded) {
+      console.log('loaded')
+      this.loading.css('width',"100%");
+    }
+
+    this.audio.setVolume(this.volume); // set vol again in case vol changed and going back to same track again
+    var self = this;
+
     $("#artist")
       .hide()
       .html("<a href='#' class='artist-link'>" + track.user.username + "</a><div>" + track.title + "</div>")
@@ -488,21 +509,20 @@ SC.Player.prototype = {
     
     this.play();
     $("#progress").fadeOut("slow",function() {
-      self.loadWaveform(track);
+      var self = this;
+      $("#progress img").attr("src",track.waveform_url);
+      $("#progress img").load(function() {
+        console.log('heeeeeeeeeeeeeeeeeeeeej')
+        $("#progress").fadeIn("slow");
+      });
+/*      $.getJSON("http://api.soundcloud.com/users/"+track.user_id+".js?callback=?",function(user) {
+        $("#progress").fadeIn("slow");
+      });*/
     });
   },
   flash: function(message) {
     $("#flash").find("div").text(message).end().addClass("on");
     setTimeout(function(){$("#flash").removeClass("on")},2000);
-  },
-  loadWaveform: function(track) {
-    var self = this;
-    self.progressParent.css("background-image","url("+track.waveform_url+")");
-    $("#progress").fadeIn("slow");
-    $.getJSON("http://api.soundcloud.com/users/"+track.user_id+".js?callback=?",function(user) {
-      //self.progressParent.css("background-image","url("+track.waveform_url+")");
-      $("#progress").fadeIn("slow");
-    });
   },
   loadArtistInfo: function(uri) {
     var self = this;
@@ -572,26 +592,35 @@ SC.Player.prototype = {
     }
   },  
   play: function() {
-    this.track.play();
-    this.isPlaying = true;
-    $("body").addClass("playing");
-    var self = this;
-    this.redrawTimer = setInterval(function(){
-      self.progress.css('width',(self.track.currentTime/self.track.duration)*100+"%");
-      self.loading.css('width',(self.track.buffered.end()/self.track.duration)*100+"%");
-      $('span:first',self.timecodes).html(SC.formatMs(self.track.currentTime*1000));
-      $('span:last',self.timecodes).html(SC.formatMs(self.track.duration*1000));
-    },200);
+    if(this.audio) {
+      if(this.audio.paused) {
+        this.audio.resume();
+      } else {
+        this.audio.play();
+      }
+      this.isPlaying = true;
+      $("body").addClass("playing");
+    }
   },
   stop: function() {
-    this.track.pause();    
-    this.isPlaying = false;
-    $("body").removeClass("playing");
-    clearInterval(this.redrawTimer);
+    if(this.audio) {
+      this.audio.pause();      
+      this.isPlaying = false;
+      $("body").removeClass("playing");
+    }
   }
 };
 
-// init the app
-$(function() {
+soundManager.flashVersion = 9;
+soundManager.url = '/scripts/.';
+soundManager.useConsole = true;
+soundManager.consoleOnly = true;
+soundManager.debugMode = true; // disable debug mode
+soundManager.defaultOptions.multiShot = false;
+soundManager.useHighPerformance = false;
+
+soundManager.onload = function() {
+  // soundManager is ready to use (create sounds and so on)
+  // init the player app
   p = new SC.Player();
-});
+}
