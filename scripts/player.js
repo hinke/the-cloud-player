@@ -15,8 +15,13 @@ SC.Player.prototype = {
       self.togglePlay();
     });
 
-    $("a#about,#about-box a.close").click(function(ev) {
-      $("#about-box").toggleClass("showing");
+    $("#about-box a.close").click(function(ev) {
+      $("#about-box").fadeOut();
+      ev.preventDefault();
+    });
+    
+    $("a#about").click(function(ev) {
+      $("#about-box").fadeIn();
       ev.preventDefault();
     });
 
@@ -409,7 +414,7 @@ SC.Player.prototype = {
       },self);
       
       // show about box
-      $("#about-box").addClass("showing");
+      $("#about-box").fadeIn();
       
       self.switchPlaylist("hot");
     }
