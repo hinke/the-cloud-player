@@ -20,6 +20,7 @@
     <div id="flash"><div></div></div>
     <div id="header">
       <div id="login">
+        <a href="" id="about">About</a> | 
         {% if user %}
           Signed in as <a href="#" class="nickname">{{user.nickname}}</a> | <a href="{{logout_url}}">Sign out</a>
         {% else %}
@@ -127,6 +128,44 @@
       </div>
       <div id="speaker"></div>
     </div>
+  
+  
+    <div id="about-box">
+      <a href="#close" class="close">X</a>
+      <ul id="player-demo">
+        <li>Playlists right in your browser<br/><img src="images/player3.png" width="200" height="102" alt="Player3"></li>
+        <li>Search for tracks, iTunes style<br/><img src="images/player2.png" width="200" height="50" alt="Player2"></li>
+        <li>And the crisp waveform is of course in<br/><img src="images/player1.png" width="200" height="68" alt="Player1"></li>
+      </ul>
+      <h1>Introducing: The Cloud Player</h1>
+      <p>
+        The Cloud Player let's you create playlists, 
+        fill them with your favorite tracks and share them with your friends, all using only a web browser and a Google account. 
+        Search for tracks or artists iTunes-style or just pick some from our hot list. 
+        Add them to a playlist by dragging them to the group of playlists on the left. 
+      </p>
+      <p>Here's what you can do with it:</p>
+      <ul id="feature-list">
+        <li>Search and play all tracks from SoundCloud</li>
+        <li>Save your favorites in playlists</li>
+        <li>If you log in with your Google account your playlists will be saved for ever</li>
+        <li>Send your ready made playlists to your friends</li>
+        <li>Collaborate in making the best playlists ever</li>
+        <li>Make smart playlists based on hot tracks, genres, BPM and more</li>
+      </ul>
+      <div id="built-by">
+        <a href="http://eric.wahlforss.com" class="portrait" title="Eric Wahlforss"><img src="images/eric.png" width="63" height="92" alt="Eric"></a>
+        <a href="http://hinkeb.com" class="portrait" title="Henrik Berggren"><img src="images/henrik.png" width="63" height="92" alt="Henrik"></a>
+        <p>
+          The Cloud Player was built by <a href="http://eric.wahlforss.com">Eric Wahlforss</a> & <a href="http://hinkeb.com">Henrik Berggren</a> using 
+          <a href="http://appengine.google.com">Google App Engine</a>, <a href="http://python.org">Python</a>, <a href="http://jquery.com">jQuery</a>, 
+          <a href="http://www.schillmania.com/projects/soundmanager2/">SoundManager 2</a> and the <a href="http://soundcloud.com/api">SoundCloud API</a>. 
+          Do you want to contribute? Go ahead and <a href="http://github.com/hinke/the-cloud-player/tree/master">fork from GitHub!</a>
+        </p>
+      </div>
+
+    </div>
+  
   
     <!-- TEMPLATES -->
     <div id="templates">
