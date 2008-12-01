@@ -107,16 +107,19 @@ class Playlist(webapp.RequestHandler):
         users_connected_to_playlist = playlist.users()
         for item in users_connected_to_playlist:
           item.delete()
+          item.user.re_index_playlists()
           
         playlist.delete()
-        
+        current_user.re_index_playlists()
       elif playlist.collaborative:
         library_item.delete()
+        current_user.re_index_playlists()
         if not playlist.has_user():
           playlist.delete()
           
       elif not library_item.is_owner:
         library_item.delete()
+        current_user.re_index_playlists()
       
 class Playlists(webapp.RequestHandler):
   def get(self):

@@ -17,6 +17,13 @@ class User(db.Model):
           return True
     return False
   
+  def re_index_playlists(self):
+    i = 0
+    for p in self.playlists():
+      p.position = i
+      p.put()
+      i+=1
+  
   def re_sort_playlists(self, library_item, new_position):
     playlists = self.playlists()
     if library_item.position < new_position: #Moved down
