@@ -433,10 +433,11 @@ SC.Playlist.prototype = {
     $("<li listId='" + this.id + "' class='" + (this.properties.is_owner ? "" : "shared") + " " + (this.properties.playlist.collaborative ? "collaborative" : "") + " " + (this.persisted ? "" : "dont-persist") + " " + (this.properties.playlist.smart ? "smart" : "") + " " + (this.properties.playlist.search ? "search" : "") + "'><span></span><a href='#'>" + this.name + (this.properties.is_owner ? "" : " <em>by " + this.properties.playlist.owner.nickname + "</em>") + "</a><a class='collaborative' title='Make Playlist Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a></li>")
       .find('a:first').click(function(ev) {
         if($(this).parents("li").hasClass("active") && self.properties.is_owner && $("body").hasClass("logged-in")) {
-          if(!$(ev.target).is("input")) { // edit in place for playlist names
-            var that = this; // very strange that i can't use self here
-            var origValue = $(this).text();
+          var that = this; // very strange that i can't use self here
+          if(!window.editingText) {
             setTimeout(function() {
+              var origValue = $(that).text();
+              console.log("RESTARRT EDIT")
               window.editingText = true;
               $(that).html("<input type='text' value='" + origValue + "'>");
               $("input", that).focus();
@@ -445,25 +446,28 @@ SC.Playlist.prototype = {
               // closes editInPlace and saves if save param is true
               var closeEdit = function(save) {
                 if(save) {
+                  console.log("SAAAAAVING")
                   self.name = $("input",that).val();
                   $(that).text(self.name);
                   self.saveName();
                 } else {
                   $(that).text(origValue);                  
                 }
+                console.log("quit edit")
                 window.editingText = false;
+                ev.stopPropagation();
                 $(document).unbind("click",applyEditClick);
                 $(window).unbind("keydown",editKey);                
               }
-              
+
               var applyEditClick = function(ev) {
-                if($("input",ev.target).length == 0 || ($("input",ev.target).length > 0 && $("input",ev.target)[0] != that)) {
+                if(!(ev.target == $("input",that)[0])) { // save if click anywhere but on the editing input
                   closeEdit(true);
                 }
               };
-              
+
               $(document).bind("click", applyEditClick);
-                            
+
               var editKey = function(ev) {
                 if(ev.keyCode === 27) {
                   closeEdit();
@@ -473,9 +477,10 @@ SC.Playlist.prototype = {
                   return false;
                 }
               }
-              
+
               $(window).keydown(editKey);
-            },500);            
+            
+            },500);
           }
         } else {
           self.player.switchPlaylist(self.id);          
