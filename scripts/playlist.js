@@ -376,6 +376,7 @@ SC.Playlist.prototype = {
         .find("a")
         .click(function(ev) {
           self.player.removePlaylist("artist");
+          console.log('new artist pl')
           self.player.playlists["artist"] = new SC.Playlist({
             is_owner: true,
             playlist : {

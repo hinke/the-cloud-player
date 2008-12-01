@@ -607,6 +607,9 @@ SC.Player.prototype = {
       this.playlists[id] = null;
       $("#lists #list-"+id).remove();
       $("#playlists li[listId="+id+"]").remove();      
+    } else if (this.playlists[id]) { // for hidden playlists, like artist/genre playlists
+      this.playlists[id] = null;
+      $("#lists #list-"+id).remove();      
     }
   },
   togglePlay : function() {
