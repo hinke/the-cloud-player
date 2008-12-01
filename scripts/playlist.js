@@ -216,6 +216,10 @@ SC.Playlist.prototype = {
             tolerance : "pointer",
             _noFinalSort : true, // mod to support multi-sortable
             helper : function(e,el) {
+              if(!el.hasClass("selected")) { // imitate itunes selection behavior, avoid sortable bug
+                el.addClass("selected");
+                el.siblings("tr.selected").removeClass("selected");
+              }
               if(el.siblings(".selected").length > 0) { // dragging more than one track
                 var els = el.parents("tbody").find(".selected").clone();
                 return $("<div></div>").prepend(els); // wrap all selected elements in a div
