@@ -2,12 +2,8 @@ SC.Player = SC.Class();
 SC.Player.prototype = {
   isPlaying: false,
   initialize: function() {
-    if($.browser.safari) {
-      this.track = new Audio("null.mp3");
-    } else {
-      this.flash("Sorry, this player only works in Safari for now!");
-    }
-    
+
+    this.audioTracks = {}; // has for all sounds
     this.progress = $('#progress div:first');
     this.loading = $('#progress div.loading');
     this.progressParent = $('#progress');
@@ -17,6 +13,16 @@ SC.Player.prototype = {
     this.playButton = $('#play');
     this.playButton.click(function() {
       self.togglePlay();
+    });
+
+    $("#about-box a.close").click(function(ev) {
+      $("#about-box").fadeOut();
+      ev.preventDefault();
+    });
+    
+    $("a#about").click(function(ev) {
+      $("#about-box").fadeIn();
+      ev.preventDefault();
     });
 
     // read rand mode from cookie
@@ -47,11 +53,6 @@ SC.Player.prototype = {
       $.cookie('loop_playlist', self.loopPlaylist);
     });
 
-    // show flash message if received a shared playlist
-    if(location.search.search(/add_shared_playlist/) != -1) {
-      self.flash("The playlist has been added to your library");      
-    }
-
     // create smart playlist, bpm slider
     $("#pl-bpm-range-slider").slider({
       min : 0,
@@ -69,6 +70,8 @@ SC.Player.prototype = {
     
     // create smart playlist form
     $("#pl-create-form").submit(function() {
+      $("input,select",this).blur();
+      
       var name = "smartpl" + Math.random(); // tmp should be replaced by naming box
       
       var props = {
@@ -87,8 +90,9 @@ SC.Player.prototype = {
 
       $.post("/playlists",props,function(data) {
         var pl = eval('(' + data + ')');
-        self.trackLists[pl.playlist.id] = new SC.Playlist(pl,self);
+        self.playlists[pl.playlist.id] = new SC.Playlist(pl,self);
         self.switchPlaylist(pl.playlist.id);
+        $("#playlists li:last a:first").click();
       });
 
       
@@ -97,14 +101,14 @@ SC.Player.prototype = {
       return false;
     });
     
-    $("#pl-cancel").click(function() {
+    $("#pl-cancel").click(function(ev) {
       $("#lists").animate({top:0});
       $("#create-smart-playlist").animate({height: "hide"});
-      return false;
+      ev.preventDefault();
     });
 
     // change nickname
-    $("a.nickname:first").click(function() {
+    $("a.nickname:first").click(function(ev) {
       var nick = prompt("Change your nickname:", this.innerHTML);
       var self = this;
       if(nick) {
@@ -112,7 +116,7 @@ SC.Player.prototype = {
           self.innerHTML = nick;
         });
       }
-      return false;
+      ev.preventDefault();
     });
 
     // resizable playlists pane
@@ -133,8 +137,7 @@ SC.Player.prototype = {
     
     $("#sidebar").width(sidebarWidth);
     $("#main-container").css("left",sidebarWidth);
-/*    $("#artwork").width(sidebarWidth);
-*/    $("#artwork").height(sidebarWidth);
+    $("#artwork").height(sidebarWidth);
 
     $("#sidebar")
       .mousemove(function(e) {
@@ -162,7 +165,6 @@ SC.Player.prototype = {
                 $playlists.css("bottom",colWidth+25);
                 $createPlaylists.css("bottom",colWidth+0);
               }
-//              $artwork.width(colWidth);
               $artwork.height(colWidth);
               $cont.css("left",colWidth);
             });
@@ -175,19 +177,22 @@ SC.Player.prototype = {
     // set volume from cookie
     this.volume = parseFloat($.cookie('volume'));
     if(!this.volume) {
-      this.volume = 1;
+      this.volume = 100;
     }
 
     // volume
     $("#volume").slider({
-      startValue : this.volume*100,
+      startValue : this.volume,
       min : 0,
       max : 100,
       slide : function(e, ui) {
-        self.track.volume = self.volume = ui.value / 100;
+        if(self.audio) {
+          self.volume = ui.value;
+          self.audio.setVolume(self.volume);
+        }
       },
       change : function(e, ui) {
-        $.cookie('volume',ui.value / 100); // save the volume in a cookie
+        $.cookie('volume',ui.value); // save the volume in a cookie
       }
     });
 
@@ -202,9 +207,9 @@ SC.Player.prototype = {
     this.playlist = [];
 
     // artist info close btn
-    $("#artist-info a.close").click(function() {
+    $("#artist-info a.close").click(function(ev) {
       self.hideArtistPane();
-      return false;
+      ev.preventDefault();
     });
 
     // artwork loading callback
@@ -214,7 +219,9 @@ SC.Player.prototype = {
 
     $("#progress").click(function(ev) {
       var percent = (ev.clientX-$(ev.target).offset().left)/($("#progress").width());
-      self.track.currentTime = self.track.duration*percent;
+      if(self.audio.durationEstimate*percent < self.audio.duration) {
+        self.audio.setPosition(self.audio.durationEstimate*percent);        
+      }
     });
 
     $("#q")
@@ -238,7 +245,8 @@ SC.Player.prototype = {
           self.removePlaylist("search1");
           var q = $("#q").val();
 
-          self.trackLists["search1"] = new SC.Playlist({
+          self.playlists["search1"] = new SC.Playlist({
+            is_owner: true,
             playlist: {
               id : "search1",
               name : "Search for '" + q + "'",
@@ -247,7 +255,8 @@ SC.Player.prototype = {
               search : true,
               smart : true,
               smart_filter : {
-                search_term : q
+                search_term : q,
+                order: "hotness"
               }
             }
           },self);
@@ -258,22 +267,20 @@ SC.Player.prototype = {
       });
     
     // add playlist button
-    $("#add-playlist").click(function() {
+    $("#add-playlist").click(function(ev) {
       if($("body").hasClass("logged-in")) {
-        var name = prompt("Please name your playlist", "My Playlist");
-        if(name) {
-          $.post("/playlists",{'name':name,'position': 0},function(data) {
-            var item = eval('(' + data + ')');
-            self.trackLists[item.playlist.id] = new SC.Playlist(item, self);
-            self.switchPlaylist(item.playlist.id);
-          });
-        }
-        return false;
+        $.post("/playlists",{'name':"Untitled playlist",'position': 0},function(data) {
+          var item = eval('(' + data + ')');
+          self.playlists[item.playlist.id] = new SC.Playlist(item, self);
+          self.switchPlaylist(item.playlist.id);
+          $("#playlists li:last a:first").click();
+        });
+        ev.preventDefault();
       }
     });
 
     // smart playlists button
-    $("#add-smart-playlist").click(function() {
+    $("#add-smart-playlist").click(function(ev) {
       if($("body").hasClass("logged-in")) {
         $("#lists").animate({top:135});
         $("#artist-info").animate({height:"hide"});
@@ -285,73 +292,75 @@ SC.Player.prototype = {
           $("#pl-genre,#pl-artist,#pl-favorite,#pl-search-term").val("")
           $("#pl-genre").focus();
         });
-        return false;
+        ev.preventDefault();
       }
     });
     
-    // remove playlist items on press delete
+    // main keyboard listener
     $(window).keydown(function(ev) {
-      if(!$("#q")[0].focused) { // don't listen to key events if search field is focused
-        var currentTrackList = self.trackLists[$("#playlists li.active:first").attr('listId')]; // optimize?
-        if(ev.keyCode === 8) {
-          if($("tr.selected",currentTrackList.list).length > 0) {
-            $("tr.selected",currentTrackList.list).remove();
-            currentTrackList.save();
-            return false;          
+      if(!$("#q")[0].focused && !window.editingText) { // don't listen to key events if search field is focused or if editing text
+        if(ev.keyCode === 8) { // delete selected tracks
+          if($("tr.selected",self.selectedPlaylist.list).length > 0) {
+            if(self.selectedPlaylist.editable) {
+              $("tr.selected",self.selectedPlaylist.list).remove();
+              self.selectedPlaylist.save();              
+            }
+            return false;
           }
         } else if(ev.keyCode === 32) { // start/stop play
           self.togglePlay();
         } else if (ev.keyCode === 13) { // start selected track
-          if($("tr.selected",currentTrackList.list).length > 0) {
-            var idx = $("tr", currentTrackList.list).index($("tr.selected",currentTrackList.list));            
-          } else {
-            $("tr", currentTrackList.list).eq(0).addClass("selected");
+          if($("tr.selected",self.selectedPlaylist.list).length > 0) {
+            var idx = $("tr", self.selectedPlaylist.list).index($("tr.selected",self.selectedPlaylist.list));            
+            self.selectedPlaylist.loadTrack(idx);
+          } else if ($("tr",self.selectedPlaylist.list).length > 0) {
+            $("tr", self.selectedPlaylist.list).eq(0).addClass("selected");
             var idx = 0;
+            self.selectedPlaylist.loadTrack(idx);
           }
-          currentTrackList.loadTrack(idx);
         } else if (ev.keyCode === 40) { // arrow down, select next
-          var sel = $("tr.selected:last",currentTrackList.list);
+          var sel = $("tr.selected:last",self.selectedPlaylist.list);
           if(sel.length > 0 && sel.next().length > 0) { // check so that el exists
             
             // a bit messy code that scrolls with the selected element
-            if(sel.next().offset().top > (($("> div:last",currentTrackList.dom).height()+$("> div:last",currentTrackList.dom).offset().top) - 17) ) {
-              $("> div:last",currentTrackList.dom)[0].scrollTop += 17;
+            if(sel.next().offset().top > (($("> div:last",self.selectedPlaylist.dom).height()+$("> div:last",self.selectedPlaylist.dom).offset().top) - 19) ) {
+              $("> div:last",self.selectedPlaylist.dom)[0].scrollTop += 19;
             }
             
             if(ev.shiftKey) { // select next track
-              $("tr.selected",currentTrackList.list).next().addClass("selected");
+              $("tr.selected",self.selectedPlaylist.list).next().addClass("selected");
             } else {
-              $("tr", currentTrackList.list).removeClass("selected");
+              $("tr", self.selectedPlaylist.list).removeClass("selected");
               sel.next().addClass("selected");
             }
           }
           return false;
         } else if (ev.keyCode === 38) { // arrow up, select prev
-          var sel = $("tr.selected:first",currentTrackList.list);
+          var sel = $("tr.selected:first",self.selectedPlaylist.list);
           if(sel.length > 0 && sel.prev().length > 0) { // check so that el exists
 
             // a bit messy code that scrolls with the selected element
-            if(sel.prev().offset().top < ($("> div:last",currentTrackList.dom).offset().top) ) {
-              $("> div:last",currentTrackList.dom)[0].scrollTop -= 17;
+            if(sel.prev().offset().top < ($("> div:last",self.selectedPlaylist.dom).offset().top) ) {
+              $("> div:last",self.selectedPlaylist.dom)[0].scrollTop -= 19;
             }
 
             if(ev.shiftKey) { // select prev track
-              $("tr.selected",currentTrackList.list).prev().addClass("selected");
+              $("tr.selected",self.selectedPlaylist.list).prev().addClass("selected");
             } else {
-              $("tr", currentTrackList.list).removeClass("selected");
+              $("tr", self.selectedPlaylist.list).removeClass("selected");
               sel.prev().addClass("selected");
             }
           }
           return false;
         } else if (ev.keyCode === 39 && self.isPlaying) { // arrow next, play next if playing
-          currentTrackList.next();
+          self.selectedPlaylist.next();
         } else if (ev.keyCode === 37 && self.isPlaying) { // arrow prev, play prev if playing
-          currentTrackList.prev();
+          self.selectedPlaylist.prev();
         } else if (ev.keyCode === 70 && ev.metaKey) { // cmd-f for search
           $("#q").focus();
           return false;
         } else if (ev.keyCode === 65 && ev.metaKey) { // cmd-a for select all
-          $("tr",currentTrackList.list).addClass("selected");
+          $("tr",self.selectedPlaylist.list).addClass("selected");
           return false;
         }
       } else {
@@ -368,7 +377,7 @@ SC.Player.prototype = {
       $(this).removeClass("click");
     });
     
-    this.trackLists = {};
+    this.playlists = {};
 
     // load hot tracks if not logged in user
     if($("body").hasClass("logged-in")) {
@@ -376,25 +385,37 @@ SC.Player.prototype = {
       // load playlists for user
       $.getJSON("/playlists",function(playlists) {
         $.each(playlists,function() {
-          self.trackLists[this.playlist.id] = new SC.Playlist(this, self);
+          self.playlists[this.playlist.id] = new SC.Playlist(this, self);
         });
-
-        if(playlists.length > 0) {
-          self.switchPlaylist(playlists[0].playlist.id);
+        
+        // show flash message if received a shared playlist
+        if(location.search.search(/add_shared_playlist/) != -1) {
+          self.switchPlaylist($("#playlists li:last").attr("listId")); // select shared playlist
+          self.flash("The playlist has been added to your library");      
+        } else {
+          if(playlists.length > 0) { // switch to first playlist
+            self.switchPlaylist(playlists[0].playlist.id);
+          }          
         }
+        
       });      
     } else { // not logged in, then load a few standard playlists without persisting
-      self.trackLists['hot'] = new SC.Playlist({
+      self.playlists['hot'] = new SC.Playlist({
+        is_owner: true,
         playlist: {
           id : "hot",
           name : "Hot Tracks",
           smart : true,
           version : 0,
           smart_filter : {
-            order : "hotness"            
+            order : "hotness"
           }
         }
       },self);
+      
+      // show about box
+      $("#about-box").fadeIn();
+      
       self.switchPlaylist("hot");
     }
     
@@ -409,31 +430,57 @@ SC.Player.prototype = {
         ui.item.css("display","block"); //prevent dragged element from getting hidden
       },
       stop : function(e,ui) {
-        self.trackLists[ui.item.attr('listid')].save();
+        self.playlists[ui.item.attr('listid')].save();
       }
     });
 
   },
   load: function(track) {
-    this.track.pause();
-    this.track = null;
-    this.track = new Audio(track.stream_url + "?stream_token=84d939bca386ec6f54f1d68d8d9b9bf3");
-    this.track.volume = this.volume;
+    var id = track.stream_url.substring(track.stream_url.lastIndexOf("/")+1);
+    this.loading.css('width',"0%");
+    this.progress.css('width',"0%");
+    
     var self = this;
-
-    this.track.addEventListener("ended", function() {
-      self.isPlaying = false;
-      self.currentPlaylist.next();
+    this.audioTracks[id] = soundManager.createSound({
+      id: id,
+      url: track.stream_url + "?stream_token=player",
+      volume : this.volume,
+      whileloading : SC.throttle(200,function() {
+          self.loading.css('width',(self.audio.bytesLoaded/self.audio.bytesTotal)*100+"%");
+      }),
+      whileplaying : SC.throttle(200,function() {
+        self.progress.css('width',(self.audio.position/self.audio.durationEstimate)*100+"%");
+        $('span:first',self.timecodes).html(SC.formatMs(self.audio.position));
+        $('span:last',self.timecodes).html(SC.formatMs(self.audio.durationEstimate));
+      }),
+      onfinish : function() {
+        self.isPlaying = false;
+        self.currentPlaylist.next();        
+      },
+      onload : function () {
+        self.loading.css('width',"100%");
+      }
     });
 
-    //$("#progress").fadeIn("fast");
+    if(this.audio) {
+      this.audio.stop();
+    }
+    this.audio = null;
+    this.audio = this.audioTracks[id]; // set current audio to the audio in the audioTracks hash
+    if(this.audio.loaded) {
+      this.loading.css('width',"100%");
+    }
+
+    this.audio.setVolume(this.volume); // set vol again in case vol changed and going back to same track again
+
     $("#artist")
       .hide()
       .html("<a href='#' class='artist-link'>" + track.user.username + "</a><div>" + track.title + "</div>")
       .find("a")
-        .click(function() {
+        .click(function(ev) {
           self.removePlaylist("artist");
-          self.trackLists["artist"] = new SC.Playlist({
+          self.playlists["artist"] = new SC.Playlist({
+            is_owner: true,
             playlist : {
               id : "artist",
               name : "Artist: " + track.user.username,
@@ -448,7 +495,7 @@ SC.Player.prototype = {
           },self);
           self.switchPlaylist("artist");
           self.loadArtistInfo(track.user.uri);
-          return false;
+          ev.preventDefault();
         }).end()
       .fadeIn();
     $("#timecodes").hide().fadeIn();
@@ -488,21 +535,19 @@ SC.Player.prototype = {
     
     this.play();
     $("#progress").fadeOut("slow",function() {
-      self.loadWaveform(track);
+      var self = this;
+      $("#progress img").attr("src",track.waveform_url);
+      $("#progress img").load(function() {
+        $("#progress").fadeIn("slow");
+      });
+/*      $.getJSON("http://api.soundcloud.com/users/"+track.user_id+".js?callback=?",function(user) {
+        $("#progress").fadeIn("slow");
+      });*/
     });
   },
   flash: function(message) {
-    $("#flash").find("div").text(message).end().addClass("on");
-    setTimeout(function(){$("#flash").removeClass("on")},2000);
-  },
-  loadWaveform: function(track) {
-    var self = this;
-    self.progressParent.css("background-image","url("+track.waveform_url+")");
-    $("#progress").fadeIn("slow");
-    $.getJSON("http://api.soundcloud.com/users/"+track.user_id+".js?callback=?",function(user) {
-      //self.progressParent.css("background-image","url("+track.waveform_url+")");
-      $("#progress").fadeIn("slow");
-    });
+    $("#flash").find("div").text(message).end().fadeIn();
+    setTimeout(function(){$("#flash").fadeOut();},1500);
   },
   loadArtistInfo: function(uri) {
     var self = this;
@@ -555,12 +600,16 @@ SC.Player.prototype = {
     $("#lists > #list-"+id).show();
     $("#playlists li").removeClass("active");
     $("#playlists li[listId="+id+"]").addClass("active");
+    this.selectedPlaylist = this.playlists[id];
   },
   removePlaylist : function(id) {
     if($("#playlists li[listId="+id+"]").length > 0) {
-      this.trackLists[id] = null;
+      this.playlists[id] = null;
       $("#lists #list-"+id).remove();
       $("#playlists li[listId="+id+"]").remove();      
+    } else if (this.playlists[id]) { // for hidden playlists, like artist/genre playlists
+      this.playlists[id] = null;
+      $("#lists #list-"+id).remove();      
     }
   },
   togglePlay : function() {
@@ -572,26 +621,35 @@ SC.Player.prototype = {
     }
   },  
   play: function() {
-    this.track.play();
-    this.isPlaying = true;
-    $("body").addClass("playing");
-    var self = this;
-    this.redrawTimer = setInterval(function(){
-      self.progress.css('width',(self.track.currentTime/self.track.duration)*100+"%");
-      self.loading.css('width',(self.track.buffered.end()/self.track.duration)*100+"%");
-      $('span:first',self.timecodes).html(SC.formatMs(self.track.currentTime*1000));
-      $('span:last',self.timecodes).html(SC.formatMs(self.track.duration*1000));
-    },200);
+    if(this.audio) {
+      if(this.audio.paused) {
+        this.audio.resume();
+      } else {
+        this.audio.play();
+      }
+      this.isPlaying = true;
+      $("body").addClass("playing");
+    }
   },
   stop: function() {
-    this.track.pause();    
-    this.isPlaying = false;
-    $("body").removeClass("playing");
-    clearInterval(this.redrawTimer);
+    if(this.audio) {
+      this.audio.pause();      
+      this.isPlaying = false;
+      $("body").removeClass("playing");
+    }
   }
 };
 
-// init the app
-$(function() {
+soundManager.flashVersion = 9;
+soundManager.url = '/scripts/.';
+soundManager.useConsole = true;
+soundManager.consoleOnly = true;
+soundManager.debugMode = false; // disable debug mode
+soundManager.defaultOptions.multiShot = false;
+soundManager.useHighPerformance = false;
+
+soundManager.onload = function() {
+  // soundManager is ready to use (create sounds and so on)
+  // init the player app
   p = new SC.Player();
-});
+}

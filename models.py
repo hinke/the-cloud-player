@@ -93,10 +93,11 @@ class Playlist(db.Model):
       s += "'duration_to':" + str(self.duration_to) + ""
       s += "}"
     
-    s += ",'owner':{"
-    s += "'nickname':'" + self.owner.nickname + "'"
-    s += "}"
-    
+    if self.owner:
+      s += ",'owner':{"
+      s += "'nickname':'" + self.owner.nickname + "'"
+      s += "}"
+          
     s += "}"
     return s
     

@@ -3,7 +3,7 @@ SC.Playlist = SC.Class();
 SC.Playlist.prototype = {
   initialize: function(props,player) { //ugly constructor, refactor
     this.properties = props;
-    if (player.trackLists[props.playlist.id]) { return; } // if it already exists, bail out here
+    if (player.playlists[props.playlist.id]) { return; } // if it already exists, bail out here
     var self = this;
     this.name = props.playlist.name;
     this.id = props.playlist.id;
@@ -14,7 +14,9 @@ SC.Playlist.prototype = {
     this.loading = false; // cheap mans queueing
     this.currentPos = 0; // this is the current position in the list at which a track is playing, needed for continous play through playlists
     this.persisted = (props.playlist.dontPersist ? false : true);
-        
+    
+    this.editable = (!self.properties.playlist.smart && (self.properties.playlist.collaborative || (self.properties.is_owner && !self.properties.playlist.collaborative)));
+    
     $('#tracklist')
       .clone()
       .attr('id',"list-" + props.playlist.id)
@@ -94,15 +96,6 @@ SC.Playlist.prototype = {
       this.addToPlaylistsList();      
     }
     
-/*    if(this.properties.playlist.smart) { // a bit messy
-      this.tracksUrl = tracksUrl
-      this.load();
-    } else {
-      this.tracksUrl = "http://api.soundcloud.com/tracks.js?ids=0&callback=?"; // here is ugly again, just load an empty url to init stuff that happens in the load method
-      this.load();
-    }
-*/
-
     this.load();
 
     $("> div",this.dom).scroll(function() {
@@ -113,7 +106,7 @@ SC.Playlist.prototype = {
     });
 
   },
-  generateTracksUrl : function() {
+  generateTracksUrl : function() { // generates the API url based on properties of the playlist
     var tracksUrl = "http://api.soundcloud.com/";
     var pl = this.properties.playlist;
     if(pl.smart) { // check for all smart playlist params
@@ -125,10 +118,10 @@ SC.Playlist.prototype = {
         tracksUrl += "tracks.js?filter=streamable";
       }
 
-      if(pl.smart_filter.order == "hotness") {
+      if(pl.smart_filter.order == "hotness" && !pl.smart_filter.user_favorites) { // prevent favs hotness sorting API bug
         tracksUrl = tracksUrl + "&order=" + pl.smart_filter.order + "&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow();
-      } else if (pl.smart_filter.order == "created_at") {
-        tracksUrl = tracksUrl + "&order=" + pl.smart_filter.order;
+      } else { // default to sort by created_at
+        tracksUrl = tracksUrl + "&order=created_at";
       }
       if(pl.smart_filter.genres) {
         tracksUrl = tracksUrl + "&genres=" + pl.smart_filter.genres;
@@ -146,7 +139,6 @@ SC.Playlist.prototype = {
       tracksUrl = "http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks;
     }
     tracksUrl += "&callback=?"; // add JSONP callback param
-    console.log(tracksUrl);
     return tracksUrl;
   },
   load : function() {
@@ -179,47 +171,72 @@ SC.Playlist.prototype = {
           data = newData; // replace data array with sorted array
         }
         
-        // if events mode, then parse out the tracks first
-        if(self.events) {
-          $.each(data,function() {
-            if(this.type === 'Track') {
-              self.tracks.push(this.track);
+        self.tracks = data;
+        $("> div:last",self.list).remove();
+
+        if(self.editable) {
+          $(self.list).sortable({
+            appendTo: "#track-drag-holder",
+            placeholder : "droppable-placeholder",
+            tolerance : "pointer",
+            _noFinalSort : true, // mod to support multi-sortable
+            helper : function(e,el) {
+              if(!el.hasClass("selected")) { // imitate itunes selection behavior, avoid sortable bug
+                el.addClass("selected");
+                el.siblings("tr.selected").removeClass("selected");
+              }
+              if(el.siblings(".selected").length > 0) { // dragging more than one track
+                var els = el.parents("tbody").find(".selected").clone();
+                return $("<div></div>").prepend(els); // wrap all selected elements in a div
+              } else {
+                return el.clone(); // ghosted drag helper              
+              }
+            },
+            opacity: 0.7,
+            delay: 30,
+            start : function(e,ui) {
+              ui.item.css("display","block"); //prevent dragged element from getting hidden
+            },
+            beforeStop : function(e,ui) {
+              if(self.player.justDropped) { // disable sort behavior if dropping in another playlist. ugly, but I can't seem to find a proper callback;
+                self.player.justDropped = false; // ugly, but I can't find a proper callback;
+              } else {
+                ui.placeholder.after(ui.item.parents("tbody").find("tr.selected")); // multi-select-hack, move all selected items to new location                            
+              }
+            },
+            stop : function(e,ui) {
+              self.save();
             }
           });
         } else {
-          self.tracks = data;
-        }
-        $("> div:last",self.list).remove();
-        
-        $(self.list).sortable({
-          appendTo: "#track-drag-holder",
-          placeholder : "droppable-placeholder",
-          tolerance : "pointer",
-          _noFinalSort : true, // mod to support multi-sortable
-          helper : function(e,el) {
-            if(el.siblings(".selected").length > 0) { // dragging more than one track
-              var els = el.parents("tbody").find(".selected").clone();
-              return $("<div></div>").prepend(els); // wrap all selected elements in a div
-            } else {
-              return el.clone(); // ghosted drag helper              
+          // for read-only playlists, FIXME: make more DRY by moving default options to separate hash
+          $(self.list).sortable({
+            appendTo: "#track-drag-holder",
+            placeholder : "droppable-placeholder-invisible",
+            tolerance : "pointer",
+            _noFinalSort : true, // mod to support multi-sortable
+            helper : function(e,el) {
+              if(!el.hasClass("selected")) { // imitate itunes selection behavior, avoid sortable bug
+                el.addClass("selected");
+                el.siblings("tr.selected").removeClass("selected");
+              }
+              if(el.siblings(".selected").length > 0) { // dragging more than one track
+                var els = el.parents("tbody").find(".selected").clone();
+                return $("<div></div>").prepend(els); // wrap all selected elements in a div
+              } else {
+                return el.clone(); // ghosted drag helper              
+              }
+            },
+            sort : function(e,ui) {
+              ui.placeholder.remove();
+            },
+            opacity: 0.7,
+            delay: 30,
+            start : function(e,ui) {
+              ui.item.css("display","block"); //prevent dragged element from getting hidden
             }
-          },
-          opacity: 0.7,
-          delay: 30,
-          start : function(e,ui) {
-            ui.item.css("display","block"); //prevent dragged element from getting hidden
-          },
-          beforeStop : function(e,ui) {
-            if(self.player.justDropped) { // disable sort behavior if dropping in another playlist. ugly, but I can't seem to find a proper callback;
-              self.player.justDropped = false; // ugly, but I can't find a proper callback;
-            } else {
-              ui.placeholder.after(ui.item.parents("tbody").find("tr.selected")); // multi-select-hack, move all selected items to new location                            
-            }
-          },
-          stop : function(e,ui) {
-            self.save();
-          }
-        });
+          });
+        };
 
         $.each(self.tracks,function() {
           self.addTrack(this);
@@ -248,10 +265,23 @@ SC.Playlist.prototype = {
         self.version++;
         console.log('saved with '+ tracks);
       } else {
-        self.player.flash("Epic fail when savingz");
+        self.player.flash("Failed when saving playlist. The playlist could have been edited by somebody else.");
         console.log('failed to save, playlist edited by somebody else');
       }
     });
+  },
+  saveName : function() {
+    var self = this;
+    $.post("/playlists/" + this.id ,{"_method":"PUT","name":this.name,"version":this.version},function(dataJS) {
+      var data = eval('(' + dataJS + ')');
+      if(data.response == 200) {
+        self.version++;
+        console.log('saved name');
+      } else {
+        self.player.flash("Failed when saving playlist. The playlist could have been edited by somebody else.");
+        console.log('failed to save, playlist edited by somebody else');
+      }
+    });    
   },
   destroy : function() {
     if(this.persisted) {
@@ -274,7 +304,7 @@ SC.Playlist.prototype = {
     $("tr",this.list).removeClass("playing");
     if(this.player.randomPlaylist) { // random is on
       this.currentPos = Math.floor(Math.random()*$("tr",this.list).length); // refine random function later
-      this.loadTrack(this.currentPos);      
+      this.loadTrack(this.currentPos);
     } else {
       var nxt = $("tr:nth-child("+(this.currentPos+2)+")",this.list);
       if(nxt.length > 0) {
@@ -287,7 +317,7 @@ SC.Playlist.prototype = {
     }
   },
   prev : function() {
-    if (this.player.track.currentTime < 2) {
+    if (this.player.audio.position < 2000) {
       var prev = $("tr:nth-child("+(this.currentPos)+")",this.list);
       if(prev.length > 0) {
         $("tr",this.list).removeClass("playing");
@@ -296,7 +326,7 @@ SC.Playlist.prototype = {
       }      
     }
     else {
-      this.player.track.currentTime = 0;
+      this.player.audio.setPosition(0);
     }
   },
   loadTrack : function(pos) {
@@ -352,9 +382,11 @@ SC.Playlist.prototype = {
       .find("td:nth-child(2)").css("width",self.colWidths[1]).text(track.title).end()
       .find("td:nth-child(3)").css("width",self.colWidths[2]).html("<a href='#'>" + track.user.username + "</a>")
         .find("a")
-        .click(function() {
+        .click(function(ev) {
           self.player.removePlaylist("artist");
-          self.player.trackLists["artist"] = new SC.Playlist({
+          console.log('new artist pl')
+          self.player.playlists["artist"] = new SC.Playlist({
+            is_owner: true,
             playlist : {
               id : "artist",
               name : "Artist: " + track.user.username,
@@ -369,7 +401,7 @@ SC.Playlist.prototype = {
           },self.player);
           self.player.switchPlaylist("artist");
           self.player.loadArtistInfo(track.user.uri);
-          return false;
+          ev.preventDefault();
         }).end()
       .end()
       .find("td:nth-child(4)").css("width",self.colWidths[3]).text(SC.formatMs(track.duration)).end()
@@ -377,10 +409,11 @@ SC.Playlist.prototype = {
       .find("td:nth-child(6)").css("width",self.colWidths[5]).text(track.bpm).end()
       .find("td:nth-child(7)").css("width",self.colWidths[6]).html("<a href='#'>" + track.genre + "</a>")
         .find("a")
-        .click(function() {
+        .click(function(ev) {
           var genre = this.innerHTML;
           self.player.removePlaylist("genre");
-          self.player.trackLists["genre"] = new SC.Playlist({
+          self.player.playlists["genre"] = new SC.Playlist({
+            is_owner: true,
             playlist : {
               id : "genre",
               smart: true,
@@ -393,7 +426,7 @@ SC.Playlist.prototype = {
             }
           }, self.player);
           self.player.switchPlaylist("genre");
-          return false;
+          ev.preventDefault();
         }).end()
       .end()
       .appendTo(this.list);
@@ -401,10 +434,59 @@ SC.Playlist.prototype = {
   },
   addToPlaylistsList: function() { // add the tab for the playlist
     var self = this;
-    $("<li listId='" + this.id + "' class='" + (this.properties.playlist.collaborative ? "collaborative" : "") + " " + (this.persisted ? "" : "dont-persist") + " " + (this.properties.playlist.smart ? "smart" : "") + " " + (this.properties.playlist.search ? "search" : "") + "'><span></span><a class='collaborative' title='Make Playlist Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a><a href='#'>"+this.name+"</a></li>")
-      .find('a:last').click(function() {
-        self.player.switchPlaylist(self.id);
-        return false;
+    $("<li listId='" + this.id + "' class='" + (this.properties.is_owner ? "" : "shared") + " " + (this.properties.playlist.collaborative ? "collaborative" : "") + " " + (this.persisted ? "" : "dont-persist") + " " + (this.properties.playlist.smart ? "smart" : "") + " " + (this.properties.playlist.search ? "search" : "") + "'><span></span><a href='#'>" + this.name + (this.properties.is_owner ? "" : " <em>by " + this.properties.playlist.owner.nickname + "</em>") + "</a><a class='collaborative' title='Make Playlist Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a></li>")
+      .find('a:first').click(function(ev) {
+        if($(this).parents("li").hasClass("active") && self.properties.is_owner && $("body").hasClass("logged-in")) {
+          var that = this; // very strange that i can't use self here
+          if(!window.editingText) {
+            setTimeout(function() {
+              var origValue = $(that).text();
+              window.editingText = true;
+              $(that).html("<input type='text' value='" + origValue + "'>");
+              $("input", that).focus();
+              $("input", that).select();
+
+              // closes editInPlace and saves if save param is true
+              var closeEdit = function(save) {
+                if(save) {
+                  self.name = $("input",that).val();
+                  $(that).text(self.name);
+                  self.saveName();
+                } else {
+                  $(that).text(origValue);                  
+                }
+                window.editingText = false;
+                ev.stopPropagation();
+                $(document).unbind("click",applyEditClick);
+                $(window).unbind("keydown",editKey);                
+              }
+
+              var applyEditClick = function(ev) {
+                if(!(ev.target == $("input",that)[0])) { // save if click anywhere but on the editing input
+                  closeEdit(true);
+                }
+              };
+
+              $(document).bind("click", applyEditClick);
+
+              var editKey = function(ev) {
+                if(ev.keyCode === 27) {
+                  closeEdit();
+                  return false;
+                } else if (ev.keyCode === 13) { // start selected track
+                  closeEdit(true);
+                  return false;
+                }
+              }
+
+              $(window).keydown(editKey);
+            
+            },500);
+          }
+        } else {
+          self.player.switchPlaylist(self.id);          
+        }
+        ev.preventDefault();
       })
       .attr('pane',this.dom)
       .end()
@@ -419,24 +501,25 @@ SC.Playlist.prototype = {
         return false;
       }).end()
       .find('a.collaborative').click(function() {
-        $.post("/playlists/" + self.id ,{"_method":"PUT","collaborative":!self.properties.playlist.collaborative,"version":self.version},function() {
-          self.properties.playlist.collaborative = !self.properties.playlist.collaborative;
-          $("#playlists li[listid=" + self.id + "]").toggleClass("collaborative");
-          if(self.properties.playlist.collaborative) {
-            self.player.flash("This playlist is now collaborative and can be edited by others");
-          } else {
-            self.player.flash("This playlist is not collaborative anymore and cannot be edited by others");
-          }
-          
-          console.log('saved with '+ self.properties.playlist.collaborative);
-        });
+        if(!$(this).parents("li").hasClass("shared")) {
+          $.post("/playlists/" + self.id ,{"_method":"PUT","collaborative":!self.properties.playlist.collaborative,"version":self.version},function() {
+            self.properties.playlist.collaborative = !self.properties.playlist.collaborative;
+            $("#playlists li[listid=" + self.id + "]").toggleClass("collaborative");
+            if(self.properties.playlist.collaborative) {
+              self.player.flash("This playlist is now collaborative and can be edited by others");
+            } else {
+              self.player.flash("This playlist is not collaborative anymore and cannot be edited by others");
+            }
+            console.log('saved with '+ self.properties.playlist.collaborative);
+          });          
+        }
         return false;
       }).end()
       .appendTo("#playlists")
       .hide()
       .fadeIn();
   	
-  	if(!this.properties.playlist.smart) { // if playlists are smart, they are read-only
+  	if(this.editable) { // if playlists are smart, they are read-only
       $('#playlists li:last')
     		.droppable({
     			accept: function(draggable) {
@@ -448,7 +531,7 @@ SC.Playlist.prototype = {
     			drop: function(ev, ui) {
     			  self.player.justDropped = true;  // ugly, but I can't find a proper callback;
     				var listId = $(this).attr('listId');
-    			  if(ui.draggable.siblings(".selected").length > 0) {
+    			  if(ui.draggable.siblings(".selected").length > 0) { //multi-drag
       				var items = ui.draggable.parents("tbody").find("tr.selected");
       				$.each(items,function() {
         				self.addTrack(this.track,true);
