@@ -437,7 +437,6 @@ SC.Playlist.prototype = {
           if(!window.editingText) {
             setTimeout(function() {
               var origValue = $(that).text();
-              console.log("RESTARRT EDIT")
               window.editingText = true;
               $(that).html("<input type='text' value='" + origValue + "'>");
               $("input", that).focus();
@@ -446,14 +445,12 @@ SC.Playlist.prototype = {
               // closes editInPlace and saves if save param is true
               var closeEdit = function(save) {
                 if(save) {
-                  console.log("SAAAAAVING")
                   self.name = $("input",that).val();
                   $(that).text(self.name);
                   self.saveName();
                 } else {
                   $(that).text(origValue);                  
                 }
-                console.log("quit edit")
                 window.editingText = false;
                 ev.stopPropagation();
                 $(document).unbind("click",applyEditClick);

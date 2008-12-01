@@ -61,6 +61,7 @@ img {
   opacity: 0;
   -webkit-box-reflect: below 3px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(white));
   border: 1px solid rgba(0,0,0,0.2);
+  -moz-box-shadow : 3px 3px 5px rgba(0,0,0,0.3);
 }
 
 #artwork img.loaded {
@@ -460,6 +461,7 @@ table {
     width: 55px;
     border: 1px solid rgba(0,0,0,0.2);
     -webkit-box-reflect: below 3px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(white));
+  -moz-box-shadow : 3px 3px 5px rgba(0,0,0,0.3);
   }
   
   #artist-info img.loaded {
