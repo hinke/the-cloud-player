@@ -15,3 +15,7 @@ handlers:
 
 - url: .*
   script: the-cloud-player.py
+
+- url: /favicon.ico
+  static_files: images/favicon.ico
+  upload: images/favicon.ico
