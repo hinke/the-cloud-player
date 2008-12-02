@@ -24,6 +24,11 @@ class User(db.Model):
       p.put()
       i+=1
   
+  def last_lib_position(self):
+    q = db.GqlQuery("SELECT * FROM Library WHERE user = :user ORDER BY position DESC", user=self)  
+    return q.get().position
+    
+  
   def re_sort_playlists(self, library_item, new_position):
     playlists = self.playlists()
     if library_item.position < new_position: #Moved down

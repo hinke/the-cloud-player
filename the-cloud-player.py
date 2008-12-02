@@ -52,9 +52,12 @@ class SharePlaylist(webapp.RequestHandler):
       share_hash = utils.url_to_entity_key(self.request.uri)
       q = db.GqlQuery("SELECT * FROM Playlist WHERE share_hash = :share_hash", share_hash=share_hash)  
       playlist = q.get()
+
       if playlist:
         if not app_user.has_playlist(playlist):
-          library_item = models.Library(user=app_user, playlist=playlist, is_owner=False)
+          last_position = app_user.last_lib_position()  
+          
+          library_item = models.Library(user=app_user, position=last_position+1  , playlist=playlist, is_owner=False)
           library_item.put()
         flash = "add_shared_playlist"
       else:
