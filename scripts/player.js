@@ -68,8 +68,17 @@ SC.Player.prototype = {
       }
     });
     
+    // code to prevent keypress event from triggering when creating smart playlist
+    this.smartPlaylistFormFocus = false;
+    $("#pl-search-term, #pl-genre, #pl-favorite, #pl-artist").focus(function() {
+      self.smartPlaylistFormFocus = true;
+    }).blur(function() {
+      self.smartPlaylistFormFocus = false;
+    });
+    
+    
     // create smart playlist form
-    $("#pl-create-form").submit(function() {
+    $("#pl-create-form").submit(function(ev) {
       $("input,select",this).blur();
       
       var name = "smartpl" + Math.random(); // tmp should be replaced by naming box
@@ -99,6 +108,8 @@ SC.Player.prototype = {
       
       $("#lists").animate({top:0});
       $("#create-smart-playlist").animate({height: "hide"});
+
+      ev.stopPropagation();
       return false;
     });
     
@@ -312,13 +323,15 @@ SC.Player.prototype = {
         } else if(ev.keyCode === 32) { // start/stop play
           self.togglePlay();
         } else if (ev.keyCode === 13) { // start selected track
-          if($("tr.selected",self.selectedPlaylist.list).length > 0) {
-            var idx = $("tr", self.selectedPlaylist.list).index($("tr.selected",self.selectedPlaylist.list));            
-            self.selectedPlaylist.loadTrack(idx);
-          } else if ($("tr",self.selectedPlaylist.list).length > 0) {
-            $("tr", self.selectedPlaylist.list).eq(0).addClass("selected");
-            var idx = 0;
-            self.selectedPlaylist.loadTrack(idx);
+          if(!self.smartPlaylistFormFocus) { // don't trigger if focus on smart playlist create form
+            if($("tr.selected",self.selectedPlaylist.list).length > 0) {
+              var idx = $("tr", self.selectedPlaylist.list).index($("tr.selected",self.selectedPlaylist.list));            
+              self.selectedPlaylist.loadTrack(idx);
+            } else if ($("tr",self.selectedPlaylist.list).length > 0) {
+              $("tr", self.selectedPlaylist.list).eq(0).addClass("selected");
+              var idx = 0;
+              self.selectedPlaylist.loadTrack(idx);
+            }
           }
         } else if (ev.keyCode === 40) { // arrow down, select next
           var sel = $("tr.selected:last",self.selectedPlaylist.list);
