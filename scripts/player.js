@@ -74,8 +74,9 @@ SC.Player.prototype = {
       
       var name = "smartpl" + Math.random(); // tmp should be replaced by naming box
       
+      var pos = $("#playlists li:not(.dont-persist)").index($("#playlists li:not(.dont-persist):last"))+1; //FIX ME don't duplicate this code, break out to function
       var props = {
-        position: 0,
+        position: pos,
         smart : true,
         name : "New Smart Playlist",
         version : 0,
@@ -270,7 +271,6 @@ SC.Player.prototype = {
     $("#add-playlist").click(function(ev) {
       if($("body").hasClass("logged-in")) {
         var pos = $("#playlists li:not(.dont-persist)").index($("#playlists li:not(.dont-persist):last"))+1; //FIXME respect non-persisted playlists, and first
-        console.log(pos)
         $.post("/playlists",{'name':"Untitled playlist",'position': pos},function(data) {
           var item = eval('(' + data + ')');
           self.playlists[item.playlist.id] = new SC.Playlist(item, self);
