@@ -255,9 +255,8 @@ SC.Playlist.prototype = {
     if($("tr",this.list).length == 0) {
       tracks = "0";
     }
-    
-    var pos = $("#playlists li").index($("#playlists li[listid=" + this.id + "]"));
-    console.log(pos)
+    // find out position index, ignore non-persisted playlists
+    var pos = $("#playlists li:not(.dont-persist)").index($("#playlists li:not(.dont-persist)[listid=" + this.id + "]"));
     
     $.post("/playlists/" + this.id ,{"_method":"PUT","tracks":tracks,"version":this.version,"position":pos},function(dataJS) {
       var data = eval('(' + dataJS + ')');

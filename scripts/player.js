@@ -177,7 +177,7 @@ SC.Player.prototype = {
     // set volume from cookie
     this.volume = parseFloat($.cookie('volume'));
     if(!this.volume) {
-      this.volume = 100;
+      this.volume = 100; // default to max
     }
 
     // volume
@@ -269,7 +269,9 @@ SC.Player.prototype = {
     // add playlist button
     $("#add-playlist").click(function(ev) {
       if($("body").hasClass("logged-in")) {
-        $.post("/playlists",{'name':"Untitled playlist",'position': 0},function(data) {
+        var pos = $("#playlists li:not(.dont-persist)").index($("#playlists li:not(.dont-persist):last"))+1; //FIXME respect non-persisted playlists, and first
+        console.log(pos)
+        $.post("/playlists",{'name':"Untitled playlist",'position': pos},function(data) {
           var item = eval('(' + data + ')');
           self.playlists[item.playlist.id] = new SC.Playlist(item, self);
           self.switchPlaylist(item.playlist.id);
@@ -430,7 +432,10 @@ SC.Player.prototype = {
         ui.item.css("display","block"); //prevent dragged element from getting hidden
       },
       stop : function(e,ui) {
-        self.playlists[ui.item.attr('listid')].save();
+        if(!ui.item.hasClass("dont-persist")) { // save if playlist is persisted
+          console.log('foo')
+          self.playlists[ui.item.attr('listid')].save();          
+        }
       }
     });
 
