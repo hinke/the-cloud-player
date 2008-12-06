@@ -47,6 +47,14 @@ def url_to_entity_key(url):
   else:
     return ""
 
+def url_to_share_key(url):
+  url_array = url.split("/")
+  if len(url_array) > 5:
+    return url_array[5]
+  else:
+    return ""
+
+
 def convert_javascript_bool_to_python(s):
   if s.lower() == "true":
     return True
@@ -111,4 +119,4 @@ def parse_smart_filters(playlist, request):
   return playlist
 
 def strip_html(s):
-  return re.replace('<.*?>', '', s)    
+  return re.sub('<.*?>', '', s)    

@@ -49,7 +49,7 @@ class SharePlaylist(webapp.RequestHandler):
       if users.get_current_user() and not app_user:
         app_user = utils.init_new_user()
         
-      share_hash = utils.url_to_entity_key(self.request.uri)
+      share_hash = utils.url_to_share_key(self.request.uri)
       q = db.GqlQuery("SELECT * FROM Playlist WHERE share_hash = :share_hash", share_hash=share_hash)  
       playlist = q.get()
 
@@ -65,6 +65,24 @@ class SharePlaylist(webapp.RequestHandler):
       
       self.redirect("/?flash="+flash)
         
+class ShareTrack(webapp.RequestHandler):
+  def get(self):
+    if not users.get_current_user():
+      self.redirect(users.create_login_url(self.request.uri)) 
+    else:      
+      app_user = utils.get_current_user()
+      if users.get_current_user() and not app_user:
+        app_user = utils.init_new_user()
+
+      track_id = utils.url_to_share_key(self.request.uri)
+      
+      playlist = models.Playlist(name = "Untitled", owner=app_user, tracks=track_id + ", ", share_hash = utils.generate_share_hash())
+      playlist.put()
+    
+      library_item = models.Library(user=app_user, playlist=playlist, is_owner=True, position = app_user.last_lib_position()+1)
+      library_item.put()
+      self.redirect("/")
+
 class Playlist(webapp.RequestHandler):  
   def get(self):
     key = utils.url_to_entity_key(self.request.uri)
@@ -84,7 +102,7 @@ class Playlist(webapp.RequestHandler):
     if method == "PUT":
     
       if library_item.is_owner: #A bit special, does not need version handling
-        if(self.request.get('name') && len(self.request.get('name')) > 0  ):
+        if(self.request.get('name') and len(self.request.get('name')) > 0  ):
           playlist.name = utils.strip_html(self.request.get('name'))
           playlist.put()
       
@@ -143,6 +161,7 @@ class Playlists(webapp.RequestHandler):
       utils.parse_smart_filters(playlist, self.request)
     
     playlist.put()
+    
     library_item = models.Library(user=current_user, playlist=playlist, is_owner=True, position = int(self.request.get("position")))
     library_item.put()
     
@@ -154,7 +173,8 @@ def main():
                                       ('/playlists/', Playlists), 
                                       ('/playlists/.*', Playlist), 
                                       ('/user', User), 
-                                      ('/share/.*', SharePlaylist), 
+                                      ('/share/playlist/.*', SharePlaylist), 
+                                      ('/share/track/.*', ShareTrack), 
                                       ('/', PlayerPage)
                                       ], debug=True)
   run_wsgi_app(application)

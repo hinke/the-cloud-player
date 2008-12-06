@@ -6,7 +6,7 @@ import utils
 class User(db.Model):
   google_user = db.UserProperty(required=True)
   date_created = db.DateTimeProperty(auto_now_add=True)
-  nickname = db.StringProperty(required=True)
+  nickname = db.TextProperty(required=True)
   
   def playlists(self):
     return (x for x in self.library_set.order("position"))
@@ -19,14 +19,20 @@ class User(db.Model):
   
   def re_index_playlists(self):
     i = 0
+    entities_to_update = []
     for p in self.playlists():
       p.position = i
-      p.put()
+      entities_to_update.append(p)
       i+=1
-  
+    db.put(entities_to_update)
+    
   def last_lib_position(self):
-    q = db.GqlQuery("SELECT * FROM Library WHERE user = :user ORDER BY position DESC", user=self)  
-    return q.get().position
+    q = db.GqlQuery("SELECT * FROM Library WHERE user = :user ORDER BY position DESC", user=self)
+    p = q.get()
+    if p:
+      return p.position
+    else:
+      return -1
     
   
   def re_sort_playlists(self, library_item, new_position):
@@ -40,16 +46,17 @@ class User(db.Model):
       library_item.put()
       
     elif library_item.position > new_position: #Moved up
+      entities_to_update = []
       for p in playlists:
         if (p.position < library_item.position and (p.position > new_position or p.position == new_position)):
           p.position += 1
-          p.put() 
+          entities_to_update.append(p)
       library_item.position = new_position
-      library_item.put()
-      
+      entities_to_update.append(library_item)
+      db.put(entities_to_update)
 
 class Playlist(db.Model):
-  name = db.StringProperty(required=True, default='Playlist')
+  name = db.TextProperty(required=True, default='Playlist')
   date_created = db.DateTimeProperty(auto_now_add=True)
   collaborative = db.BooleanProperty(default=False)  
   tracks = db.TextProperty(default="0")
