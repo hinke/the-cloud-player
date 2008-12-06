@@ -82,7 +82,12 @@ class Playlist(webapp.RequestHandler):
     library_item = playlist.library_item_for_current_user()
     
     if method == "PUT":
-  
+    
+      if library_item.is_owner: #A bit special, does not need version handling
+        if(self.request.get('name') && len(self.request.get('name')) > 0  ):
+          playlist.name = utils.strip_html(self.request.get('name'))
+          playlist.put()
+      
       if(int(self.request.get('version')) == playlist.version):
         if(self.request.get('position')): #Rights: Can always update this
           current_user.re_sort_playlists(library_item, int(self.request.get('position')))
@@ -97,7 +102,8 @@ class Playlist(webapp.RequestHandler):
 
         if (playlist.collaborative or library_item.is_owner): #Rights: Owner or collaborators can update this
           if(self.request.get('tracks')):
-            playlist.tracks = self.request.get('tracks')        
+            playlist.tracks = self.request.get('tracks')
+            
           playlist.version += 1
           playlist.put()
         

@@ -5,6 +5,7 @@ from google.appengine.ext import db
 import models
 from datetime import datetime
 import os
+import re
 
 def init_new_user():
   google_user = users.get_current_user()
@@ -108,3 +109,6 @@ def parse_smart_filters(playlist, request):
   if(request.get('duration_to')):
     playlist.duration_to = int(request.get('duration_to'))
   return playlist
+
+def strip_html(s):
+  return re.replace('<.*?>', '', s)    
