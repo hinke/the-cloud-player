@@ -5,6 +5,7 @@ from google.appengine.ext import db
 import models
 from datetime import datetime
 import os
+import re
 
 def init_new_user():
   google_user = users.get_current_user()
@@ -12,12 +13,32 @@ def init_new_user():
   app_user = models.User(google_user=google_user, nickname=nickname)
   app_user.put()
   
-  hot = models.Playlist(name = "Hot Tracks", smart = True, owner=app_user, order = "hotness", share_hash = generate_share_hash())
-  hot.put()
+  default_playlists = []
+  p = models.Playlist(name = "Hot Tracks", smart = True, owner=app_user, order = "hotness", share_hash = generate_share_hash())
+  default_playlists.append(p)
+  p = models.Playlist(name = "Indie", smart = True, owner=app_user, genres="indie", order = "latest", share_hash = generate_share_hash())
+  default_playlists.append(p)
+  p = models.Playlist(name = "Deep House", smart = True, owner=app_user, genres="deep house", order = "latest", share_hash = generate_share_hash())
+  default_playlists.append(p)
+  p = models.Playlist(name = "Rock", smart = True, owner=app_user, genres="rock", order = "latest", share_hash = generate_share_hash())
+  default_playlists.append(p)
+  p = models.Playlist(name = "Techno", smart = True, owner=app_user, genres="techno", order = "latest", share_hash = generate_share_hash())
+  default_playlists.append(p)
+  p = models.Playlist(name = "Spoken Word", smart = True, owner=app_user, genres="spoken+word, spokenword", order = "latest", share_hash = generate_share_hash())
+  default_playlists.append(p)
+  p = models.Playlist(name = "Dubstep", smart = True, owner=app_user, genres="dubstep, dub+step", order = "latest", share_hash = generate_share_hash())
+  default_playlists.append(p)
   
-  library_item = models.Library(user=app_user, playlist=hot, is_owner=True, position = 1)
-  library_item.put()
-  
+  db.put(default_playlists)
+
+  library = []
+  i = 0
+  for p in default_playlists:
+     library.append(models.Library(user=app_user, playlist=p, is_owner=True, position = i))
+     i +=1
+    
+  db.put(library)
+    
   return app_user
 
 def make_pretty_nickname_from_email(email):
@@ -45,6 +66,14 @@ def url_to_entity_key(url):
     return url_array[4]
   else:
     return ""
+
+def url_to_share_key(url):
+  url_array = url.split("/")
+  if len(url_array) > 4:
+    return url_array[4]
+  else:
+    return ""
+
 
 def convert_javascript_bool_to_python(s):
   if s.lower() == "true":
@@ -108,3 +137,6 @@ def parse_smart_filters(playlist, request):
   if(request.get('duration_to')):
     playlist.duration_to = int(request.get('duration_to'))
   return playlist
+
+def strip_html(s):
+  return re.sub('<.*?>', '', s)    
