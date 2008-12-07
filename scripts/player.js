@@ -7,7 +7,6 @@ SC.Player.prototype = {
     this.progress = $('#progress div:first');
     this.loading = $('#progress div.loading');
     this.progressParent = $('#progress');
-    this.timecodes = $('#timecodes');
     
     var self = this;
     this.playButton = $('#play');
@@ -76,7 +75,6 @@ SC.Player.prototype = {
       self.smartPlaylistFormFocus = false;
     });
     
-    
     // create smart playlist form
     $("#pl-create-form").submit(function(ev) {
       $("input,select",this).blur();
@@ -144,7 +142,7 @@ SC.Player.prototype = {
     // init width from cookie
     var sidebarWidth = parseInt($.cookie('playlist_pane_width'));
     if(!sidebarWidth) {
-      sidebarWidth = 200;
+      sidebarWidth = 220;
     }
     
     $("#sidebar").width(sidebarWidth);
@@ -230,7 +228,8 @@ SC.Player.prototype = {
     });
 
     $("#progress").click(function(ev) {
-      var percent = (ev.clientX-$(ev.target).offset().left)/($("#progress").width());
+      console.log()
+      var percent = (ev.clientX-$("#progress").offset().left)/($("#progress").width());
       if(self.audio.durationEstimate*percent < self.audio.duration) {
         self.audio.setPosition(self.audio.durationEstimate*percent);        
       }
@@ -250,7 +249,7 @@ SC.Player.prototype = {
       })
       .blur(function() {
         this.focused = false;
-        $(this).val('Search');
+        $(this).val('Search Artists & Tracks');
       })
       .keydown(function(ev) {
         if(ev.keyCode === 13) {
@@ -457,6 +456,8 @@ SC.Player.prototype = {
     var id = track.stream_url.substring(track.stream_url.lastIndexOf("/")+1);
     this.loading.css('width',"0%");
     this.progress.css('width',"0%");
+    $("#player-display img.logo").fadeOut('slow');
+    $("#progress").fadeIn('slow');
     
     var self = this;
     this.audioTracks[id] = soundManager.createSound({
@@ -468,8 +469,8 @@ SC.Player.prototype = {
       }),
       whileplaying : SC.throttle(200,function() {
         self.progress.css('width',(self.audio.position/self.audio.durationEstimate)*100+"%");
-        $('span:first',self.timecodes).html(SC.formatMs(self.audio.position));
-        $('span:last',self.timecodes).html(SC.formatMs(self.audio.durationEstimate));
+        $('#position').html(SC.formatMs(self.audio.position));
+        $('#duration').html(SC.formatMs(self.audio.durationEstimate));
       }),
       onfinish : function() {
         self.isPlaying = false;
@@ -493,8 +494,8 @@ SC.Player.prototype = {
 
     $("#artist")
       .hide()
-      .html("<a href='#' class='artist-link'>" + track.user.username + "</a><div>" + track.title + "</div>")
-      .find("a")
+      .html("<a href='#' class='artist-link'>" + track.user.username + "</a> · <span>" + track.title + "</span>" + " <a href='" + track.permalink_url + "' target='_blank'>»</a>" + (track.purchase_url ? " <a href='" + track.purchase_url + "' target='_blank'>Buy »</a>" : ""))
+      .find("a.artist-link")
         .click(function(ev) {
           self.removePlaylist("artist");
           self.playlists["artist"] = new SC.Playlist({
@@ -516,14 +517,9 @@ SC.Player.prototype = {
           ev.preventDefault();
         }).end()
       .fadeIn();
-    $("#timecodes").hide().fadeIn();
-    $("#check-track-on-sc").hide().html("<a href='" + track.permalink_url + "' target='_blank'>Check this track on SoundCloud »</a>" + "&nbsp;&nbsp;&nbsp;<a href='" + track.permalink_url + "/stats' target='_blank'>Stats »</a>").fadeIn("slow");
     
-    if(track.purchase_url) {
-      $("#check-track-on-sc").append("&nbsp;&nbsp;&nbsp;<a href='" + track.purchase_url + "' target='_blank'>Buy Track »</a>");
-    }
-    
-    $("#progress span.marker").remove();
+    /* commented out timed comment implementation for now */
+/*    $("#progress span.marker").remove();
     $.getJSON("http://api.soundcloud.com/tracks/"+track.id+"/comments.js?callback=?",function(comments) {
       $.each(comments,function() {
         if(this.timestamp) {
@@ -532,7 +528,7 @@ SC.Player.prototype = {
             .appendTo("#progress");
         }
       });
-    });
+    });*/
     // growl notification for fluid
     if(window.fluid) {
       window.fluid.showGrowlNotification({
@@ -552,11 +548,11 @@ SC.Player.prototype = {
     }
     
     this.play();
-    $("#progress").fadeOut("slow",function() {
+    $("#progress img").fadeOut("slow",function() {
       var self = this;
       $("#progress img").attr("src",track.waveform_url);
       $("#progress img").load(function() {
-        $("#progress").fadeIn("slow");
+        $("#progress img").fadeIn("slow");
       });
 /*      $.getJSON("http://api.soundcloud.com/users/"+track.user_id+".js?callback=?",function(user) {
         $("#progress").fadeIn("slow");

@@ -37,20 +37,8 @@
           <a href="{{login_url}}">Sign in with your Google Account</a>        
         {% endif %}
       </div>
-      <img id="logo" src="images/logo-new.png" />
-      <input accesskey="f" type="search" name="q" id="q" value="Search" />
-      <div id="player-display">
-        <div id="timecodes"><span></span> / <span></span></div>
-        <div id="artist">
-        
-        </div>
-        <div id="progress">
-          <img class="waveform" src="/images/empty.png">
-          <div class="inner"></div>
-          <div class="loading"></div>
-        </div>
-      </div>
-      <div id="check-track-on-sc"></div>
+      <img id="logo" src="images/logo.png" />
+      <input accesskey="f" type="search" name="q" id="q" value="Search Artists &amp; Tracks" />
     </div>
 
     <div id="main-container">
@@ -137,6 +125,22 @@
         <div class="ui-slider-handle"></div>	
       </div>
       <div id="speaker"></div>
+      <div id="player-display">
+        <img src="/images/logo-mini.png" class="logo">
+        <div id="artist">
+        
+        </div>
+        <div id="position"></div>
+        <div id="progress">
+          <img class="waveform" src="/images/empty.png">
+          <div class="inner">
+            <div class="playhead"></div>
+          </div>
+          <div class="loading"></div>
+        </div>
+        <div id="duration"></div>
+      </div>
+
     </div>
   
   
