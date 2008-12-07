@@ -49,8 +49,8 @@ def url_to_entity_key(url):
 
 def url_to_share_key(url):
   url_array = url.split("/")
-  if len(url_array) > 5:
-    return url_array[5]
+  if len(url_array) > 4:
+    return url_array[4]
   else:
     return ""
 

@@ -33,17 +33,18 @@ class User(db.Model):
       return p.position
     else:
       return -1
-    
   
   def re_sort_playlists(self, library_item, new_position):
     playlists = self.playlists()
     if library_item.position < new_position: #Moved down
+      entities_to_update = []
       for p in playlists:
         if (p.position > library_item.position and (p.position < new_position or p.position == new_position)):
           p.position -= 1
-          p.put() 
+          entities_to_update.append(p)
       library_item.position = new_position
-      library_item.put()
+      entities_to_update.append(library_item)
+      db.put(entities_to_update)
       
     elif library_item.position > new_position: #Moved up
       entities_to_update = []
