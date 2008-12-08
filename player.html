@@ -14,7 +14,7 @@
     <script src="/scripts/utils.js{% if in_development_enviroment %}?v= {{rando}} {% endif %}" type="text/javascript"></script>
     <script src="/scripts/player.js{% if in_development_enviroment %}?v= {{rando}} {% endif %}" type="text/javascript"></script>
     <script src="/scripts/playlist.js{% if in_development_enviroment %}?v= {{rando}} {% endif %}" type="text/javascript"></script>
-
+    {%if not in_development_enviroment %}
     <script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
@@ -23,7 +23,8 @@
     var pageTracker = _gat._getTracker("UA-168866-8");
     pageTracker._trackPageview();
     </script>
-
+    {% endif %}
+    
     <link href="/images/favicon.ico" rel="shortcut icon" />
   </head>
   <body unselectable="on" class="{% if user %}logged-in{% endif %}">
