@@ -136,8 +136,9 @@ class Playlist(webapp.RequestHandler):
       
 class Playlists(webapp.RequestHandler):
   def get(self):
-    if utils.get_current_user():
-      self.response.out.write(utils.serialize_library(utils.get_current_user().playlists()))
+    app_user = utils.get_current_user()
+    if app_user:
+      self.response.out.write(utils.serialize_library(app_user.playlists()))
 
   def post(self):  #Create new playlist
     current_user = utils.get_current_user()

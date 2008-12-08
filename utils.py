@@ -6,6 +6,8 @@ import models
 from datetime import datetime
 import os
 import re
+from django.utils import simplejson
+
 
 def init_new_user():
   google_user = users.get_current_user()
@@ -82,26 +84,12 @@ def convert_javascript_bool_to_python(s):
     return False
     
 def serialize_library(library):
-  s = "["
-  
-  try:
-    item = library.next()    
-    while 1:
-      try:
-        s += item.serialize()
-        item = library.next()
-      except StopIteration:
-        break
+  d = []  
+  for item in library:
+    d.append(item.to_dict())
     
-      s += ","
-  except StopIteration:
-   return "[]"
+  return simplejson.dumps(d) 
     
-    
-  s += "]"
-
-  return s
-
 def generate_share_hash():
   return str(hex(abs(hash(str(datetime.now())))))[2:7]
   
