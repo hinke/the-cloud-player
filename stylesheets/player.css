@@ -1207,12 +1207,12 @@ table {
     float: right;
   }
 
-  a.portrait img {
+  #built-by img {
     border: 1px solid black;
     float: right;
     margin: 0 0 0 1em;
-    width: 20px;
-    height: 30px;
+    width: 90px;
+    height: 51px;
   }
   
   #feature-list {

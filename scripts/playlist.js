@@ -441,7 +441,8 @@ SC.Playlist.prototype = {
             setTimeout(function() {
               var origValue = $(that).text();
               window.editingText = true;
-              $(that).html("<input type='text' value='" + origValue + "'>");
+              $(that).html("<input type='text'>");
+              $("input",that).val(origValue);
               $("input", that).focus();
               $("input", that).select();
 
