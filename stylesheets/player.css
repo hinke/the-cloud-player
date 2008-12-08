@@ -1192,11 +1192,12 @@ table {
     font-size: 10px;
     width: 400px;
     border: 1px solid #ccc;
-    padding: 5px;
+    padding: 5px 5px 8px 5px;
     border-radius: 5px;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     background: url(/images/fade-2.png) repeat-x 0 0%;
+    clear:both;
   }
   
   #built-by p {
