@@ -16,6 +16,9 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 import models
 import utils
+
+from django.utils import simplejson
+
       
 class StartPage(webapp.RequestHandler):
   def get(self):
@@ -65,24 +68,6 @@ class SharePlaylist(webapp.RequestHandler):
       
       self.redirect("/?flash="+flash)
         
-class ShareTrack(webapp.RequestHandler): #Not used at the moment, needs some more thought
-  def get(self):
-    if not users.get_current_user():
-      self.redirect(users.create_login_url(self.request.uri)) 
-    else:      
-      app_user = utils.get_current_user()
-      if users.get_current_user() and not app_user:
-        app_user = utils.init_new_user()
-
-      track_id = utils.url_to_share_key(self.request.uri)
-      
-      playlist = models.Playlist(name = "Untitled", owner=app_user, tracks=track_id + ", ", share_hash = utils.generate_share_hash())
-      playlist.put()
-    
-      library_item = models.Library(user=app_user, playlist=playlist, is_owner=True, position = app_user.last_lib_position()+1)
-      library_item.put()
-      self.redirect("/")
-
 class Playlist(webapp.RequestHandler):  
   def get(self):
     key = utils.url_to_entity_key(self.request.uri)

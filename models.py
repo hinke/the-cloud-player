@@ -1,7 +1,7 @@
 from google.appengine.ext import db
 import logging
 import utils
-
+from django.utils import simplejson
 
 class User(db.Model):
   google_user = db.UserProperty(required=True)
@@ -81,38 +81,47 @@ class Playlist(db.Model):
   duration_to = db.IntegerProperty(default=0)
   
   def serialize(self):
-    s = "{"
-    s += "'id':'" + str(self.key()) + "',"
-    s += "'name':'" + self.name + "',"
-    s += "'date_created':'" + str(self.date_created) + "',"
-    s += "'collaborative':" + str(self.collaborative).lower() + ","
-    s += "'tracks':'" + self.tracks + "'," 
-    s += "'version':" + str(self.version) + "," 
-    s += "'share_hash':'" + self.share_hash + "'," 
-    s += "'smart':" + str(self.smart).lower()
+    return simplejson.dumps(self.to_dict())
+    
+  def to_dict(self):
+    d = {
+      'id': str(self.key()),
+      'name': self.name,
+      'date_created': str(self.date_created),
+      'collaborative': self.collaborative,
+      'tracks': self.tracks,
+      'version': self.version,
+      'share_hash': self.share_hash,
+      'smart': self.smart
+    }
+    
     if self.smart:
-      s += ",'smart_filter':{"
-      s += "'artist':'" + self.artist + "',"
-      s += "'genres':'" + self.genres + "',"
-      s += "'tags':'" + self.tags + "',"
-      s += "'uploaded_from':'" + str(self.uploaded_from) + "',"
-      s += "'uploaded_to':'" + str(self.uploaded_to) + "',"
-      s += "'bpm_from':" + str(self.bpm_from) + ","
-      s += "'bpm_to':" + str(self.bpm_to) + ","
-      s += "'search_term':'" + self.search_term + "',"
-      s += "'user_favorites':'" + self.user_favorites + "',"
-      s += "'order':'" + self.order + "',"
-      s += "'duration_from':" + str(self.duration_from) + ","
-      s += "'duration_to':" + str(self.duration_to) + ""
-      s += "}"
+      smart_filter = {
+        'artist': self.artist,
+        'genres': self.genres,
+        'tags': self.tags,
+        'uploaded_from': str(self.uploaded_from),
+        'uploaded_to': str(self.uploaded_to),
+        'bpm_from': self.bpm_from,
+        'bpm_to': self.bpm_to,
+        'search_term': self.search_term,
+        'user_favorites': self.user_favorites,
+        'order': self.order,
+        'duration_from': self.duration_from,
+        'duration_to': self.duration_to
+      }
+      
+      s = {'smart_filter':smart_filter}
+      d.update(s)
     
     if self.owner:
-      s += ",'owner':{"
-      s += "'nickname':'" + self.owner.nickname + "'"
-      s += "}"
-          
-    s += "}"
-    return s
+      owner = {
+        'nickname': self.owner.nickname
+      } 
+      s = {'owner':owner}
+      d.update(s)
+    
+    return d
     
   def library_item_for_current_user(self):
     q = db.GqlQuery("SELECT * FROM Library WHERE user = :user AND playlist = :playlist", user=utils.get_current_user(), playlist=self)  
@@ -133,10 +142,14 @@ class Library(db.Model):
   position = db.IntegerProperty(default=0)
   
   def serialize(self):
-    s = "{"
-    s += "'is_owner':" + str(self.is_owner).lower() + ","
-    s += "'position':" + str(self.position) + ","
-    s += "'playlist':" + self.playlist.serialize() 
-    s += "}"
-    return s
+    return simplejson.dumps(self.to_dict())
+  
+  def to_dict(self):
+    d = {
+      'is_owner': self.is_owner,
+      'position': self.position,
+      'playlist': self.playlist.to_dict()
+    }
+    
+    return d
   
