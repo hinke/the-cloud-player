@@ -38,10 +38,15 @@ $.extend(SC, {
 	utcNow : function() {
     return this.utcDate(new Date());
 	},
+	utcLastMonth : function () {
+    var d = new Date();
+    d.setDate(d.getDate()-30);
+    return SC.utcDate(d);	  
+	},
 	utcYesterday : function () {
-    var now = new Date();
-    now.setDate(now.getDate()-1);
-    return SC.utcDate(now);	  
+    var d = new Date();
+    d.setDate(d.getDate()-1);
+    return SC.utcDate(d);	  
 	},
   arraySum : function(a) {
     var sum = 0

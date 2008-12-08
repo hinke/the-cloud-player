@@ -228,7 +228,6 @@ SC.Player.prototype = {
     });
 
     $("#progress").click(function(ev) {
-      console.log()
       var percent = (ev.clientX-$("#progress").offset().left)/($("#progress").width());
       if(self.audio.durationEstimate*percent < self.audio.duration) {
         self.audio.setPosition(self.audio.durationEstimate*percent);        
@@ -311,7 +310,7 @@ SC.Player.prototype = {
     // main keyboard listener
     $(window).keydown(function(ev) {
       if(!$("#q")[0].focused && !window.editingText) { // don't listen to key events if search field is focused or if editing text
-        if(ev.keyCode === 8) { // delete selected tracks
+        if(ev.keyCode === 8 && !self.smartPlaylistFormFocus) { // delete selected tracks
           if($("tr.selected",self.selectedPlaylist.list).length > 0) {
             if(self.selectedPlaylist.editable) {
               $("tr.selected",self.selectedPlaylist.list).remove();
@@ -321,16 +320,14 @@ SC.Player.prototype = {
           }
         } else if(ev.keyCode === 32) { // start/stop play
           self.togglePlay();
-        } else if (ev.keyCode === 13) { // start selected track
-          if(!self.smartPlaylistFormFocus) { // don't trigger if focus on smart playlist create form
-            if($("tr.selected",self.selectedPlaylist.list).length > 0) {
-              var idx = $("tr", self.selectedPlaylist.list).index($("tr.selected",self.selectedPlaylist.list));            
-              self.selectedPlaylist.loadTrack(idx);
-            } else if ($("tr",self.selectedPlaylist.list).length > 0) {
-              $("tr", self.selectedPlaylist.list).eq(0).addClass("selected");
-              var idx = 0;
-              self.selectedPlaylist.loadTrack(idx);
-            }
+        } else if (ev.keyCode === 13 && !self.smartPlaylistFormFocus) { // start selected track, don't trigger if focus on smart playlist create form
+          if($("tr.selected",self.selectedPlaylist.list).length > 0) {
+            var idx = $("tr", self.selectedPlaylist.list).index($("tr.selected",self.selectedPlaylist.list));            
+            self.selectedPlaylist.loadTrack(idx);
+          } else if ($("tr",self.selectedPlaylist.list).length > 0) {
+            $("tr", self.selectedPlaylist.list).eq(0).addClass("selected");
+            var idx = 0;
+            self.selectedPlaylist.loadTrack(idx);
           }
         } else if (ev.keyCode === 40) { // arrow down, select next
           var sel = $("tr.selected:last",self.selectedPlaylist.list);
@@ -405,14 +402,16 @@ SC.Player.prototype = {
         // show flash message if received a shared playlist
         if(location.search.search(/add_shared_playlist/) != -1) {
           self.switchPlaylist($("#playlists li:last").attr("listId")); // select shared playlist
-          self.flash("The playlist has been added to your library");      
+          self.flash("The playlist has been added to your library");
+        } else if (location.search.search(/playlist_not_found/) != -1) {
+          self.flash("The playlist was not found");
         } else {
           if(playlists.length > 0) { // switch to first playlist
             self.switchPlaylist(playlists[0].playlist.id);
           }          
         }
         
-      });      
+      });
     } else { // not logged in, then load a few standard playlists without persisting
       self.playlists['hot'] = new SC.Playlist({
         is_owner: true,
@@ -423,6 +422,90 @@ SC.Player.prototype = {
           version : 0,
           smart_filter : {
             order : "hotness"
+          }
+        }
+      },self);
+
+      self.playlists['indie'] = new SC.Playlist({
+        is_owner: true,
+        playlist: {
+          id : "indie",
+          name : "Indie",
+          smart : true,
+          version : 0,
+          smart_filter : {
+            order : "latest",
+            genres : "indie"
+          }
+        }
+      },self);
+
+      self.playlists['deephouse'] = new SC.Playlist({
+        is_owner: true,
+        playlist: {
+          id : "deephouse",
+          name : "Deep House",
+          smart : true,
+          version : 0,
+          smart_filter : {
+            order : "latest",
+            genres : "deep house"
+          }
+        }
+      },self);
+
+      self.playlists['rock'] = new SC.Playlist({
+        is_owner: true,
+        playlist: {
+          id : "rock",
+          name : "Rock",
+          smart : true,
+          version : 0,
+          smart_filter : {
+            order : "latest",
+            genres : "rock"
+          }
+        }
+      },self);
+
+      self.playlists['techno'] = new SC.Playlist({
+        is_owner: true,
+        playlist: {
+          id : "techno",
+          name : "Techno",
+          smart : true,
+          version : 0,
+          smart_filter : {
+            order : "latest",
+            genres : "techno"
+          }
+        }
+      },self);
+
+      self.playlists['spokenword'] = new SC.Playlist({
+        is_owner: true,
+        playlist: {
+          id : "spokenword",
+          name : "Spoken Word",
+          smart : true,
+          version : 0,
+          smart_filter : {
+            order : "latest",
+            genres : "spoken+word,spokenword"
+          }
+        }
+      },self);
+
+      self.playlists['dubstep'] = new SC.Playlist({
+        is_owner: true,
+        playlist: {
+          id : "dubstep",
+          name : "Dubstep",
+          smart : true,
+          version : 0,
+          smart_filter : {
+            order : "latest",
+            genres : "dubstep, dub+step"
           }
         }
       },self);
@@ -445,7 +528,6 @@ SC.Player.prototype = {
       },
       stop : function(e,ui) {
         if(!ui.item.hasClass("dont-persist")) { // save if playlist is persisted
-          console.log('foo')
           self.playlists[ui.item.attr('listid')].save();          
         }
       }

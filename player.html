@@ -38,7 +38,7 @@
         {% endif %}
       </div>
       <img id="logo" src="images/logo.png" />
-      <input accesskey="f" type="search" name="q" id="q" value="Search Artists &amp; Tracks" />
+      <input accesskey="f" maxlength="50" type="search" name="q" id="q" value="Search Artists &amp; Tracks" />
     </div>
 
     <div id="main-container">
@@ -146,35 +146,24 @@
   
     <div id="about-box">
       <a href="#close" class="close">X</a>
-      <ul id="player-demo">
-        <li>Playlists right in your browser<br/><img src="images/player3.png" width="200" height="102" alt="Player3"></li>
-        <li>Search for tracks, iTunes style<br/><img src="images/player2.png" width="200" height="50" alt="Player2"></li>
-        <li>And the crisp waveform is of course in<br/><img src="images/player1.png" width="200" height="68" alt="Player1"></li>
-      </ul>
-      <h1>Introducing: The Cloud Player</h1>
-      <p>
-        The Cloud Player let's you create playlists, 
-        fill them with your favorite tracks and share them with your friends, all using only a web browser and a Google account. 
-        Search for tracks or artists iTunes-style or just pick some from our hot list. 
-        Add them to a playlist by dragging them to the group of playlists on the left. 
-      </p>
-      <p>Here's what you can do with it:</p>
+      <h1>The Cloud Player</h1>
+      <img src="/images/about-thumb.png" width="294" height="238" id="about-thumb" alt="Thumbnail">
+      <p>The Cloud Player is a <strong>web-based music player</strong> that let’s you...</p>
       <ul id="feature-list">
-        <li>Search and play all tracks from SoundCloud</li>
-        <li>Save your favorites in playlists</li>
-        <li>If you log in with your Google account your playlists will be saved for ever</li>
-        <li>Send your ready made playlists to your friends</li>
-        <li>Collaborate in making the best playlists ever</li>
-        <li>Make smart playlists based on hot tracks, genres, BPM and more</li>
+        <li id="feature-find"><span></span><strong>Find and play</strong> all tracks from SoundCloud</li>
+        <li id="feature-save"><span></span><strong>Save playlists</strong> to your Google Account</li>
+        <li id="feature-smart"><span></span>Make <strong>smart playlists</strong> based on genre, BPM, etc</li>
+        <li id="feature-share"><span></span><strong>Share</strong> your ready-made playlists with your friends</li>
+        <li id="feature-collaborate"><span></span><strong>Collaborate</strong> in making the best playlists ever</li>
       </ul>
       <div id="built-by">
-        <a href="http://eric.wahlforss.com" class="portrait" title="Eric Wahlforss"><img src="images/eric.png" width="63" height="92" alt="Eric"></a>
-        <a href="http://hinkeb.com" class="portrait" title="Henrik Berggren"><img src="images/henrik.png" width="63" height="92" alt="Henrik"></a>
         <p>
-          The Cloud Player was built by <a href="http://eric.wahlforss.com">Eric Wahlforss</a> & <a href="http://hinkeb.com">Henrik Berggren</a> using 
+          <a href="http://eric.wahlforss.com" class="portrait" title="Eric Wahlforss"><img src="images/eric.png" width="63" height="92" alt="Eric"></a>
+          <a href="http://hinkeb.com" class="portrait" title="Henrik Berggren"><img src="images/henrik.png" width="63" height="92" alt="Henrik"></a>
+          Built by <a href="http://eric.wahlforss.com">Eric Wahlforss</a> &amp; <a href="http://hinkeb.com">Henrik Berggren</a> using 
           <a href="http://appengine.google.com">Google App Engine</a>, <a href="http://python.org">Python</a>, <a href="http://jquery.com">jQuery</a>, 
-          <a href="http://www.schillmania.com/projects/soundmanager2/">SoundManager 2</a> and the <a href="http://soundcloud.com/api">SoundCloud API</a>. 
-          Do you want to contribute? Go ahead and <a href="http://github.com/hinke/the-cloud-player/tree/master">fork from GitHub!</a>
+          <a href="http://www.schillmania.com/projects/soundmanager2/">SoundManager 2</a>, <a href="http://www.everaldo.com/crystal/">Crystal</a> and the <a href="http://soundcloud.com/api">SoundCloud API</a>. 
+          Do you want to contribute? Go ahead and <a href="http://github.com/hinke/the-cloud-player/tree/master">fork from GitHub</a>!
         </p>
       </div>
 

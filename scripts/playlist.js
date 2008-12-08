@@ -249,10 +249,10 @@ SC.Playlist.prototype = {
   save : function() {
     var self = this;
     var tracks = "";
-    $("tr",this.list).each(function() {
+    $("tr:not(.droppable-placeholder)",this.list).each(function() {
       tracks += this.track.id + ",";
     });
-    if($("tr",this.list).length == 0) {
+    if($("tr:not(.droppable-placeholder)",this.list).length == 0) {
       tracks = "0";
     }
     // find out position index, ignore non-persisted playlists
@@ -271,6 +271,7 @@ SC.Playlist.prototype = {
   },
   saveName : function() {
     var self = this;
+    this.name = this.name.replace(/<.*?>/,""); // sanitize name
     $.post("/playlists/" + this.id ,{"_method":"PUT","name":this.name,"version":this.version},function(dataJS) {
       var data = eval('(' + dataJS + ')');
       if(data.response == 200) {
@@ -383,7 +384,6 @@ SC.Playlist.prototype = {
         .find("a")
         .click(function(ev) {
           self.player.removePlaylist("artist");
-          console.log('new artist pl')
           self.player.playlists["artist"] = new SC.Playlist({
             is_owner: true,
             playlist : {
@@ -448,7 +448,7 @@ SC.Playlist.prototype = {
               // closes editInPlace and saves if save param is true
               var closeEdit = function(save) {
                 if(save) {
-                  self.name = $("input",that).val();
+                  self.name = $("input",that).val().replace(/<.*?>/,"");
                   $(that).text(self.name);
                   self.saveName();
                 } else {
