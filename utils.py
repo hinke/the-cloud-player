@@ -9,8 +9,7 @@ import re
 from django.utils import simplejson
 
 
-def init_new_user():
-  google_user = users.get_current_user()
+def init_new_user(google_user):
   nickname = make_pretty_nickname_from_email(google_user.email())
   app_user = models.User(google_user=google_user, nickname=nickname)
   app_user.put()
@@ -68,14 +67,6 @@ def url_to_entity_key(url):
     return url_array[4]
   else:
     return ""
-
-def url_to_share_key(url):
-  url_array = url.split("/")
-  if len(url_array) > 4:
-    return url_array[4]
-  else:
-    return ""
-
 
 def convert_javascript_bool_to_python(s):
   if s.lower() == "true":

@@ -19,11 +19,6 @@ import utils
 
 from django.utils import simplejson
 
-      
-class StartPage(webapp.RequestHandler):
-  def get(self):
-    self.response.out.write(template.render('index.html', {}))
-
 class User(webapp.RequestHandler):
   def post(self):
     app_user = utils.get_current_user()
@@ -37,22 +32,24 @@ class User(webapp.RequestHandler):
     
 class PlayerPage(webapp.RequestHandler):
   def get(self):
+    google_user = users.get_current_user()
     app_user = utils.get_current_user()
-    if users.get_current_user() and not app_user:
-      app_user = utils.init_new_user()
+    if google_user and not app_user:
+      app_user = utils.init_new_user(google_user)
     
     self.response.out.write(template.render('player.html', {'user':app_user,'rando': random.random(), 'login_url': users.create_login_url("/"), 'logout_url':users.create_logout_url("/"), 'in_development_enviroment':utils.in_development_enviroment()}))
 
 class SharePlaylist(webapp.RequestHandler):
   def get(self):
-    if not users.get_current_user():
+    google_user = users.get_current_user()
+    if not google_user:
       self.redirect(users.create_login_url(self.request.uri)) 
     else:      
       app_user = utils.get_current_user()
-      if users.get_current_user() and not app_user:
-        app_user = utils.init_new_user()
+      if google_user and not app_user:
+        app_user = utils.init_new_user(google_user)
         
-      share_hash = utils.url_to_share_key(self.request.uri)
+      share_hash = utils.url_to_entity_key(self.request.uri)
       q = db.GqlQuery("SELECT * FROM Playlist WHERE share_hash = :share_hash", share_hash=share_hash)  
       playlist = q.get()
 
@@ -88,29 +85,29 @@ class Playlist(webapp.RequestHandler):
       need_version_control = False
       
       if(self.request.get('position')): #Rights: Can always update this
-        current_user.re_sort_playlists(library_item, int(self.request.get('position')))
-        
+        current_user.re_sort_playlists(library_item, int(self.request.get('position')))        
+
+      if (playlist.collaborative or library_item.is_owner): #Rights: Owner or collaborators can update this
+        if playlist.smart:
+          utils.parse_smart_filters(playlist, self.request)
+        if(self.request.get('tracks') and len(self.request.get('tracks')) != len(playlist.tracks)):
+          playlist.tracks = self.request.get('tracks')
+
+        need_version_control = playlist.collaborative
+
       if library_item.is_owner: #Rights: Only owner can update this
         if(self.request.get('name') and len(self.request.get('name')) > 0):
           playlist.name = utils.strip_html(self.request.get('name'))
         if(self.request.get('collaborative')):
           playlist.collaborative = utils.convert_javascript_bool_to_python(self.request.get('collaborative'))
-
-      if (playlist.collaborative or library_item.is_owner): #Rights: Owner or collaborators can update this
-        if playlist.smart:
-          utils.parse_smart_filters(playlist, self.request)
-          need_version_control = playlist.collaborative
-        if(self.request.get('tracks') and len(self.request.get('tracks')) != len(playlist.tracks)):
-          playlist.tracks = self.request.get('tracks')
-          need_version_control = playlist.collaborative
       
       if need_version_control: 
-        if int(self.request.get('version')) == playlist.version:
+        if int(self.request.get('version')) < playlist.version:
+          self.response.out.write(library_item.serialize())            
+        else:
           playlist.version += 1
           playlist.put()
           self.response.out.write(utils.status_code_json(200))
-        else:
-          self.response.out.write(library_item.serialize())            
       else:
         playlist.put()
         self.response.out.write(utils.status_code_json(200))
