@@ -396,7 +396,7 @@ SC.Player.prototype = {
     
     this.playlists = {};
 
-    // load hot tracks if not logged in user
+    // load latest tracks if not logged in user
     if($("body").hasClass("logged-in")) {
 
       // load playlists for user
@@ -419,11 +419,11 @@ SC.Player.prototype = {
         
       });
     } else { // not logged in, then load a few standard playlists without persisting
-      self.playlists['hot'] = new SC.Playlist({
+      self.playlists['latest'] = new SC.Playlist({
         is_owner: true,
         playlist: {
-          id : "hot",
-          name : "Hot Tracks",
+          id : "latest",
+          name : "Latest Tracks",
           smart : true,
           version : 0,
           smart_filter : {
@@ -519,7 +519,7 @@ SC.Player.prototype = {
       // show about box
       $("#about-box").fadeIn();
       
-      self.switchPlaylist("hot");
+      self.switchPlaylist("latest");
     }
     
     $("#playlists").sortable({
