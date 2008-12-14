@@ -266,7 +266,7 @@ SC.Player.prototype = {
               smart : true,
               smart_filter : {
                 search_term : q,
-                order: "hotness"
+                order: "created_at"
               }
             }
           },self);
@@ -313,7 +313,13 @@ SC.Player.prototype = {
         if(ev.keyCode === 8 && !self.smartPlaylistFormFocus) { // delete selected tracks
           if($("tr.selected",self.selectedPlaylist.list).length > 0) {
             if(self.selectedPlaylist.editable) {
+              var selListItem = $("tr.selected:first",self.selectedPlaylist.list).prev("tr"); // select prev track when removing
               $("tr.selected",self.selectedPlaylist.list).remove();
+              if(selListItem.length > 0) { // select track post-delete behaviour
+                selListItem.addClass("selected");
+              } else {
+                $("tr:first",self.selectedPlaylist.list).addClass("selected");
+              }
               self.selectedPlaylist.save();              
             }
             return false;
@@ -588,7 +594,7 @@ SC.Player.prototype = {
               smart: true,
               smart_filter: {
                 artist : track.user.permalink,                
-                order: "hotness"
+                order: "created_at"
               },
               dontPersist : true,
               dontShowPlaylistItem : true

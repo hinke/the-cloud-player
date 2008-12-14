@@ -40,12 +40,14 @@ class API(webapp.RequestHandler):
     api_parameters = utils.extract_parameters(self.request.uri)
     if api_parameters:
       self.response.headers["Content-Type"] = "text/javascript; charset=utf-8"
+      self.response.headers["Cache-Control"] = "max-age=3600, must-revalidate" # testing force client caching
       parameters_hash = str(hash(api_parameters))    
+      self.response.headers["Etag"] = parameters_hash # testing force client caching
       hit = memcache.get(parameters_hash)
       if hit is None:
         try:
           response = urlfetch.fetch(url = sc_api_url + api_parameters,method=urlfetch.GET, headers={'Content-Type': 'text/javascript; charset=utf-8'})
-          memcache.set(parameters_hash, response.content, 900)
+          memcache.set(parameters_hash, response.content, 3600)
           utils.print_with_callback(callback, response.content. self.response)
         except:
           utils.print_with_callback(callback, utils.status_code_json(408), self.response)
@@ -113,7 +115,7 @@ class Playlist(webapp.RequestHandler):
       if (playlist.collaborative or library_item.is_owner): #Rights: Owner or collaborators can update this
         if playlist.smart:
           utils.parse_smart_filters(playlist, self.request)
-        if(self.request.get('tracks') and len(self.request.get('tracks')) != len(playlist.tracks)):
+        if self.request.get('tracks'):
           playlist.tracks = self.request.get('tracks')
 
         need_version_control = playlist.collaborative

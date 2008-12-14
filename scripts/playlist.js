@@ -1,14 +1,25 @@
 // todo: better internal data structure for playlists, know position in list, remove track etc
 SC.Playlist = SC.Class();
 SC.Playlist.prototype = {
-  initialize: function(props,player) { //ugly constructor, refactor
-    this.properties = props;
+  initialize: function(props,player) {
+    this.player = player; // ref to the player
     if (player.playlists[props.playlist.id]) { return; } // if it already exists, bail out here
+
+    this.init(props); // init the playlist
+
+    // add tab to list of playlists
+    // but only do this if it's not simply an artist or genre playlist
+    if(!this.properties.playlist.dontShowPlaylistItem) {
+      this.addToPlaylistsList();      
+    }
+
+  },
+  init : function(props) { // this will init the playlist
+    this.properties = props;
     var self = this;
     this.name = props.playlist.name;
     this.id = props.playlist.id;
     this.version = props.playlist.version;
-    this.player = player; // ref to the player
     this.offset = 0; // the offset when getting more tracks through the rest interface
     this.endOfList = false; // this is false until server returns less than 50 hits
     this.loading = false; // cheap mans queueing
@@ -17,7 +28,7 @@ SC.Playlist.prototype = {
     
     this.editable = (!self.properties.playlist.smart && (self.properties.playlist.collaborative || (self.properties.is_owner && !self.properties.playlist.collaborative)));
     
-    $('#tracklist')
+    $('#playlist')
       .clone()
       .attr('id',"list-" + props.playlist.id)
       .appendTo("#lists")
@@ -89,12 +100,6 @@ SC.Playlist.prototype = {
         var colIdx = $(this).parents("thead").find("th").index(this) + 1;
         $.cookie('playlist_col_width_' + (colIdx-1),$(this).width());
       });
-
-    // add tab to list of playlists
-    // but only do this if it's not simply an artist or genre playlist
-    if(!this.properties.playlist.dontShowPlaylistItem) {
-      this.addToPlaylistsList();      
-    }
     
     this.load();
 
@@ -103,150 +108,164 @@ SC.Playlist.prototype = {
       if(this.scrollHeight-(this.scrollTop+this.clientHeight) < 400) {
         self.load();
       }
-    });
-
+    });    
   },
-  generateTracksUrl : function() { // generates the API url based on properties of the playlist
-    var tracksUrl = "/api/";
+  reload : function(props) {
+    // remove playlist
+    this.dom.remove();
+    this.init(props);
+    this.player.switchPlaylist(this.id);
+  },
+  generateTracksUrl : function(baseUrl) { // generates the API url based on properties of the playlist
+    var baseUrl = (baseUrl ? baseUrl : "/api/");
     var pl = this.properties.playlist;
     if(pl.smart) { // check for all smart playlist params
       if(pl.smart_filter.user_favorites) { // user favs pl
-        tracksUrl += "users/" + pl.smart_filter.user_favorites + "/favorites.js?filter=streamable"
+        baseUrl += "users/" + pl.smart_filter.user_favorites + "/favorites.js?filter=streamable"
       } else if(pl.smart_filter.artist) { // artist pl
-        tracksUrl += "users/" + pl.smart_filter.artist + "/tracks.js?filter=streamable"
+        baseUrl += "users/" + pl.smart_filter.artist + "/tracks.js?filter=streamable"
       } else { // dynamic smart pl
-        tracksUrl += "tracks.js?filter=streamable";
+        baseUrl += "tracks.js?filter=streamable";
       }
 
       if(pl.smart_filter.order == "hotness" && !pl.smart_filter.user_favorites) { // prevent favs hotness sorting API bug
-        tracksUrl = tracksUrl + "&order=" + pl.smart_filter.order + "&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow();
+        baseUrl = baseUrl + "&order=" + pl.smart_filter.order + "&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow();
       } else { // default to sort by created_at
-        tracksUrl = tracksUrl + "&order=created_at";
+        baseUrl = baseUrl + "&order=created_at";
       }
       if(pl.smart_filter.genres) {
-        tracksUrl = tracksUrl + "&genres=" + pl.smart_filter.genres;
+        baseUrl = baseUrl + "&genres=" + pl.smart_filter.genres;
       }
       if(pl.smart_filter.search_term) {
-        tracksUrl += "&q=" + pl.smart_filter.search_term;
+        baseUrl += "&q=" + pl.smart_filter.search_term;
       }
       if(pl.smart_filter.bpm_from && pl.smart_filter.bpm_from != 0) {
-        tracksUrl += "&bpm[from]=" + pl.smart_filter.bpm_from;
+        baseUrl += "&bpm[from]=" + pl.smart_filter.bpm_from;
       }
       if(pl.smart_filter.bpm_to && pl.smart_filter.bpm_to != 250) {
-        tracksUrl += "&bpm[to]=" + pl.smart_filter.bpm_to;
+        baseUrl += "&bpm[to]=" + pl.smart_filter.bpm_to;
       }
     } else { // this is normal playlist
-      tracksUrl = tracksUrl + "tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks;
+      baseUrl = baseUrl + "tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks;
     }
-    tracksUrl += "&callback=?"; // add JSONP callback param
-    return tracksUrl;
+    baseUrl += "&callback=?"; // add JSONP callback param
+    return baseUrl;
   },
   load : function() {
     var self = this;
-    var url = this.generateTracksUrl() + "&offset=" + this.offset;
     if(!this.endOfList && !this.loading) {
       $("<div><div style='position:relative'><div id='throbber'></div></div></div>").appendTo(self.list);
       self.loading = true;
       self.tracks = [];
-      $.getJSON(url, function(data) {
-        
-        console.log(data)
-        self.offset += 50;
-        if(data.length < 50) {
-          self.endOfList = true;
-        }
-        // if persisted playlist we must sort the tracks array here according to the ids-string sort order
-        // kind of ugly but impossible to persist sort order since sql can't return ordered list based on id params in query
-        if(self.persisted && !self.properties.playlist.smart) {
-          var trackIds = self.generateTracksUrl().match(/ids=([^&]*)/)[1].split(",");
-          trackIds.pop(); // remove last ","
-          var newData = new Array();
-          $.each(trackIds,function() {
-            var id = this;
-            $.each(data,function() {
-              if(this.id == id) {
-                newData.push(this);
-                return;
-              }
-            });
-          });
-          data = newData; // replace data array with sorted array
-        }
-        
-        self.tracks = data;
-        $("> div:last",self.list).remove();
-
-        if(self.editable) {
-          $(self.list).sortable({
-            appendTo: "#track-drag-holder",
-            placeholder : "droppable-placeholder",
-            tolerance : "pointer",
-            _noFinalSort : true, // mod to support multi-sortable
-            helper : function(e,el) {
-              if(!el.hasClass("selected")) { // imitate itunes selection behavior, avoid sortable bug
-                el.addClass("selected");
-                el.siblings("tr.selected").removeClass("selected");
-              }
-              if(el.siblings(".selected").length > 0) { // dragging more than one track
-                var els = el.parents("tbody").find(".selected").clone();
-                return $("<div></div>").prepend(els); // wrap all selected elements in a div
-              } else {
-                return el.clone(); // ghosted drag helper              
-              }
-            },
-            opacity: 0.7,
-            delay: 30,
-            start : function(e,ui) {
-              ui.item.css("display","block"); //prevent dragged element from getting hidden
-            },
-            beforeStop : function(e,ui) {
-              if(self.player.justDropped) { // disable sort behavior if dropping in another playlist. ugly, but I can't seem to find a proper callback;
-                self.player.justDropped = false; // ugly, but I can't find a proper callback;
-              } else {
-                ui.placeholder.after(ui.item.parents("tbody").find("tr.selected")); // multi-select-hack, move all selected items to new location                            
-              }
-            },
-            stop : function(e,ui) {
-              self.save();
-            }
-          });
+      $.getJSON(this.generateTracksUrl() + "&offset=" + this.offset, function(data) {
+        if(data.response && parseInt(data.response) == 408) { // if google app engine timeout, then fallback to use the sc api directly, bypassing the caching layer
+          console.log('app engine timeout, sc api fallback')
+          $.getJSON(self.generateTracksUrl("http://api.soundcloud.com/") + "&offset=" + self.offset, function(dataNonCached) {
+            self.processTrackData(dataNonCached);
+          })
         } else {
-          // for read-only playlists, FIXME: make more DRY by moving default options to separate hash
-          $(self.list).sortable({
-            appendTo: "#track-drag-holder",
-            placeholder : "droppable-placeholder-invisible",
-            tolerance : "pointer",
-            _noFinalSort : true, // mod to support multi-sortable
-            helper : function(e,el) {
-              if(!el.hasClass("selected")) { // imitate itunes selection behavior, avoid sortable bug
-                el.addClass("selected");
-                el.siblings("tr.selected").removeClass("selected");
-              }
-              if(el.siblings(".selected").length > 0) { // dragging more than one track
-                var els = el.parents("tbody").find(".selected").clone();
-                return $("<div></div>").prepend(els); // wrap all selected elements in a div
-              } else {
-                return el.clone(); // ghosted drag helper              
-              }
-            },
-            sort : function(e,ui) {
-              ui.placeholder.remove();
-            },
-            opacity: 0.7,
-            delay: 30,
-            start : function(e,ui) {
-              ui.item.css("display","block"); //prevent dragged element from getting hidden
-            }
-          });
-        };
-
-        $.each(self.tracks,function() {
-          self.addTrack(this);
-        });
-        //show new tracks with fade fx
-        self.loading = false;
+          self.processTrackData(data);
+        }
       });
     }
+  },
+  processTrackData : function(data) {
+    var self = this;
+    self.offset += 50;
+    if(data.length < 50) {
+      self.endOfList = true;
+    }
+    // if persisted playlist we must sort the tracks array here according to the ids-string sort order
+    // kind of ugly but impossible to persist sort order since sql can't return ordered list based on id params in query
+    if(self.persisted && !self.properties.playlist.smart) {
+      var trackIds = self.generateTracksUrl().match(/ids=([^&]*)/)[1].split(",");
+      trackIds.pop(); // remove last ","
+      var newData = new Array();
+      $.each(trackIds,function() {
+        var id = this;
+        $.each(data,function() {
+          if(this.id == id) {
+            newData.push(this);
+            return;
+          }
+        });
+      });
+      data = newData; // replace data array with sorted array
+    }
+    
+    self.tracks = data;
+    $("> div:last",self.list).remove();
+
+    if(self.editable) {
+      $(self.list).sortable({
+        appendTo: "#track-drag-holder",
+        placeholder : "droppable-placeholder",
+        tolerance : "pointer",
+        _noFinalSort : true, // mod to support multi-sortable
+        helper : function(e,el) {
+          if(!el.hasClass("selected")) { // imitate itunes selection behavior, avoid sortable bug
+            el.addClass("selected");
+            el.siblings("tr.selected").removeClass("selected");
+          }
+          if(el.siblings(".selected").length > 0) { // dragging more than one track
+            var els = el.parents("tbody").find(".selected").clone();
+            return $("<div></div>").prepend(els); // wrap all selected elements in a div
+          } else {
+            return el.clone(); // ghosted drag helper              
+          }
+        },
+        opacity: 0.7,
+        delay: 30,
+        start : function(e,ui) {
+          ui.item.css("display","block"); //prevent dragged element from getting hidden
+        },
+        beforeStop : function(e,ui) {
+          if(self.player.justDropped) { // disable sort behavior if dropping in another playlist. ugly, but I can't seem to find a proper callback;
+            self.player.justDropped = false; // ugly, but I can't find a proper callback;
+          } else {
+            ui.placeholder.after(ui.item.parents("tbody").find("tr.selected")); // multi-select-hack, move all selected items to new location                            
+          }
+        },
+        stop : function(e,ui) {
+          self.save();
+        }
+      });
+    } else {
+      // for read-only playlists, FIXME: make more DRY by moving default options to separate hash
+      $(self.list).sortable({
+        appendTo: "#track-drag-holder",
+        placeholder : "droppable-placeholder-invisible",
+        tolerance : "pointer",
+        _noFinalSort : true, // mod to support multi-sortable
+        helper : function(e,el) {
+          if(!el.hasClass("selected")) { // imitate itunes selection behavior, avoid sortable bug
+            el.addClass("selected");
+            el.siblings("tr.selected").removeClass("selected");
+          }
+          if(el.siblings(".selected").length > 0) { // dragging more than one track
+            var els = el.parents("tbody").find(".selected").clone();
+            return $("<div></div>").prepend(els); // wrap all selected elements in a div
+          } else {
+            return el.clone(); // ghosted drag helper              
+          }
+        },
+        sort : function(e,ui) {
+          ui.placeholder.remove();
+        },
+        opacity: 0.7,
+        delay: 30,
+        start : function(e,ui) {
+          ui.item.css("display","block"); //prevent dragged element from getting hidden
+        }
+      });
+    };
+
+    $.each(self.tracks,function() {
+      self.addTrack(this);
+    });
+    //show new tracks with fade fx
+    self.loading = false;
+    
   },
   save : function() {
     var self = this;
@@ -266,22 +285,21 @@ SC.Playlist.prototype = {
         self.version++;
         console.log('saved with '+ tracks);
       } else {
-        self.player.flash("Failed when saving playlist. The playlist could have been edited by somebody else.");
-        console.log('failed to save, playlist edited by somebody else');
+        self.player.flash("Failed when saving playlist. Reloading.");
+        self.reload(data); // reload the playlist based on data in json response
       }
     });
   },
   saveName : function() {
     var self = this;
     this.name = this.name.replace(/<.*?>/,""); // sanitize name
-    $.post("/playlists/" + this.id ,{"_method":"PUT","name":this.name,"version":this.version},function(dataJS) {
+    $.post("/playlists/" + this.id ,{"_method":"PUT","name":this.name},function(dataJS) {
       var data = eval('(' + dataJS + ')');
       if(data.response == 200) {
         self.version++;
         console.log('saved name');
       } else {
-        self.player.flash("Failed when saving playlist. The playlist could have been edited by somebody else.");
-        console.log('failed to save, playlist edited by somebody else');
+        self.player.flash("Sorry, saving the playlist failed");
       }
     });    
   },
@@ -352,7 +370,7 @@ SC.Playlist.prototype = {
     }
             
     //populate table
-    $('#tracklist-row table tr')
+    $('#playlist-row table tr')
       .clone()
       .css("width",SC.arraySum(self.colWidths)+7*7)
       .dblclick(function() {
@@ -394,7 +412,7 @@ SC.Playlist.prototype = {
               smart: true,
               smart_filter: {
                 artist : track.user.permalink,
-                order: "hotness"                
+                order: "created_at"                
               },
               dontPersist : true,
               dontShowPlaylistItem : true
@@ -420,7 +438,7 @@ SC.Playlist.prototype = {
               smart: true,
               smart_filter: {
                 genres : genre,
-                order: "hotness"                
+                order: "created_at"                
               },
               dontPersist : true,
               dontShowPlaylistItem : true
@@ -439,7 +457,7 @@ SC.Playlist.prototype = {
       .find('a:first').click(function(ev) {
         if($(this).parents("li").hasClass("active") && self.properties.is_owner && $("body").hasClass("logged-in")) {
           var that = this; // very strange that i can't use self here
-          if(!window.editingText) {
+          if(!window.editingText) { // edit in place for playlist title
             setTimeout(function() {
               var origValue = $(that).text();
               window.editingText = true;
@@ -486,7 +504,7 @@ SC.Playlist.prototype = {
             },500);
           }
         } else {
-          self.player.switchPlaylist(self.id);          
+          self.player.switchPlaylist(self.id);
         }
         ev.preventDefault();
       })
