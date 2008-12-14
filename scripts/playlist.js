@@ -107,7 +107,7 @@ SC.Playlist.prototype = {
 
   },
   generateTracksUrl : function() { // generates the API url based on properties of the playlist
-    var tracksUrl = "http://api.soundcloud.com/";
+    var tracksUrl = "/api/";
     var pl = this.properties.playlist;
     if(pl.smart) { // check for all smart playlist params
       if(pl.smart_filter.user_favorites) { // user favs pl
@@ -136,7 +136,7 @@ SC.Playlist.prototype = {
         tracksUrl += "&bpm[to]=" + pl.smart_filter.bpm_to;
       }
     } else { // this is normal playlist
-      tracksUrl = "http://api.soundcloud.com/tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks;
+      tracksUrl = tracksUrl + "tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks;
     }
     tracksUrl += "&callback=?"; // add JSONP callback param
     return tracksUrl;
@@ -149,6 +149,8 @@ SC.Playlist.prototype = {
       self.loading = true;
       self.tracks = [];
       $.getJSON(url, function(data) {
+        
+        console.log(data)
         self.offset += 50;
         if(data.length < 50) {
           self.endOfList = true;

@@ -18,6 +18,8 @@ import models
 import utils
 
 from django.utils import simplejson
+from google.appengine.api import memcache
+from google.appengine.api import urlfetch
 
 class User(webapp.RequestHandler):
   def post(self):
@@ -29,7 +31,28 @@ class User(webapp.RequestHandler):
     app_user.put()
     
     self.response.out.write(utils.status_code_json(200))
-    
+
+
+class API(webapp.RequestHandler):
+  def get(self):
+    sc_api_url = "http://api.soundcloud.com/"
+    callback = self.request.get('callback')
+    api_parameters = utils.extract_parameters(self.request.uri)
+    if api_parameters:
+      self.response.headers["Content-Type"] = "text/javascript; charset=utf-8"
+      parameters_hash = str(hash(api_parameters))    
+      hit = memcache.get(parameters_hash)
+      if hit is None:
+        try:
+          response = urlfetch.fetch(url = sc_api_url + api_parameters,method=urlfetch.GET, headers={'Content-Type': 'text/javascript; charset=utf-8'})
+          memcache.set(parameters_hash, response.content, 900)
+          utils.print_with_callback(callback, response.content. self.response)
+        except:
+          utils.print_with_callback(callback, utils.status_code_json(408), self.response)
+      else:
+        utils.print_with_callback(callback, hit, self.response)
+        
+      
 class PlayerPage(webapp.RequestHandler):
   def get(self):
     google_user = users.get_current_user()
@@ -156,6 +179,7 @@ def main():
                                       ('/playlists', Playlists), 
                                       ('/playlists/', Playlists), 
                                       ('/playlists/.*', Playlist), 
+                                      ('/api/.*', API), 
                                       ('/user', User), 
                                       ('/share/.*', SharePlaylist), 
                                       ('/', PlayerPage)

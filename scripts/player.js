@@ -421,7 +421,7 @@ SC.Player.prototype = {
           smart : true,
           version : 0,
           smart_filter : {
-            order : "hotness"
+            order : "latest"
           }
         }
       },self);

@@ -119,3 +119,25 @@ def parse_smart_filters(playlist, request):
 
 def strip_html(s):
   return re.sub('<.*?>', '', s)    
+  
+def extract_parameters(url):
+  url_array = url.split("/api")
+  if len(url_array) > 1:
+    ret = strip_named_parameter("from_date", url_array[1])
+    ret = strip_named_parameter("to_date", ret)
+    ret = strip_named_parameter("callback", ret)
+    ret = strip_named_parameter("_", ret)
+    return ret
+  else:
+    return None
+
+def print_with_callback(callback, content, response):
+  response.out.write(callback)
+  response.out.write("(")
+  response.out.write(content)
+  response.out.write(")")
+  
+
+def strip_named_parameter(parameter_to_remove, url):
+  p = re.compile('&'+parameter_to_remove+'[^&]*')
+  return p.sub('', url)
