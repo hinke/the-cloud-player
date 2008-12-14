@@ -117,15 +117,19 @@ SC.Playlist.prototype = {
     this.player.switchPlaylist(this.id);
   },
   generateTracksUrl : function(baseUrl) { // generates the API url based on properties of the playlist
-    var baseUrl = (baseUrl ? baseUrl : "/api/");
+    var format = "js";
+    if(!baseUrl) { // if no baseUrl then use json
+      var format = "json";
+      var baseUrl = "/api/";      
+    }
     var pl = this.properties.playlist;
     if(pl.smart) { // check for all smart playlist params
       if(pl.smart_filter.user_favorites) { // user favs pl
-        baseUrl += "users/" + pl.smart_filter.user_favorites + "/favorites.js?filter=streamable"
+        baseUrl += "users/" + pl.smart_filter.user_favorites + "/favorites." + format + "?filter=streamable"
       } else if(pl.smart_filter.artist) { // artist pl
-        baseUrl += "users/" + pl.smart_filter.artist + "/tracks.js?filter=streamable"
+        baseUrl += "users/" + pl.smart_filter.artist + "/tracks." + format + "?filter=streamable"
       } else { // dynamic smart pl
-        baseUrl += "tracks.js?filter=streamable";
+        baseUrl += "tracks." + format + "?filter=streamable";
       }
 
       if(pl.smart_filter.order == "hotness" && !pl.smart_filter.user_favorites) { // prevent favs hotness sorting API bug
@@ -146,9 +150,11 @@ SC.Playlist.prototype = {
         baseUrl += "&bpm[to]=" + pl.smart_filter.bpm_to;
       }
     } else { // this is normal playlist
-      baseUrl = baseUrl + "tracks.js?filter=streamable&ids=" + this.properties.playlist.tracks;
+      baseUrl = baseUrl + "tracks." + format + "?filter=streamable&ids=" + this.properties.playlist.tracks;
     }
-    baseUrl += "&callback=?"; // add JSONP callback param
+    if(format == "js") {
+      baseUrl += "&callback=?"; // add JSONP callback param      
+    }
     return baseUrl;
   },
   load : function() {
@@ -157,7 +163,8 @@ SC.Playlist.prototype = {
       $("<div><div style='position:relative'><div id='throbber'></div></div></div>").appendTo(self.list);
       self.loading = true;
       self.tracks = [];
-      $.getJSON(this.generateTracksUrl() + "&offset=" + this.offset, function(data) {
+      $.get(this.generateTracksUrl() + "&offset=" + this.offset, function(dataJS) {
+        var data = eval('(' + dataJS + ')');
         if(data.response && parseInt(data.response) == 408) { // if google app engine timeout, then fallback to use the sc api directly, bypassing the caching layer
           console.log('app engine timeout, sc api fallback')
           $.getJSON(self.generateTracksUrl("http://api.soundcloud.com/") + "&offset=" + self.offset, function(dataNonCached) {

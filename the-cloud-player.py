@@ -40,9 +40,8 @@ class API(webapp.RequestHandler):
     api_parameters = utils.extract_parameters(self.request.uri)
     if api_parameters:
       self.response.headers["Content-Type"] = "text/javascript; charset=utf-8"
-      self.response.headers["Cache-Control"] = "max-age=3600, must-revalidate" # testing force client caching
+      self.response.headers["Cache-Control"] = "max-age=3600, must-revalidate" # testing force client caching, works in ff3 at least
       parameters_hash = str(hash(api_parameters))    
-      self.response.headers["Etag"] = parameters_hash # testing force client caching
       hit = memcache.get(parameters_hash)
       if hit is None:
         try:
