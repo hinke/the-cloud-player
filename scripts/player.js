@@ -753,5 +753,5 @@ soundManager.useHighPerformance = false;
 soundManager.onload = function() {
   // soundManager is ready to use (create sounds and so on)
   // init the player app
-  p = new SC.Player();
+  window.p = new SC.Player();
 }
