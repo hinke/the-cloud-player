@@ -13,7 +13,7 @@ class User(db.Model):
   
   def has_playlist(self, playlist):
     for p in self.playlists():
-        if p.playlist and p.playlist is playlist:
+        if p.playlist and p.playlist.key() == playlist.key():
           return True
     return False
   
@@ -123,9 +123,12 @@ class Playlist(db.Model):
     
     return d
     
-  def library_item_for_current_user(self):
-    q = db.GqlQuery("SELECT * FROM Library WHERE user = :user AND playlist = :playlist", user=utils.get_current_user(), playlist=self)  
+  def library_item_for_user(self, user):
+    q = db.GqlQuery("SELECT * FROM Library WHERE user = :user AND playlist = :playlist", user=user, playlist=self)  
     return q.get()
+
+  def library_item_for_current_user(self):
+    return self.library_item_for_user(utils.get_current_user())
   
   def has_user(self):
     for u in self.users():

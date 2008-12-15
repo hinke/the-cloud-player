@@ -102,11 +102,12 @@ class Playlist(webapp.RequestHandler):
     playlist = db.get(db.Key(key))
     current_user = utils.get_current_user()
     
-    #Get corresponding link or create it
-    library_item = playlist.library_item_for_current_user()
+    #Get corresponding link
+    library_item = playlist.library_item_for_user(current_user)
     
     if method == "PUT":
       need_version_control = False
+      playlist_changed = False
       
       if(self.request.get('position')): #Rights: Can always update this
         current_user.re_sort_playlists(library_item, int(self.request.get('position')))        
@@ -114,27 +115,33 @@ class Playlist(webapp.RequestHandler):
       if (playlist.collaborative or library_item.is_owner): #Rights: Owner or collaborators can update this
         if playlist.smart:
           utils.parse_smart_filters(playlist, self.request)
+          playlist_changed = True
         if self.request.get('tracks'):
           playlist.tracks = self.request.get('tracks')
+          playlist_changed = True
 
         need_version_control = playlist.collaborative
 
       if library_item.is_owner: #Rights: Only owner can update this
         if(self.request.get('name') and len(self.request.get('name')) > 0):
           playlist.name = utils.strip_html(self.request.get('name'))
+          playlist_changed = True
         if(self.request.get('collaborative')):
           playlist.collaborative = utils.convert_javascript_bool_to_python(self.request.get('collaborative'))
+          playlist_changed = True
       
-      if need_version_control: 
-        if int(self.request.get('version')) < playlist.version:
-          self.response.out.write(library_item.serialize())            
+      if playlist_changed:
+        if need_version_control: 
+          if int(self.request.get('version')) < playlist.version:
+            self.response.out.write(library_item.serialize())            
+          else:
+            playlist.version += 1
+            playlist.put()
+            self.response.out.write(utils.status_code_json(200))
         else:
-          playlist.version += 1
           playlist.put()
-          self.response.out.write(utils.status_code_json(200))
-      else:
-        playlist.put()
-        self.response.out.write(utils.status_code_json(200))
+
+      self.response.out.write(utils.status_code_json(200))
         
     elif method == "DELETE":
       if library_item.is_owner and not playlist.collaborative:
