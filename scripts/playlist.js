@@ -17,6 +17,7 @@ SC.Playlist.prototype = {
   init : function(props) { // this will init the playlist
     this.properties = props;
     var self = this;
+    this.limit = 40; // limit of ajax requests
     this.name = props.playlist.name;
     this.id = props.playlist.id;
     this.version = props.playlist.version;
@@ -155,7 +156,7 @@ SC.Playlist.prototype = {
     if(format == "js") {
       baseUrl += "&callback=?"; // add JSONP callback param      
     }
-    baseUrl += "&limit=100" // increase limit to 100
+    baseUrl += "&limit=" + this.limit; // increase limit to 100
     return baseUrl;
   },
   load : function() {
@@ -179,8 +180,8 @@ SC.Playlist.prototype = {
   },
   processTrackData : function(data) {
     var self = this;
-    self.offset += 100;
-    if(data.length < 100) {
+    self.offset += this.limit;
+    if(data.length < this.limit) {
       self.endOfList = true;
     }
     // if persisted playlist we must sort the tracks array here according to the ids-string sort order
