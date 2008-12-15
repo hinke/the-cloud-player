@@ -1,7 +1,7 @@
 body {
   background-color: #ddd;
   -webkit-background-size: 100% 100%;
-  font-family: "Lucida Grande";
+  font-family: "Lucida Grande", Arial, sans-serif;
   color : #333;
   padding : 0;
   margin: 0;
