@@ -19,6 +19,7 @@ body {
 }
 
 #login a {
+  outline: 0;
   color: white;
   text-decoration: none;
 }
@@ -1122,7 +1123,7 @@ table {
 
 /* about box */
 
-#about-box {
+#about-box, .share-playlist {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -1142,7 +1143,7 @@ table {
   z-index: 20;
 }
 
-  #about-box a.close {
+  #about-box a.close, .share-playlist a.close {
     text-decoration: none;
     float: right;
     margin-right: -5px;
@@ -1258,6 +1259,22 @@ table {
 
   #feature-list #feature-collaborate span {
     background-position: -308px -1px;
+  }
+
+.share-playlist {
+  width: 400px;
+  margin-left: -230px;
+  margin-top: -100px;
+}
+
+  .share-playlist h1 {
+    margin: -10px 0 15px 0;
+    padding: 0;
+  }
+  
+  .share-playlist input {
+    width: 100%;
+    font-size: 16px;
   }
 
 /* clearing */

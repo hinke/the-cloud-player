@@ -21,7 +21,7 @@ SC.Playlist.prototype = {
     this.id = props.playlist.id;
     this.version = props.playlist.version;
     this.offset = 0; // the offset when getting more tracks through the rest interface
-    this.endOfList = false; // this is false until server returns less than 50 hits
+    this.endOfList = false; // this is false until server returns less than 100 hits
     this.loading = false; // cheap mans queueing
     this.currentPos = 0; // this is the current position in the list at which a track is playing, needed for continous play through playlists
     this.persisted = (props.playlist.dontPersist ? false : true);
@@ -155,6 +155,7 @@ SC.Playlist.prototype = {
     if(format == "js") {
       baseUrl += "&callback=?"; // add JSONP callback param      
     }
+    baseUrl += "&limit=100" // increase limit to 100
     return baseUrl;
   },
   load : function() {
@@ -178,8 +179,8 @@ SC.Playlist.prototype = {
   },
   processTrackData : function(data) {
     var self = this;
-    self.offset += 50;
-    if(data.length < 50) {
+    self.offset += 100;
+    if(data.length < 100) {
       self.endOfList = true;
     }
     // if persisted playlist we must sort the tracks array here according to the ids-string sort order
@@ -316,13 +317,14 @@ SC.Playlist.prototype = {
         console.log('deleted from server...')
       });      
     }
-    $("#playlists li[listid=" + this.id + "]").fadeOut('fast');
-    $("#lists #list-"+this.id).remove();
-
     // select first playlist after delete, if exists
     if($("#playlists li:first").length > 0) {
       this.player.switchPlaylist($("#playlists li:first").attr("listid"));      
     }
+
+    $("#playlists li[listid=" + this.id + "]").fadeOut('fast');
+    $("#lists #list-"+this.id).remove();
+
   },
   length : function() {
     return $("tr",this.list).length;
@@ -524,7 +526,19 @@ SC.Playlist.prototype = {
         return false;
       }).end()
       .find('a.share').click(function() {
-        prompt("Send this link to anyone who you want to share this playlist with:", this.href);
+        $("#share-playlist > div:first")
+          .clone()
+          .find("a.close").click(function() {
+            $(this).parents("div.share-playlist").fadeOut(function() {
+              $(this).remove();
+            });
+            return false;
+          }).end()
+          .find("input").val(this.href).end()
+          .appendTo("body")
+          .fadeIn(function() {
+            $(".share-playlist input").focus().select();
+          });
         return false;
       }).end()
       .find('a.collaborative').click(function() {
