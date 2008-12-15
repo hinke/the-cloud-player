@@ -534,7 +534,7 @@ SC.Player.prototype = {
       },
       stop : function(e,ui) {
         if(!ui.item.hasClass("dont-persist")) { // save if playlist is persisted
-          self.playlists[ui.item.attr('listid')].save();          
+          self.playlists[ui.item.attr('listid')].savePosition();          
         }
       }
     });

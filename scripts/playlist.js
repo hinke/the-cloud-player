@@ -285,10 +285,8 @@ SC.Playlist.prototype = {
     if($("tr:not(.droppable-placeholder)",this.list).length == 0) {
       tracks = "0";
     }
-    // find out position index, ignore non-persisted playlists
-    var pos = $("#playlists li:not(.dont-persist)").index($("#playlists li:not(.dont-persist)[listid=" + this.id + "]"));
     
-    $.post("/playlists/" + this.id ,{"_method":"PUT","tracks":tracks,"version":this.version,"position":pos},function(dataJS) {
+    $.post("/playlists/" + this.id ,{"_method":"PUT","tracks":tracks,"version":this.version},function(dataJS) {
       var data = eval('(' + dataJS + ')');
       if(data.response == 200) {
         self.version++;
@@ -309,6 +307,19 @@ SC.Playlist.prototype = {
         console.log('saved name');
       } else {
         self.player.flash("Sorry, saving the playlist failed");
+      }
+    });    
+  },
+  savePosition : function() {
+    var self = this;
+    // find out position index, ignore non-persisted playlists
+    var pos = $("#playlists li:not(.dont-persist)").index($("#playlists li:not(.dont-persist)[listid=" + this.id + "]"));
+    $.post("/playlists/" + this.id ,{"_method":"PUT","position":pos},function(dataJS) {
+      var data = eval('(' + dataJS + ')');
+      if(data.response == 200) {
+        console.log('saved position');
+      } else {
+        self.player.flash("Sorry, saving the playlist position failed");
       }
     });    
   },
