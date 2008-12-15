@@ -411,6 +411,8 @@ SC.Player.prototype = {
           self.flash("The playlist has been added to your library");
         } else if (location.search.search(/playlist_not_found/) != -1) {
           self.flash("The playlist was not found");
+        } else if (location.search.search(/playlist_already_in_lib/) != -1) {
+          self.flash("You already have this playlist");
         } else {
           if(playlists.length > 0) { // switch to first playlist
             self.switchPlaylist(playlists[0].playlist.id);

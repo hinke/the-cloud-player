@@ -83,7 +83,9 @@ class SharePlaylist(webapp.RequestHandler):
           
           library_item = models.Library(user=app_user, position=last_position+1  , playlist=playlist, is_owner=False)
           library_item.put()
-        flash = "add_shared_playlist"
+          flash = "add_shared_playlist"
+        else:
+          flash = "playlist_already_in_lib"          
       else:
         flash = "playlist_not_found"
       

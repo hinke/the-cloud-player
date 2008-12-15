@@ -12,10 +12,9 @@ class User(db.Model):
     return (x for x in self.library_set.order("position"))
   
   def has_playlist(self, playlist):
-    for p in self.playlists():
-        if p.playlist and p.playlist.key() == playlist.key():
-          return True
-    return False
+    q = db.GqlQuery("SELECT * FROM Library WHERE user = :user AND playlist = :playlist ORDER BY position DESC", user=self, playlist=playlist)
+    return q.get()
+
   
   def re_index_playlists(self):
     i = 0
