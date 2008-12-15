@@ -1072,6 +1072,7 @@ table {
   #flash div {
     margin: 0 auto;
     max-width: 50%;
+    background: black;
     background: rgba(0,0,0,0.7);
     text-align: center;
     color: white;
@@ -1130,8 +1131,8 @@ table {
   margin-left: -390px;
   margin-top: -190px;
   width: 730px;
-  background: rgba(255,255,255,1);
-  border: 5px solid rgba(170,170,170,1);
+  background: white;
+  border: 5px solid rgb(170,170,170);
   -webkit-box-shadow : 3px 3px 5px rgba(0,0,0,0.3);
   -moz-box-shadow : 3px 3px 5px rgba(0,0,0,0.3);
   color: #555;
