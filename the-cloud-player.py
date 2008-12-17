@@ -73,7 +73,7 @@ class SharePlaylist(webapp.RequestHandler):
       if google_user and not app_user:
         app_user = utils.init_new_user(google_user)
         
-      share_hash = utils.url_to_entity_key(self.request.uri)
+      share_hash = utils.url_to_share_key(self.request.uri)
       q = db.GqlQuery("SELECT * FROM Playlist WHERE share_hash = :share_hash", share_hash=share_hash)  
       playlist = q.get()
 
@@ -94,75 +94,68 @@ class SharePlaylist(webapp.RequestHandler):
 class Playlist(webapp.RequestHandler):  
   def get(self):
     key = utils.url_to_entity_key(self.request.uri)
-    playlist = db.get(db.Key(key))
-    library_item = playlist.library_item_for_current_user()
-    self.response.out.write(library_item.serialize())
+    if key:
+      playlist = db.get(db.Key(key))
+      if playlist:
+        library_item = playlist.library_item_for_current_user()
+        self.response.out.write(library_item.serialize())
 
   def post(self):
     method = self.request.get("_method")
     key = utils.url_to_entity_key(self.request.uri)
-    playlist = db.get(db.Key(key))
-    current_user = utils.get_current_user()
+    if key:
+      playlist = db.get(db.Key(key))
+      if playlist:
+        current_user = utils.get_current_user()
     
-    #Get corresponding link
-    library_item = playlist.library_item_for_user(current_user)
+        #Get corresponding link
+        library_item = playlist.library_item_for_user(current_user)
     
-    if method == "PUT":
-      need_version_control = False
-      playlist_changed = False
+        if method == "PUT":
+          need_version_control = False
+          playlist_changed = False
       
-      if(self.request.get('position')): #Rights: Can always update this
-        current_user.re_sort_playlists(library_item, int(self.request.get('position')))        
+          if(self.request.get('position')): #Rights: Can always update this
+            current_user.re_sort_playlists(library_item, int(self.request.get('position')))        
 
-      if (playlist.collaborative or library_item.is_owner): #Rights: Owner or collaborators can update this
-        if playlist.smart:
-          utils.parse_smart_filters(playlist, self.request)
-          playlist_changed = True
-        if self.request.get('tracks'):
-          playlist.tracks = self.request.get('tracks')
-          playlist_changed = True
+          if (playlist.collaborative or library_item.is_owner): #Rights: Owner or collaborators can update this
+            if playlist.smart:
+              utils.parse_smart_filters(playlist, self.request)
+              playlist_changed = True
+            if self.request.get('tracks'):
+              playlist.tracks = self.request.get('tracks')
+              playlist_changed = True
 
-        need_version_control = playlist.collaborative
+            need_version_control = playlist.collaborative
 
-      if library_item.is_owner: #Rights: Only owner can update this
-        if(self.request.get('name') and len(self.request.get('name')) > 0):
-          playlist.name = utils.strip_html(self.request.get('name'))
-          playlist_changed = True
-        if(self.request.get('collaborative')):
-          playlist.collaborative = utils.convert_javascript_bool_to_python(self.request.get('collaborative'))
-          playlist_changed = True
+          if library_item.is_owner: #Rights: Only owner can update this
+            if(self.request.get('name') and len(self.request.get('name')) > 0):
+              playlist.name = utils.strip_html(self.request.get('name'))
+              playlist_changed = True
+            if(self.request.get('collaborative')):
+              playlist.collaborative = utils.convert_javascript_bool_to_python(self.request.get('collaborative'))
+              playlist_changed = True
       
-      if playlist_changed:
-        if need_version_control: 
-          if int(self.request.get('version')) < playlist.version:
-            self.response.out.write(library_item.serialize())            
+          if playlist_changed:
+            if need_version_control: 
+              if self.request.get('version') and not int(self.request.get('version')) < playlist.version:
+                playlist.version += 1
+                playlist.put()
+                self.response.out.write(utils.status_code_json(200))
+              else:
+                self.response.out.write(library_item.serialize())
+            else:
+              playlist.put()
+              self.response.out.write(utils.status_code_json(200))
           else:
-            playlist.version += 1
-            playlist.put()
             self.response.out.write(utils.status_code_json(200))
-        else:
-          playlist.put()
-
-      self.response.out.write(utils.status_code_json(200))
-        
-    elif method == "DELETE":
-      if library_item.is_owner and not playlist.collaborative:
-        users_connected_to_playlist = playlist.users()
-        for item in users_connected_to_playlist:
-          item.delete()
-          item.user.re_index_playlists()
-          
-        playlist.delete()
-        current_user.re_index_playlists()
-      elif playlist.collaborative:
-        library_item.delete()
-        current_user.re_index_playlists()
-        if not playlist.has_user():
-          playlist.delete()
-          
-      elif not library_item.is_owner:
-        library_item.delete()
-        current_user.re_index_playlists()
+            
+        elif method == "DELETE":
+          library_item.delete()
+          current_user.re_index_playlists()
+          if not playlist.has_user():
+            playlist.delete()
+          self.response.out.write(utils.status_code_json(200))
       
 class Playlists(webapp.RequestHandler):
   def get(self):

@@ -63,10 +63,17 @@ def utf8string(s):
   
 def url_to_entity_key(url):
   url_array = url.split("/")
+  if len(url_array) > 4 and len(url_array[4]) > 30:
+    return url_array[4]
+  else:
+    return False
+
+def url_to_share_key(url):
+  url_array = url.split("/")
   if len(url_array) > 4:
     return url_array[4]
   else:
-    return ""
+    return False
 
 def convert_javascript_bool_to_python(s):
   if s.lower() == "true":
