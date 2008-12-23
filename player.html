@@ -11,6 +11,7 @@
     <script src="/scripts/soundmanager2.js" type="text/javascript"></script>
     <script type="text/javascript" src="/scripts/md5.js"></script>
     <script type="text/javascript" src="/scripts/jquery-ui-personalized-1.6rc2.js?v={{rando}}"></script>
+    <script type="text/javascript" src="/scripts/jquery.history_remote.js"></script>
     <script type="text/javascript" src="/scripts/jquery.cookie.js"></script>
     <script src="/scripts/utils.js{% if in_development_enviroment %}?v= {{rando}} {% endif %}" type="text/javascript"></script>
     <script src="/scripts/player.js{% if in_development_enviroment %}?v= {{rando}} {% endif %}" type="text/javascript"></script>
@@ -34,7 +35,7 @@
       <div id="login">
         <a href="" id="about">About</a> | 
         {% if user %}
-          Signed in as <a href="#" class="nickname">{{user.nickname}}</a> | <a href="{{logout_url}}">Sign out</a>
+          Signed in as <a href="#nick" class="nickname">{{user.nickname}}</a> | <a href="{{logout_url}}">Sign out</a>
         {% else %}
           <a href="{{login_url}}">Sign in with your Google Account</a>        
         {% endif %}
@@ -49,7 +50,7 @@
           <a href="#close" class="close">x</a>
           <h3>This is the artist</h3>
           <p>This is the desc</p>
-          <p class="check-on-sc"><a href="#">Go to the artist on SoundCloud »</a></p>
+          <p class="check-on-sc"><a href="#sc">Go to the artist on SoundCloud »</a></p>
         </div>
         <img src="http://a1.soundcloud.com/avatars/0001/1308/i039964_big.jpg">
       </div>
@@ -163,8 +164,7 @@
           <img src="/images/erichenrik.png" width="90" height="51" alt="Henrik &amp; Eric">
           Built by <a href="http://hinkeb.com">Henrik Berggren</a> &amp; <a href="http://eric.wahlforss.com">Eric Wahlforss</a> using 
           <a href="http://appengine.google.com">Google App Engine</a>, <a href="http://python.org">Python</a>, <a href="http://jquery.com">jQuery</a>, 
-          <a href="http://www.schillmania.com/projects/soundmanager2/">SoundManager 2</a>, <a href="http://www.everaldo.com/crystal/">Crystal</a> and the <a href="http://soundcloud.com/api">SoundCloud API</a>. 
-          Do you want to contribute? Go ahead and <a href="http://github.com/hinke/the-cloud-player/tree/master">fork from GitHub</a>!
+          <a href="http://www.schillmania.com/projects/soundmanager2/">SoundManager 2</a>, <a href="http://www.everaldo.com/crystal/">Crystal</a> and the <a href="http://soundcloud.com/api">SoundCloud API</a>. Also thanks to <a href="http://bassistance.de/">Jörn</a> for the back-button support. Do you want to contribute? Go ahead and <a href="http://github.com/hinke/the-cloud-player/tree/master">fork from GitHub</a>!
         </p>
       </div>
 

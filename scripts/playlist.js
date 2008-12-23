@@ -421,9 +421,9 @@ SC.Playlist.prototype = {
       })
       .find("td:nth-child(1)").css("width",self.colWidths[0]).end()
       .find("td:nth-child(2)").css("width",self.colWidths[1]).text(track.title).end()
-      .find("td:nth-child(3)").css("width",self.colWidths[2]).html("<a href='#'>" + track.user.username + "</a>")
+      .find("td:nth-child(3)").css("width",self.colWidths[2]).html("<a href='#" + track.user.username.replace(/\s/, "+") + "'>" + track.user.username + "</a>")
         .find("a")
-        .click(function(ev) {
+        .history(function(ev) {
           self.player.removePlaylist("artist");
           self.player.playlists["artist"] = new SC.Playlist({
             is_owner: true,
@@ -441,15 +441,14 @@ SC.Playlist.prototype = {
           },self.player);
           self.player.switchPlaylist("artist");
           self.player.loadArtistInfo(track.user.uri);
-          ev.preventDefault();
         }).end()
       .end()
       .find("td:nth-child(4)").css("width",self.colWidths[3]).text(SC.formatMs(track.duration)).end()
       .find("td:nth-child(5)").css("width",self.colWidths[4]).html(track.description).attr("title",track.description).end()
       .find("td:nth-child(6)").css("width",self.colWidths[5]).text(track.bpm).end()
-      .find("td:nth-child(7)").css("width",self.colWidths[6]).html("<a href='#'>" + track.genre + "</a>")
+      .find("td:nth-child(7)").css("width",self.colWidths[6]).html("<a href='#" + track.genre.replace(/\s/, "+") + "'>" + track.genre + "</a>")
         .find("a")
-        .click(function(ev) {
+        .history(function(ev) {
           var genre = this.innerHTML;
           self.player.removePlaylist("genre");
           self.player.playlists["genre"] = new SC.Playlist({
@@ -466,7 +465,6 @@ SC.Playlist.prototype = {
             }
           }, self.player);
           self.player.switchPlaylist("genre");
-          ev.preventDefault();
         }).end()
       .end()
       .appendTo(this.list);
@@ -474,8 +472,8 @@ SC.Playlist.prototype = {
   },
   addToPlaylistsList: function() { // add the tab for the playlist
     var self = this;
-    $("<li listId='" + this.id + "' class='" + (this.properties.is_owner ? "" : "shared") + " " + (this.properties.playlist.collaborative ? "collaborative" : "") + " " + (this.persisted ? "" : "dont-persist") + " " + (this.properties.playlist.smart ? "smart" : "") + " " + (this.properties.playlist.search ? "search" : "") + "'><span></span><a href='#'>" + this.name + (this.properties.is_owner ? "" : " <em>by " + this.properties.playlist.owner.nickname + "</em>") + "</a><a class='collaborative' title='Make Playlist Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a></li>")
-      .find('a:first').click(function(ev) {
+    $("<li listId='" + this.id + "' class='" + (this.properties.is_owner ? "" : "shared") + " " + (this.properties.playlist.collaborative ? "collaborative" : "") + " " + (this.persisted ? "" : "dont-persist") + " " + (this.properties.playlist.smart ? "smart" : "") + " " + (this.properties.playlist.search ? "search" : "") + "'><span></span><a href='#" + this.name.replace(/\s/, "+") + "'>" + this.name + (this.properties.is_owner ? "" : " <em>by " + this.properties.playlist.owner.nickname + "</em>") + "</a><a class='collaborative' title='Make Playlist Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a></li>")
+      .find('a:first').history(function(ev) {
         if($(this).parents("li").hasClass("active") && self.properties.is_owner && $("body").hasClass("logged-in")) {
           var that = this; // very strange that i can't use self here
           if(!window.editingText) { // edit in place for playlist title
@@ -491,7 +489,7 @@ SC.Playlist.prototype = {
               var closeEdit = function(save) {
                 if(save) {
                   self.name = $("input",that).val().replace(/<.*?>/,"");
-                  $(that).text(self.name);
+                  $(that).text(self.name).attr("href", "#" + self.name.replace(/\s/, "+"));;
                   self.saveName();
                 } else {
                   $(that).text(origValue);                  
@@ -527,7 +525,6 @@ SC.Playlist.prototype = {
         } else {
           self.player.switchPlaylist(self.id);
         }
-        ev.preventDefault();
       })
       .attr('pane',this.dom)
       .end()

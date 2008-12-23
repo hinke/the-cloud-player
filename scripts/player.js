@@ -419,6 +419,11 @@ SC.Player.prototype = {
           }          
         }
         
+        // init back-button support
+        $.ajaxHistory.initialize(function() {
+          $("#playlists a:first").click();
+        });
+                
       });
     } else { // not logged in, then load a few standard playlists without persisting
       self.playlists['latest'] = new SC.Playlist({
@@ -522,6 +527,12 @@ SC.Player.prototype = {
       $("#about-box").fadeIn();
       
       self.switchPlaylist("latest");
+
+      // init back-button support
+      $.ajaxHistory.initialize(function() {
+        $("#playlists a:first").click();
+      });
+
     }
     
     $("#playlists").sortable({
