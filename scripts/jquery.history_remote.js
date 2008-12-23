@@ -311,20 +311,21 @@ $.fn.remote = function(output, settings, callback) {
  * @cat Plugins/History
  * @author Klaus Hartl/klaus.hartl@stilbuero.de
  */
-$.fn.history = function(callback) {
+$.fn.history = function(callback,bypassHistory) {
     return this.click(function(e) {        
-		// add to history only if true click occured,
-		// not a triggered click...
-        if (e.clientX) {
-	        // ...and die if already active
-			if (this.hash == location.hash) {
-				return false;
-			} 
-           	$.ajaxHistory.update(this.hash);
-        }
-		if (typeof callback == 'function') {
-			callback.call(this, e);
-		}
+		  // add to history only if true click occured,
+		  // not a triggered click...
+		  
+      if (e.clientX) {
+	      // ...and die if already active
+			  if (this.hash == location.hash && !bypassHistory) { // eric bypass patch here to enable renaming
+			    return false;
+			  } 
+        $.ajaxHistory.update(this.hash);
+      }
+		  if (typeof callback == 'function') {
+			  callback.call(this, e);
+		  }
     });
 };
 

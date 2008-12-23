@@ -525,7 +525,7 @@ SC.Playlist.prototype = {
         } else {
           self.player.switchPlaylist(self.id);
         }
-      })
+      },true)
       .attr('pane',this.dom)
       .end()
       .find('a.delete').click(function() {
@@ -535,19 +535,21 @@ SC.Playlist.prototype = {
         return false;
       }).end()
       .find('a.share').click(function() {
-        $("#share-playlist > div:first")
-          .clone()
-          .find("a.close").click(function() {
-            $(this).parents("div.share-playlist").fadeOut(function() {
-              $(this).remove();
-            });
-            return false;
-          }).end()
-          .find("input").val(this.href).end()
-          .appendTo("body")
-          .fadeIn(function() {
-            $(".share-playlist input").focus().select();
-          });
+        if($("body").hasClass("logged-in")) {
+          $("#share-playlist > div:first")
+            .clone()
+            .find("a.close").click(function() {
+              $(this).parents("div.share-playlist").fadeOut(function() {
+                $(this).remove();
+              });
+              return false;
+            }).end()
+            .find("input").val(this.href).end()
+            .appendTo("body")
+            .fadeIn(function() {
+              $(".share-playlist input").focus().select();
+            });          
+        }
         return false;
       }).end()
       .find('a.collaborative').click(function() {
