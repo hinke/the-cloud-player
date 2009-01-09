@@ -15,6 +15,7 @@ def init_new_user(google_user):
   app_user.put()
   
   default_playlists = []
+  
   p = models.Playlist(name = "Hot Tracks", smart = True, owner=app_user, order = "hotness", share_hash = generate_share_hash())
   default_playlists.append(p)
   p = models.Playlist(name = "Indie", smart = True, owner=app_user, genres="indie", order = "latest", share_hash = generate_share_hash())

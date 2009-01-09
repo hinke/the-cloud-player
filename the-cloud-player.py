@@ -57,7 +57,7 @@ class API(webapp.RequestHandler):
 class PlayerPage(webapp.RequestHandler):
   def get(self):
     google_user = users.get_current_user()
-    app_user = utils.get_current_user()
+    app_user = utils.get_user(google_user)
     if google_user and not app_user:
       app_user = utils.init_new_user(google_user)
     
@@ -165,6 +165,7 @@ class Playlists(webapp.RequestHandler):
 
   def post(self):  #Create new playlist
     current_user = utils.get_current_user()
+    
     playlist = models.Playlist(name = self.request.get("name"),owner=current_user, smart = utils.convert_javascript_bool_to_python(self.request.get("smart")), share_hash = utils.generate_share_hash())
     
     if playlist.smart:
