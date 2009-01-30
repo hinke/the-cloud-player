@@ -196,11 +196,16 @@ class Playlists(webapp.RequestHandler):
     
     self.response.out.write(library_item.serialize())
 
+class Flush(webapp.RequestHandler):
+  def get(self):
+    memcache.flush_all()
+
 def main():
   application = webapp.WSGIApplication([
                                       ('/playlists', Playlists), 
                                       ('/playlists/', Playlists), 
-                                      ('/playlists/.*', Playlist), 
+                                      ('/playlists/.*', Playlist),
+                                      ('/pages/flush[/]*', Flush),
                                       ('/api/.*', API), 
                                       ('/user', User), 
                                       ('/share/.*', SharePlaylist), 
