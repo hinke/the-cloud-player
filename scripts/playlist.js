@@ -491,7 +491,7 @@ SC.Playlist.prototype = {
   addToPlaylistsList: function() { // add the tab for the playlist
     var self = this;
     $("<li listId='" + this.id + "' class='" + (this.properties.is_owner ? "" : "shared") + " " + (this.properties.playlist.collaborative ? "collaborative" : "") + " " + (this.persisted ? "" : "dont-persist") + " " + (this.properties.playlist.smart ? "smart" : "") + " " + (this.properties.playlist.search ? "search" : "") + "'><span></span><a href='#" + this.name.replace(/\s/, "+") + "'>" + this.name + (this.properties.is_owner ? "" : " <em>by " + this.properties.playlist.owner.nickname + "</em>") + "</a><a class='collaborative' title='Make Playlist Collaborative' href='/playlists/" + this.id + "'>&nbsp;</a><a class='share' title='Share Playlist' href='/share/" + this.properties.playlist.share_hash + "'>&nbsp;</a><a class='delete' title='Remove Playlist' href='/playlists/" + this.id + "'>&nbsp;</a></li>")
-      .find('a:first').history(function(ev) {
+      .find('a:first').click(function(ev) {
         if($(this).parents("li").hasClass("active") && self.properties.is_owner && $("body").hasClass("logged-in")) {
           var that = this; // very strange that i can't use self here
           if(!window.editingText) { // edit in place for playlist title
@@ -543,7 +543,8 @@ SC.Playlist.prototype = {
         } else {
           self.player.switchPlaylist(self.id);
         }
-      },true)
+        return false;
+      })
       .attr('pane',this.dom)
       .end()
       .find('a.delete').click(function() {
