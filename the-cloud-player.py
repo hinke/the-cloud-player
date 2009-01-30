@@ -58,13 +58,13 @@ class API(webapp.RequestHandler):
     api_parameters = utils.extract_parameters(self.request.uri)
     if api_parameters:
       self.response.headers["Content-Type"] = "text/javascript; charset=utf-8"
-      self.response.headers["Cache-Control"] = "max-age=3600, must-revalidate" # testing force client caching, works in ff3 at least
+      self.response.headers["Cache-Control"] = "max-age=10800, must-revalidate" # testing force client caching, works in ff3 at least
       parameters_hash = str(hash(api_parameters))    
       hit = memcache.get(parameters_hash)
       if hit is None:
         try:
           response = urlfetch.fetch(url = sc_api_url + api_parameters,method=urlfetch.GET, headers={'Content-Type': 'text/javascript; charset=utf-8'})
-          memcache.set(parameters_hash, response.content, 3600)
+          memcache.set(parameters_hash, response.content, 10800)
           utils.print_with_callback(callback, response.content. self.response)
         except:
           utils.print_with_callback(callback, utils.status_code_json(408), self.response)
