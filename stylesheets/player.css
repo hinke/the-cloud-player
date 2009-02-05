@@ -401,13 +401,14 @@ table {
     left: 24px;
     background-image: url(/images/icons.png);
     background-position: -150px 56px;
-    width: 104px;
+    width: 99px;
     height: 10px;
   }
   
   .ui-slider-range {
     background: rgba(63,111,211,0.2);
     height: 10px;
+    position: absolute;
   }
 
   #create-smart-playlist .buttons {
@@ -916,7 +917,7 @@ table {
   left: 149px;
   background-image: url(/images/icons.png);
   background-position: -150px 56px;
-  width: 104px;
+  width: 99px;
   height: 10px;  
 }
 
@@ -948,6 +949,7 @@ table {
   background-position: -151px 79px;
   position: absolute;
   z-index: 10;
+  margin-left: -6px;
 }
 
 #footer input[type=image] {

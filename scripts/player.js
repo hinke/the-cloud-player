@@ -72,17 +72,17 @@ SC.Player.prototype = {
 
     // create smart playlist, bpm slider
     $("#pl-bpm-range-slider").slider({
-      min : 0,
-      max : 250,
+      min : 50,
+      max : 200,
       range: true,
+      values: [50,200],
       slide : function(e, ui) {
-        $("#bpm-range-start").text($("#pl-bpm-range-slider").slider("value",0));
-        $("#bpm-range-stop").text(Math.floor($("#pl-bpm-range-slider").slider("value",0) + ui.range));
+        $("#bpm-range-start").text(ui.values[0]);
+        $("#bpm-range-stop").text(ui.values[1]);
+        $("#pl-bpm-range-start").val(ui.values[0]);
+        $("#pl-bpm-range-stop").val(ui.values[1]);
       },
-      change : function(e, ui) {
-        $("#pl-bpm-range-start").val($("#pl-bpm-range-slider").slider("value",0));
-        $("#pl-bpm-range-stop").val($("#pl-bpm-range-slider").slider("value",0) + ui.range);
-      }
+      orientation : 'horizontal'
     });
     
     // code to prevent keypress event from triggering when creating smart playlist
@@ -208,9 +208,11 @@ SC.Player.prototype = {
       this.volume = 100; // default to max
     }
 
+    console.log(this.volume)
+
     // volume
     $("#volume").slider({
-      startValue : this.volume,
+      value : this.volume,
       min : 0,
       max : 100,
       slide : function(e, ui) {
@@ -220,6 +222,7 @@ SC.Player.prototype = {
         }
       },
       change : function(e, ui) {
+        console.log(e,ui.value)
         $.cookie('volume',ui.value); // save the volume in a cookie
       }
     });
