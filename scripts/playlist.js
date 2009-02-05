@@ -254,7 +254,6 @@ SC.Playlist.prototype = {
           }
         },
         stop : function(e,ui) {
-          self.save();
         }
       });
     } else {
@@ -277,7 +276,7 @@ SC.Playlist.prototype = {
           }
         },
         sort : function(e,ui) {
-          ui.placeholder.remove();
+          //ui.placeholder.remove();
         },
         opacity: 0.7,
         delay: 30,
@@ -600,6 +599,7 @@ SC.Playlist.prototype = {
     			hoverClass: 'droppable-hover',
     			tolerance: 'pointer',
     			drop: function(ev, ui) {
+    			  console.log('foobar!!!!!!!!')
     			  self.player.justDropped = true;  // ugly, but I can't find a proper callback;
     				var listId = $(this).attr('listId');
     			  if(ui.draggable.siblings(".selected").length > 0) { //multi-drag
