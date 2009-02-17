@@ -56,6 +56,11 @@ $.extend(SC, {
 	utcNow : function() {
     return this.utcDate(new Date());
 	},
+	utcLastWeek : function () {
+    var d = new Date();
+    d.setDate(d.getDate()-7);
+    return SC.utcDate(d);	  
+	},
 	utcLastMonth : function () {
     var d = new Date();
     d.setDate(d.getDate()-30);
