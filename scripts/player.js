@@ -287,7 +287,7 @@ SC.Player.prototype = {
               smart : true,
               smart_filter : {
                 search_term : q,
-                order: "created_at"
+                order: "hotness"
               }
             }
           },self);
@@ -618,7 +618,7 @@ SC.Player.prototype = {
               smart: true,
               smart_filter: {
                 artist : track.user.permalink,                
-                order: "created_at"
+                order: "hotness"
               },
               dontPersist : true,
               dontShowPlaylistItem : true

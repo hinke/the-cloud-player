@@ -153,8 +153,8 @@ SC.Playlist.prototype = {
 
       if(pl.smart_filter.order == "hotness" && !pl.smart_filter.user_favorites) { // prevent favs hotness sorting API bug
         baseUrl = baseUrl + "&order=" + pl.smart_filter.order + "&from_date=" + SC.utcYesterday() + "&to_date=" + SC.utcNow();
-      } else { // default to sort by created_at
-        baseUrl = baseUrl + "&order=created_at";
+      } else { // default to sort by hotness
+        baseUrl = baseUrl + "&order=hotness";
       }
       if(pl.smart_filter.genres) {
         baseUrl = baseUrl + "&genres=" + pl.smart_filter.genres;
@@ -450,7 +450,7 @@ SC.Playlist.prototype = {
               smart: true,
               smart_filter: {
                 artist : track.user.permalink,
-                order: "created_at"                
+                order: "hotness"                
               },
               dontPersist : true,
               dontShowPlaylistItem : true
@@ -475,7 +475,7 @@ SC.Playlist.prototype = {
               smart: true,
               smart_filter: {
                 genres : genre,
-                order: "created_at"                
+                order: "hotness"                
               },
               dontPersist : true,
               dontShowPlaylistItem : true
