@@ -67,7 +67,7 @@ $.extend(SC, {
 	dateLastMonth : function () {
     var d = new Date();
     d.setDate(d.getDate()-30);
-    return SC.utcDate(d);	  
+    return SC.date(d);	  
 	},
 	utcLastMonth : function () {
     var d = new Date();
