@@ -53,12 +53,20 @@ $.extend(SC, {
 	utcDate: function(date) {
 	  return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
 	},
+	date: function(date) {
+	  return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+	},
 	utcNow : function() {
     return this.utcDate(new Date());
 	},
 	utcLastWeek : function () {
     var d = new Date();
     d.setDate(d.getDate()-7);
+    return SC.utcDate(d);	  
+	},
+	dateLastMonth : function () {
+    var d = new Date();
+    d.setDate(d.getDate()-30);
     return SC.utcDate(d);	  
 	},
 	utcLastMonth : function () {

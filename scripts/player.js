@@ -417,7 +417,7 @@ SC.Player.prototype = {
     
     this.playlists = {};
 
-    // load latest tracks if not logged in user
+    // load hot tracks if not logged in user
     if($("body").hasClass("logged-in")) {
 
       // load playlists for user
@@ -446,7 +446,7 @@ SC.Player.prototype = {
         is_owner: true,
         playlist: {
           id : "latest",
-          name : "Latest Tracks",
+          name : "Hot Tracks",
           smart : true,
           version : 0,
           smart_filter : {

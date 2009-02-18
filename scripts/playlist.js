@@ -152,7 +152,7 @@ SC.Playlist.prototype = {
       }
 
       if(pl.smart_filter.order == "hotness" && !pl.smart_filter.user_favorites) { // prevent favs hotness sorting API bug
-        baseUrl = baseUrl + "&order=" + pl.smart_filter.order + "&created_at[from]=" + SC.utcLastWeek() + "&created_at[to]=" + SC.utcNow();
+        baseUrl = baseUrl + "&order=" + pl.smart_filter.order + "&created_at[from]=" + SC.dateLastMonth();
       } else { // default to sort by hotness
         baseUrl = baseUrl + "&order=hotness";
       }

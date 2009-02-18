@@ -149,8 +149,6 @@ def strip_html(s):
 def extract_parameters(url):
   url_array = url.split("/api")
   if len(url_array) > 1:
-    ret = strip_named_parameter("created_at[from]", url_array[1])
-    ret = strip_named_parameter("created_at[to]", ret)
     ret = strip_named_parameter("callback", ret)
     ret = strip_named_parameter("_", ret)
     return ret
