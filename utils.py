@@ -149,7 +149,7 @@ def strip_html(s):
 def extract_parameters(url):
   url_array = url.split("/api")
   if len(url_array) > 1:
-    ret = strip_named_parameter("callback", ret)
+    ret = strip_named_parameter("callback", url_array[1])
     ret = strip_named_parameter("_", ret)
     return ret
   else:
@@ -160,7 +160,6 @@ def print_with_callback(callback, content, response):
   response.out.write("(")
   response.out.write(content)
   response.out.write(")")
-  
 
 def strip_named_parameter(parameter_to_remove, url):
   p = re.compile('&'+parameter_to_remove+'[^&]*')
