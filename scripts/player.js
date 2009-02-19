@@ -447,7 +447,7 @@ SC.Player.prototype = {
           smart : true,
           version : 0,
           smart_filter : {
-            order : "latest"
+            order : "hotness"
           }
         }
       },self);
@@ -460,7 +460,7 @@ SC.Player.prototype = {
           smart : true,
           version : 0,
           smart_filter : {
-            order : "latest",
+            order : "hotness",
             genres : "indie"
           }
         }
@@ -474,7 +474,7 @@ SC.Player.prototype = {
           smart : true,
           version : 0,
           smart_filter : {
-            order : "latest",
+            order : "hotness",
             genres : "deep house"
           }
         }
@@ -488,7 +488,7 @@ SC.Player.prototype = {
           smart : true,
           version : 0,
           smart_filter : {
-            order : "latest",
+            order : "hotness",
             genres : "rock"
           }
         }
@@ -502,7 +502,7 @@ SC.Player.prototype = {
           smart : true,
           version : 0,
           smart_filter : {
-            order : "latest",
+            order : "hotness",
             genres : "techno"
           }
         }
@@ -516,7 +516,7 @@ SC.Player.prototype = {
           smart : true,
           version : 0,
           smart_filter : {
-            order : "latest",
+            order : "hotness",
             genres : "spoken+word,spokenword"
           }
         }
@@ -530,7 +530,7 @@ SC.Player.prototype = {
           smart : true,
           version : 0,
           smart_filter : {
-            order : "latest",
+            order : "hotness",
             genres : "dubstep, dub+step"
           }
         }
