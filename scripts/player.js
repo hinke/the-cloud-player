@@ -208,8 +208,6 @@ SC.Player.prototype = {
       this.volume = 100; // default to max
     }
 
-    console.log(this.volume)
-
     // volume
     $("#volume").slider({
       value : this.volume,
@@ -222,7 +220,6 @@ SC.Player.prototype = {
         }
       },
       change : function(e, ui) {
-        console.log(e,ui.value)
         $.cookie('volume',ui.value); // save the volume in a cookie
       }
     });
