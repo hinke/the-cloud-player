@@ -284,7 +284,8 @@ SC.Player.prototype = {
               smart : true,
               smart_filter : {
                 search_term : q,
-                order: "hotness"
+                order: "hotness",
+                hotness_from : "2007-01-01"
               }
             }
           },self);
