@@ -25,6 +25,7 @@ import wsgiref.handlers
 
 import random
 import logging
+import urllib
 
 from google.appengine.ext import db
 
@@ -56,7 +57,8 @@ class User(webapp.RequestHandler):
 
 class API(webapp.RequestHandler):
   def get(self):
-    sc_api_url = "http://api.soundcloud.com/"
+    
+    sc_api_url = "http://api.soundcloud.com"
     callback = self.request.get('callback')
     api_parameters = utils.extract_parameters(self.request.uri)
     if api_parameters:
@@ -66,14 +68,13 @@ class API(webapp.RequestHandler):
       hit = memcache.get(parameters_hash)
       if hit is None:
         try:
-          response = urlfetch.fetch(url = sc_api_url + api_parameters,method=urlfetch.GET, headers={'Content-Type': 'text/javascript; charset=utf-8'})
+          response = urlfetch.fetch(url = sc_api_url + urllib.quote_plus(api_parameters),method=urlfetch.GET, headers={'Content-Type': 'text/javascript; charset=utf-8'})
           memcache.set(parameters_hash, response.content, 10800)
-          utils.print_with_callback(callback, response.content. self.response)
+          utils.print_with_callback(callback, response.content, self.response)
         except:
           utils.print_with_callback(callback, utils.status_code_json(408), self.response)
       else:
-        utils.print_with_callback(callback, hit, self.response)
-        
+        utils.print_with_callback(callback, hit, self.response)        
       
 class PlayerPage(webapp.RequestHandler):
   def get(self):

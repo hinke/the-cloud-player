@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 application: the-cloud-player
-version: 2
+version: 3
 runtime: python
 api_version: 1
 
@@ -34,9 +34,6 @@ handlers:
 - url: /images
   static_dir: images
 
-- url: .*
-  script: the-cloud-player.py
-
 - url: /favicon.ico
   static_files: images/favicon.ico
   upload: images/favicon.ico
@@ -44,3 +41,7 @@ handlers:
 - url: /robots.txt
   static_files: robots.txt
   upload: robots.txt
+
+- url: .*
+  script: the-cloud-player.py
+

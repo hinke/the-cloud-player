@@ -158,10 +158,13 @@ def extract_parameters(url):
     return None
 
 def print_with_callback(callback, content, response):
-  response.out.write(callback)
-  response.out.write("(")
-  response.out.write(content)
-  response.out.write(")")
+  if len(str(callback)) > 0:
+    response.out.write(callback)
+    response.out.write("(")
+    response.out.write(content)
+    response.out.write(")")
+  else:
+    response.out.write(content)
 
 def strip_named_parameter(parameter_to_remove, url):
   p = re.compile('&'+parameter_to_remove+'[^&]*')
