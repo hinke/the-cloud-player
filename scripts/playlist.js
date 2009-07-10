@@ -156,6 +156,7 @@ SC.Playlist.prototype = {
       }
 
       if(pl.smart_filter.order == "hotness" && !pl.smart_filter.user_favorites) { // prevent favs hotness sorting API bug
+        console.log(pl.smart_filter.hotness_from)
         var hotness_from = (pl.smart_filter.hotness_from ? pl.smart_filter.hotness_from : SC.dateLastMonth());
         baseUrl = baseUrl + "&order=" + pl.smart_filter.order + "&created_at[from]=" + hotness_from;
       } else { // default to sort by latest
@@ -446,6 +447,7 @@ SC.Playlist.prototype = {
       .find("td:nth-child(3)").css("width",self.colWidths[2]).html("<a href='#" + track.user.username.replace(/\s/, "+") + "'>" + track.user.username + "</a>")
         .find("a")
         .history(function(ev) {
+          console.log('clicked art')
           self.player.removePlaylist("artist");
           self.player.playlists["artist"] = new SC.Playlist({
             is_owner: true,
@@ -455,7 +457,8 @@ SC.Playlist.prototype = {
               smart: true,
               smart_filter: {
                 artist : track.user.permalink,
-                order: "hotness"                
+                order: "hotness",
+                hotness_from : "2007-01-01"
               },
               dontPersist : true,
               dontShowPlaylistItem : true
