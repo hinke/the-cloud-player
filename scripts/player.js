@@ -620,7 +620,8 @@ SC.Player.prototype = {
               smart: true,
               smart_filter: {
                 artist : track.user.permalink,                
-                order: "hotness"
+                order: "hotness",
+                hotness_from : "2007-01-01"
               },
               dontPersist : true,
               dontShowPlaylistItem : true
