@@ -150,7 +150,10 @@ SC.Playlist.prototype = {
       if(pl.smart_filter.user_favorites) { // user favs pl
         baseUrl += "users/" + pl.smart_filter.user_favorites + "/favorites." + format + "?filter=streamable"
       } else if(pl.smart_filter.artist) { // artist pl
-        baseUrl += "users/" + pl.smart_filter.artist + "/tracks." + format + "?filter=streamable"
+        // get the sc user_id from the uri
+        var tmp = pl.smart_filter.artist.split("/");
+        var userId = tmp[tmp.length-1];
+        baseUrl += "users/" + userId + "/tracks." + format + "?filter=streamable"
       } else { // dynamic smart pl
         baseUrl += "tracks." + format + "?filter=streamable";
       }
@@ -195,7 +198,7 @@ SC.Playlist.prototype = {
           console.log('app engine timeout, sc api fallback')
           $.getJSON(self.generateTracksUrl("http://api.soundcloud.com/") + "&offset=" + self.offset, function(dataNonCached) {
             self.processTrackData(dataNonCached);
-          })
+          });
         } else {
           self.processTrackData(data);
         }
@@ -456,7 +459,7 @@ SC.Playlist.prototype = {
               name : "Artist: " + track.user.username,
               smart: true,
               smart_filter: {
-                artist : track.user.permalink,
+                artist : track.user.uri,
                 order: "hotness",
                 hotness_from : "2007-01-01"
               },
@@ -625,5 +628,5 @@ SC.Playlist.prototype = {
     		});  	  
   	}  		
   		
-  }
+                      }
 }

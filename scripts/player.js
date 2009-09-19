@@ -470,7 +470,7 @@ SC.Player.prototype = {
           }
         }
       },self);
-
+      
       self.playlists['deephouse'] = new SC.Playlist({
         is_owner: true,
         playlist: {
@@ -484,7 +484,7 @@ SC.Player.prototype = {
           }
         }
       },self);
-
+      
       self.playlists['rock'] = new SC.Playlist({
         is_owner: true,
         playlist: {
@@ -498,7 +498,7 @@ SC.Player.prototype = {
           }
         }
       },self);
-
+      
       self.playlists['techno'] = new SC.Playlist({
         is_owner: true,
         playlist: {
@@ -512,7 +512,7 @@ SC.Player.prototype = {
           }
         }
       },self);
-
+      
       self.playlists['spokenword'] = new SC.Playlist({
         is_owner: true,
         playlist: {
@@ -526,7 +526,7 @@ SC.Player.prototype = {
           }
         }
       },self);
-
+      
       self.playlists['dubstep'] = new SC.Playlist({
         is_owner: true,
         playlist: {
@@ -576,7 +576,7 @@ SC.Player.prototype = {
     var self = this;
     this.audioTracks[id] = soundManager.createSound({
       id: id,
-      url: track.stream_url + "?stream_token=player",
+      url: track.stream_url + "?oauth_consumer_key=UdbhZcCSuxR9AxcfR3uvgg",
       volume : this.volume,
       whileloading : SC.throttle(200,function() {
           self.loading.css('width',(self.audio.bytesLoaded/self.audio.bytesTotal)*100+"%");
@@ -619,7 +619,7 @@ SC.Player.prototype = {
               name : "Artist: " + track.user.username,
               smart: true,
               smart_filter: {
-                artist : track.user.permalink,                
+                artist : track.user.uri,                
                 order: "hotness",
                 hotness_from : "2007-01-01"
               },
