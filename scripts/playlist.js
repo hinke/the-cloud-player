@@ -142,8 +142,8 @@ SC.Playlist.prototype = {
   generateTracksUrl : function(baseUrl) { // generates the API url based on properties of the playlist
     var format = "js";
     if(!baseUrl) { // if no baseUrl then use json
-      var format = "json";
-      var baseUrl = "/api/";      
+      var format = "js";
+      var baseUrl = "http://api.soundcloud.com/";      
     }
     var pl = this.properties.playlist;
     if(pl.smart) { // check for all smart playlist params
@@ -159,7 +159,6 @@ SC.Playlist.prototype = {
       }
 
       if(pl.smart_filter.order == "hotness" && !pl.smart_filter.user_favorites) { // prevent favs hotness sorting API bug
-        console.log(pl.smart_filter.hotness_from)
         var hotness_from = (pl.smart_filter.hotness_from ? pl.smart_filter.hotness_from : SC.dateLastMonth());
         baseUrl = baseUrl + "&order=" + pl.smart_filter.order + "&created_at[from]=" + hotness_from;
       } else { // default to sort by latest
@@ -185,6 +184,7 @@ SC.Playlist.prototype = {
     }
     // limit to tracks under 20 mins long
     baseUrl += "&duration[to]=1200000&limit=" + this.limit; // increase limit to 100
+    console.log(baseUrl)
     return baseUrl;
   },
   load : function() {
@@ -193,8 +193,7 @@ SC.Playlist.prototype = {
       $("<div><div style='position:relative'><div id='throbber'></div></div></div>").appendTo(self.list);
       self.loading = true;
       self.tracks = [];
-      $.get(this.generateTracksUrl() + "&offset=" + this.offset, function(dataJS) {
-        var data = eval('(' + dataJS + ')');
+      $.getJSON(this.generateTracksUrl() + "&offset=" + this.offset, function(data) {
         if(data.response && parseInt(data.response) == 408) { // if google app engine timeout, then fallback to use the sc api directly, bypassing the caching layer
           console.log('app engine timeout, sc api fallback')
           $.getJSON(self.generateTracksUrl("http://api.soundcloud.com/") + "&offset=" + self.offset, function(dataNonCached) {
@@ -450,8 +449,8 @@ SC.Playlist.prototype = {
       .find("td:nth-child(2)").css("width",self.colWidths[1]).text(track.title).end()
       .find("td:nth-child(3)").css("width",self.colWidths[2]).html("<a href='#" + track.user.username.replace(/\s/, "+") + "'>" + track.user.username + "</a>")
         .find("a")
-        .history(function(ev) {
-          console.log('clicked art')
+        .click(function(ev) {
+          console.log('clicked artist')
           self.player.removePlaylist("artist");
           self.player.playlists["artist"] = new SC.Playlist({
             is_owner: true,
@@ -470,6 +469,7 @@ SC.Playlist.prototype = {
           },self.player);
           self.player.switchPlaylist("artist");
           self.player.loadArtistInfo(track.user.uri);
+          return false;
         }).end()
       .end()
       .find("td:nth-child(4)").css("width",self.colWidths[3]).text(SC.formatMs(track.duration)).end()
@@ -597,9 +597,7 @@ SC.Playlist.prototype = {
         }
         return false;
       }).end()
-      .appendTo("#playlists")
-      .hide()
-      .fadeIn();
+      .appendTo("#playlists");
   	
   	if(this.editable) { // if playlists are smart, they are read-only
       $('#playlists li:last')
@@ -611,7 +609,6 @@ SC.Playlist.prototype = {
     			hoverClass: 'droppable-hover',
     			tolerance: 'pointer',
     			drop: function(ev, ui) {
-    			  console.log('foobar!!!!!!!!')
     			  self.player.justDropped = true;  // ugly, but I can't find a proper callback;
     				var listId = $(this).attr('listId');
     			  if(ui.draggable.siblings(".selected").length > 0) { //multi-drag

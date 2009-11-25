@@ -541,9 +541,12 @@ SC.Player.prototype = {
         }
       },self);
       
-      // show about box
-      $("#about-box").fadeIn();
-      
+    	// show about box, if on live server and user hasn't seen it for 24 hours
+      if(location.href.split(".").length > 1 && !$.cookie('viewed_intro') == '1'){
+        $.cookie('viewed_intro', '1', { expires: 1 });
+        $("#about-box").fadeIn();
+      }
+
       self.switchPlaylist("latest");
 
     }
@@ -726,6 +729,7 @@ SC.Player.prototype = {
   },
   switchPlaylist: function(id) {
     $("#lists > div").hide();
+    console.log(id)
     $("#lists > #list-"+id).show();
     $("#playlists li").removeClass("active");
     $("#playlists li[listId="+id+"]").addClass("active");
