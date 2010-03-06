@@ -160,7 +160,7 @@ SC.Playlist.prototype = {
 
       if(pl.smart_filter.order == "hotness" && !pl.smart_filter.user_favorites) { // prevent favs hotness sorting API bug
         var hotness_from = (pl.smart_filter.hotness_from ? pl.smart_filter.hotness_from : SC.dateLastMonth());
-        baseUrl = baseUrl + "&order=" + pl.smart_filter.order + "&created_at[from]=" + hotness_from;
+        baseUrl = baseUrl; //removed sort by hotness here
       } else { // default to sort by latest
         baseUrl = baseUrl + "&order=created_at";
       }
