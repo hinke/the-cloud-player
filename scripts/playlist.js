@@ -157,10 +157,10 @@ SC.Playlist.prototype = {
       } else { // dynamic smart pl
         baseUrl += "tracks." + format + "?filter=streamable";
       }
-
+      console.log(pl.smart_filter.order)
       if(pl.smart_filter.order == "hotness" && !pl.smart_filter.user_favorites) { // prevent favs hotness sorting API bug
         var hotness_from = (pl.smart_filter.hotness_from ? pl.smart_filter.hotness_from : SC.dateLastMonth());
-        baseUrl = baseUrl; //removed sort by hotness here
+        baseUrl = baseUrl + "&order=hotness&created_at[from]=" + hotness_from; //removed sort by hotness here
       } else { // default to sort by latest
         baseUrl = baseUrl + "&order=created_at";
       }
