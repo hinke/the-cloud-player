@@ -571,8 +571,6 @@ SC.Player.prototype = {
   },
   load: function(track) {
     var id = "id" + track.id;
-//    var id = track.uri.substring(track.stream_url.lastIndexOf("/")+1);
-//    var id = track.stream_url.substring(track.stream_url.lastIndexOf("/")+1);
     this.loading.css('width',"0%");
     this.progress.css('width',"0%");
     $("#player-display img.logo").fadeOut('slow');
