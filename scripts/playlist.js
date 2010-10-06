@@ -143,7 +143,7 @@ SC.Playlist.prototype = {
     var format = "js";
     if(!baseUrl) { // if no baseUrl then use json
       var format = "js";
-      var baseUrl = "http://api.soundcloud.com/";      
+      var baseUrl = "http://api.soundcloud.com/";
     }
     var pl = this.properties.playlist;
     if(pl.smart) { // check for all smart playlist params
@@ -182,7 +182,7 @@ SC.Playlist.prototype = {
       baseUrl += "&callback=?"; // add JSONP callback param      
     }
     // limit to tracks under 20 mins long
-    baseUrl += "&duration[to]=1200000&limit=" + this.limit; // increase limit to 100
+    baseUrl += "&duration[to]=1200000&limit=" + this.limit + "&consumer_key=UdbhZcCSuxR9AxcfR3uvgg"; // increase limit to 100
     return baseUrl;
   },
   load : function() {

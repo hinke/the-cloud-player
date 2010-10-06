@@ -579,7 +579,7 @@ SC.Player.prototype = {
     var self = this;
     this.audioTracks[id] = soundManager.createSound({
       id: id,
-      url: track.stream_url + "?oauth_consumer_key=UdbhZcCSuxR9AxcfR3uvgg",
+      url: track.stream_url + "?consumer_key=UdbhZcCSuxR9AxcfR3uvgg",
       volume : this.volume,
       whileloading : SC.throttle(200,function() {
           self.loading.css('width',(self.audio.bytesLoaded/self.audio.bytesTotal)*100+"%");
