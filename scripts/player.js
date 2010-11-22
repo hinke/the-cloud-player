@@ -20,6 +20,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+var CONSUMER_KEY = "UdbhZcCSuxR9AxcfR3uvgg";
+
 SC.Player = SC.Class();
 SC.Player.prototype = {
   isPlaying: false,
@@ -579,7 +581,7 @@ SC.Player.prototype = {
     var self = this;
     this.audioTracks[id] = soundManager.createSound({
       id: id,
-      url: track.stream_url + "?consumer_key=UdbhZcCSuxR9AxcfR3uvgg",
+      url: track.stream_url + "?consumer_key=" + CONSUMER_KEY,
       volume : this.volume,
       whileloading : SC.throttle(200,function() {
           self.loading.css('width',(self.audio.bytesLoaded/self.audio.bytesTotal)*100+"%");
@@ -683,7 +685,7 @@ SC.Player.prototype = {
   },
   loadArtistInfo: function(uri) {
     var self = this;
-    $.getJSON(uri + ".js?callback=?",function(user) {
+    $.getJSON(uri + ".js?callback=?" + "&consumer_key=" + CONSUMER_KEY,function(user) {
       if(!user.city) {
         user.city = "";
       };

@@ -182,7 +182,7 @@ SC.Playlist.prototype = {
       baseUrl += "&callback=?"; // add JSONP callback param      
     }
     // limit to tracks under 20 mins long
-    baseUrl += "&duration[to]=1200000&limit=" + this.limit + "&consumer_key=UdbhZcCSuxR9AxcfR3uvgg"; // increase limit to 100
+    baseUrl += "&duration[to]=1200000&limit=" + this.limit + "&consumer_key=" + CONSUMER_KEY; // increase limit to 100
     return baseUrl;
   },
   load : function() {
