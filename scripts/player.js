@@ -765,6 +765,15 @@ SC.Player.prototype = {
       this.isPlaying = true;
       $("body").addClass("playing");
     }
+	else {
+		//ensure that at least a track plays
+		//similar to itunes default behaviour
+		$(".selected").dblclick();//try to play a highlighted track
+		if(!this.audio) {
+			//no selected track, play first track in the playlist
+			$("tbody").find("tr:first").dblclick();
+		}
+	}
   },
   stop: function() {
     if(this.audio) {
